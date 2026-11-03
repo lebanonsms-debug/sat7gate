@@ -54,6 +54,7 @@ export function TopNav({ profile }: { profile: Profile | null }) {
           <div className="text-slate-400">
             Inside: <span className="text-white font-medium">{occupancy.people} People / {occupancy.vehicles} Vehicles</span>
           </div>
+          <div className="text-slate-600">build-20261103135239</div>
         </div>
       </div>
       <div className="flex items-center gap-4">

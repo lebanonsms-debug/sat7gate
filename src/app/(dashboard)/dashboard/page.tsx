@@ -104,13 +104,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Security Operations Center</h1>
-        <p className="text-slate-400 mt-1">Real-time access oversight for SAT-7, Blue Sun, Different Production, and NBC complex</p>
-      </div>
-      <div className="text-right text-xs text-slate-600">build-20261103135239</div>
-
       {/* Quick Actions */}
       <div className="flex gap-3">
         <Link href="/register-entry"><Button className="bg-cyan-600 hover:bg-cyan-700 gap-2"><UserPlus className="w-4 h-4" />New Gate Entry</Button></Link>

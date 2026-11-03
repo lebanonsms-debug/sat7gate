@@ -10,6 +10,7 @@ import {
   ShieldCheck, BarChart3, History as HistoryIcon,
   Camera, ClipboardList
 } from 'lucide-react'
+import type { Profile } from '@/lib/types'
 
 const navSections = [
   {
@@ -42,7 +43,7 @@ const navSections = [
   }
 ]
 
-export function Sidebar({ role, onLogout }: { role: string; onLogout: () => void }) {
+export function Sidebar({ profile, onLogout }: { profile: Profile | null; onLogout: () => void }) {
   const pathname = usePathname()
 
   return (
@@ -66,7 +67,7 @@ export function Sidebar({ role, onLogout }: { role: string; onLogout: () => void
           <div key={section.title}>
             <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-2">{section.title}</h3>
             <div className="space-y-1">
-              {section.items.filter(item => item.roles.includes(role)).map(item => {
+              {section.items.filter(item => item.roles.includes(profile?.role || '')).map(item => {
                 const Icon = item.icon
                 const active = pathname === item.href
                 return (
@@ -107,11 +108,11 @@ export function Sidebar({ role, onLogout }: { role: string; onLogout: () => void
       <div className="p-4 border-t border-slate-800">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
-            SO
+            {profile?.full_name?.charAt(0).toUpperCase() || 'U'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">Officer on Duty</p>
-            <p className="text-xs text-slate-400">SG-104</p>
+            <p className="text-sm font-medium text-white truncate">{profile?.full_name || 'User'}</p>
+            <p className="text-xs text-slate-400 capitalize">{profile?.role?.replace('_', ' ') || 'User'}</p>
           </div>
         </div>
         <Button variant="ghost" className="w-full justify-start gap-3 text-slate-400 hover:text-white hover:bg-slate-900" onClick={onLogout}>
