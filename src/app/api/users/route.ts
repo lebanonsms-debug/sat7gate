@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
+import * as cookie from 'cookie'
 
-function getCookies(request: Request) {
-  const cookieHeader = request.headers.get('Cookie')
+function parseCookies(cookieHeader: string | null) {
   if (!cookieHeader) return []
-  return cookieHeader.split(';').map((c) => {
-    const [name, value] = c.trim().split('=')
-    return { name, value: decodeURIComponent(value) }
-  })
+  const parsed = cookie.parse(cookieHeader)
+  return Object.entries(parsed)
+    .filter(([name]) => !['Path', 'Domain', 'Expires', 'Max-Age', 'Secure', 'HttpOnly', 'SameSite'].includes(name))
+    .map(([name, value]) => ({ name, value }))
 }
 
 export async function GET(request: Request) {
@@ -19,15 +19,15 @@ export async function GET(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          getAll() {
-            return getCookies(request)
+          async getAll() {
+            return parseCookies(request.headers.get('Cookie'))
           },
-          setAll(cookiesToSet) {
+          setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
             cookiesToSet.forEach(({ name, value, options }) => {
               response.cookies.set(name, value, options)
             })
           },
-        },
+        } as any,
       }
     )
 
@@ -67,15 +67,15 @@ export async function POST(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          getAll() {
-            return getCookies(request)
+          async getAll() {
+            return parseCookies(request.headers.get('Cookie'))
           },
-          setAll(cookiesToSet) {
+          setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
             cookiesToSet.forEach(({ name, value, options }) => {
               response.cookies.set(name, value, options)
             })
           },
-        },
+        } as any,
       }
     )
 
