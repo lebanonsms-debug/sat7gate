@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Activity, Users, Car, UserPlus, TrendingUp, Clock, QrCode, Camera } from 'lucide-react'
+import { Activity, Users, Car, UserPlus, TrendingUp, Clock, Camera } from 'lucide-react'
 import Link from 'next/link'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -130,7 +130,6 @@ export default function DashboardPage() {
       <div className="flex gap-3">
         <Link href="/register-entry"><Button className="bg-cyan-600 hover:bg-cyan-700 gap-2"><UserPlus className="w-4 h-4" />New Gate Entry</Button></Link>
         <Link href="/live-gate"><Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800 gap-2"><Activity className="w-4 h-4" />Live Gate Monitor</Button></Link>
-        <Link href="/qr-passes"><Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800 gap-2"><QrCode className="w-4 h-4" />Scan QR Pass</Button></Link>
         <Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800 gap-2"><Camera className="w-4 h-4" />LPR Console</Button>
       </div>
 

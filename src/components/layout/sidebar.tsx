@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   LayoutDashboard, UserPlus, Activity, Users, Car,
-  Building2, QrCode, FileText, Settings, LogOut,
+  Building2, FileText, Settings, LogOut,
   ShieldCheck, BarChart3, History as HistoryIcon,
   Camera, ClipboardList, UsersRound
 } from 'lucide-react'
@@ -28,7 +28,6 @@ const navSections = [
       { href: '/visitor-history', label: 'Visitor History', icon: HistoryIcon, roles: ['security_officer', 'administrator', 'management', 'viewer'] },
       { href: '/employees', label: 'Employees', icon: Users, roles: ['security_officer', 'administrator', 'management', 'viewer'] },
       { href: '/vehicles', label: 'Vehicles', icon: Car, roles: ['security_officer', 'administrator'] },
-      { href: '/qr-passes', label: 'QR Visitor Passes', icon: QrCode, roles: ['security_officer', 'administrator'], badge: '2' },
       { href: '/companies', label: 'Companies', icon: Building2, roles: ['administrator'] },
     ]
   },
