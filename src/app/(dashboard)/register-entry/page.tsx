@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { VoiceInput } from '@/components/ui/voice-input'
 import { useRouter } from 'next/navigation'
 import type { PersonCategory, Company } from '@/lib/types'
 
@@ -87,7 +88,9 @@ export default function RegisterEntryPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Full Name *</label>
-                <Input value={form.fullName} onChange={e => setForm({...form, fullName: e.target.value})} required />
+                <VoiceInput onTranscript={(text) => setForm({...form, fullName: text})}>
+                  <Input value={form.fullName} onChange={e => setForm({...form, fullName: e.target.value})} required />
+                </VoiceInput>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Category *</label>
@@ -108,16 +111,22 @@ export default function RegisterEntryPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">ID Number</label>
-                <Input value={form.idNumber} onChange={e => setForm({...form, idNumber: e.target.value})} />
+                <VoiceInput onTranscript={(text) => setForm({...form, idNumber: text})}>
+                  <Input value={form.idNumber} onChange={e => setForm({...form, idNumber: e.target.value})} />
+                </VoiceInput>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Purpose</label>
-                <Input value={form.purpose} onChange={e => setForm({...form, purpose: e.target.value})} />
+                <VoiceInput onTranscript={(text) => setForm({...form, purpose: text})}>
+                  <Input value={form.purpose} onChange={e => setForm({...form, purpose: e.target.value})} />
+                </VoiceInput>
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Notes</label>
-              <textarea className="flex w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500" rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
+              <VoiceInput onTranscript={(text) => setForm({...form, notes: form.notes ? form.notes + ' ' + text : text})}>
+                <textarea className="flex w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500" rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
+              </VoiceInput>
             </div>
 
             <div className="border-t border-slate-700 pt-4">
@@ -125,19 +134,27 @@ export default function RegisterEntryPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">License Plate</label>
-                  <Input value={form.plateNumber} onChange={e => setForm({...form, plateNumber: e.target.value.toUpperCase()})} placeholder="e.g. 1234 ABC" />
+                  <VoiceInput onTranscript={(text) => setForm({...form, plateNumber: text.toUpperCase()})}>
+                    <Input value={form.plateNumber} onChange={e => setForm({...form, plateNumber: e.target.value.toUpperCase()})} placeholder="e.g. 1234 ABC" />
+                  </VoiceInput>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">Manufacturer</label>
-                  <Input value={form.manufacturer} onChange={e => setForm({...form, manufacturer: e.target.value})} />
+                  <VoiceInput onTranscript={(text) => setForm({...form, manufacturer: text})}>
+                    <Input value={form.manufacturer} onChange={e => setForm({...form, manufacturer: e.target.value})} />
+                  </VoiceInput>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">Model</label>
-                  <Input value={form.model} onChange={e => setForm({...form, model: e.target.value})} />
+                  <VoiceInput onTranscript={(text) => setForm({...form, model: text})}>
+                    <Input value={form.model} onChange={e => setForm({...form, model: e.target.value})} />
+                  </VoiceInput>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">Color</label>
-                  <Input value={form.color} onChange={e => setForm({...form, color: e.target.value})} />
+                  <VoiceInput onTranscript={(text) => setForm({...form, color: text})}>
+                    <Input value={form.color} onChange={e => setForm({...form, color: e.target.value})} />
+                  </VoiceInput>
                 </div>
               </div>
             </div>

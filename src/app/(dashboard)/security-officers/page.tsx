@@ -5,6 +5,7 @@ import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { VoiceInput } from '@/components/ui/voice-input'
 import { ShieldCheck } from 'lucide-react'
 import type { Profile } from '@/lib/types'
 
@@ -36,9 +37,15 @@ export default function SecurityOfficersPage() {
         <CardHeader><CardTitle>Create Officer</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={createOfficer} className="flex gap-4 flex-wrap">
-            <Input placeholder="Full name" value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required />
-            <Input placeholder="Email" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
-            <Input placeholder="Password" type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
+            <VoiceInput onTranscript={(text) => setForm({...form, full_name: text})}>
+              <Input placeholder="Full name" value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required />
+            </VoiceInput>
+            <VoiceInput onTranscript={(text) => setForm({...form, email: text})}>
+              <Input placeholder="Email" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+            </VoiceInput>
+            <VoiceInput onTranscript={(text) => setForm({...form, password: text})}>
+              <Input placeholder="Password" type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
+            </VoiceInput>
             <select className="flex h-10 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" value={form.role} onChange={e => setForm({...form, role: e.target.value as Profile['role']})}>
               <option value="security_officer">Security Officer</option>
               <option value="administrator">Administrator</option>
