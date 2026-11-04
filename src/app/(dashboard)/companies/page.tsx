@@ -22,10 +22,15 @@ export default function CompaniesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
     if (editing) {
-      await supabase.from('companies').update(form).eq('id', editing.id)
+      await supabase.from('companies').update({ ...form, updated_at: new Date().toISOString() }).eq('id', editing.id)
+      await supabase.from('audit_logs').insert({ user_id: user.id, action: 'update_company', entity_type: 'company', entity_id: editing.id, details: `Updated company ${form.name}` })
     } else {
-      await supabase.from('companies').insert(form)
+      const { data } = await supabase.from('companies').insert(form).select('id').single()
+      if (data) await supabase.from('audit_logs').insert({ user_id: user.id, action: 'create_company', entity_type: 'company', entity_id: data.id, details: `Created company ${form.name}` })
     }
     setForm({ name: '', identifier: '', color: '#22d3ee', active: true })
     setEditing(null)
@@ -33,7 +38,13 @@ export default function CompaniesPage() {
   }
 
   const startEdit = (c: Company) => { setEditing(c); setForm({ name: c.name, identifier: c.identifier, color: c.color, active: c.active }) }
-  const toggleActive = async (c: Company) => { await supabase.from('companies').update({ active: !c.active }).eq('id', c.id); fetch() }
+  const toggleActive = async (c: Company) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase.from('companies').update({ active: !c.active }).eq('id', c.id)
+    await supabase.from('audit_logs').insert({ user_id: user.id, action: !c.active ? 'enable_company' : 'disable_company', entity_type: 'company', entity_id: c.id, details: `${!c.active ? 'Enabled' : 'Disabled'} company ${c.name}` })
+    fetch()
+  }
 
   return (
     <div className="space-y-6">
