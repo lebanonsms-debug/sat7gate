@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import type { Profile } from '@/lib/types'
 import { Sidebar } from '@/components/layout/sidebar'
@@ -13,7 +13,7 @@ export default function DashboardLayout({
 }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClientComponentClient()
+  const supabase = useMemo(() => createClientComponentClient(), [])
 
   useEffect(() => {
     const fetchProfile = async () => {
