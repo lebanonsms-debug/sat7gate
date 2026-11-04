@@ -29,7 +29,7 @@ export default function CompaniesPage() {
     if (!user) { setMessage('You must be logged in to update companies'); return }
 
     if (editing) {
-      const { error } = await supabase.from('companies').update({ ...form, updated_at: new Date().toISOString() }).eq('id', editing.id)
+      const { error } = await supabase.from('companies').update({ ...form }).eq('id', editing.id)
       if (error) { setMessage(error.message); return }
       await supabase.from('audit_logs').insert({ user_id: user.id, action: 'update_company', entity_type: 'company', entity_id: editing.id, details: `Updated company ${form.name}` })
     } else {
