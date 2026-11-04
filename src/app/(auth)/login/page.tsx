@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ShieldCheck } from 'lucide-react'
@@ -12,28 +13,30 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const supabase = createClientComponentClient()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-      const result = await res.json()
-      if (!res.ok) {
-        setError(result.error || 'Login failed')
-      } else {
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
         router.push('/dashboard')
         router.refresh()
       }
-    } catch {
-      setError('Network error')
-    } finally {
+    }
+    checkSession()
+  }, [supabase, router])
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      setError(error.message)
       setLoading(false)
+    } else {
+      router.push('/dashboard')
+      router.refresh()
     }
   }
 

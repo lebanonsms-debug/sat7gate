@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -27,7 +27,7 @@ export default function DashboardPage() {
   const [hourlyData, setHourlyData] = useState<any[]>([])
   const [companyData, setCompanyData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = createClientComponentClient()
+  const supabase = useMemo(() => createClientComponentClient(), [])
 
   const fetchData = async () => {
     try {
