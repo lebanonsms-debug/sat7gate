@@ -59,8 +59,8 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-400 text-lg">Failed to load profile</p>
-          <p className="text-slate-400 mt-2">Please try logging in again</p>
+          <p className="text-red-400 text-lg" style={{color:'#ff6568'}}>Failed to load profile</p>
+          <p className="text-slate-400 mt-2" style={{color:'#90a1b9'}}>Please try logging in again</p>
         </div>
       </div>
     )
