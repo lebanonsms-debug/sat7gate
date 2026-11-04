@@ -79,8 +79,8 @@ export default function RegisterEntryPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold text-white mb-2">Register Entry</h1>
-      <p className="text-slate-400 mb-6">Register a new person entering the building</p>
+      <h1 className="text-3xl font-bold text-white mb-2">NEW ENTRY</h1>
+      <p className="text-slate-400 mb-6">Create a new gate entry record</p>
       <Card className="border-slate-700 bg-slate-800/50">
         <CardHeader><CardTitle>Visitor Information</CardTitle></CardHeader>
         <CardContent>
