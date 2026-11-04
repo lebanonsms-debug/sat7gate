@@ -56,7 +56,14 @@ export default function DashboardLayout({
   }
 
   if (!profile) {
-    return null
+    return (
+      <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 text-lg">Failed to load profile</p>
+          <p className="text-slate-400 mt-2">Please try logging in again</p>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -30,69 +30,74 @@ export default function DashboardPage() {
   const supabase = createClientComponentClient()
 
   const fetchData = async () => {
-    const today = new Date().toISOString().split('T')[0]
-    const { data: movements } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))')
-    const allMovements = movements || []
-    const todayMovements = allMovements.filter((m: any) => m.entry_time?.startsWith(today))
-    const inside = allMovements.filter((m: any) => m.status === 'inside')
-    const exited = allMovements.filter((m: any) => m.status === 'exited')
+    try {
+      const today = new Date().toISOString().split('T')[0]
+      const { data: movements } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))')
+      const allMovements = movements || []
+      const todayMovements = allMovements.filter((m: any) => m.entry_time?.startsWith(today))
+      const inside = allMovements.filter((m: any) => m.status === 'inside')
+      const exited = allMovements.filter((m: any) => m.status === 'exited')
 
-    // Calculate average duration
-    let totalDuration = 0
-    exited.forEach((m: any) => {
-      if (m.exit_time && m.entry_time) {
-        totalDuration += (new Date(m.exit_time).getTime() - new Date(m.entry_time).getTime())
-      }
-    })
-    const avgMs = exited.length > 0 ? totalDuration / exited.length : 0
-    const avgMins = Math.round(avgMs / 60000)
+      // Calculate average duration
+      let totalDuration = 0
+      exited.forEach((m: any) => {
+        if (m.exit_time && m.entry_time) {
+          totalDuration += (new Date(m.exit_time).getTime() - new Date(m.entry_time).getTime())
+        }
+      })
+      const avgMs = exited.length > 0 ? totalDuration / exited.length : 0
+      const avgMins = Math.round(avgMs / 60000)
 
-    // Peak hour
-    const hours: Record<number, number> = {}
-    todayMovements.forEach((m: any) => { const h = new Date(m.entry_time).getHours(); hours[h] = (hours[h] || 0) + 1 })
-    const peakHourEntry = Object.entries(hours).sort((a, b) => b[1] - a[1])[0]
-    const peakHour = peakHourEntry ? `${peakHourEntry[0].padStart(2, '0')}:00` : '--:--'
+      // Peak hour
+      const hours: Record<number, number> = {}
+      todayMovements.forEach((m: any) => { const h = new Date(m.entry_time).getHours(); hours[h] = (hours[h] || 0) + 1 })
+      const peakHourEntry = Object.entries(hours).sort((a, b) => b[1] - a[1])[0]
+      const peakHour = peakHourEntry ? `${peakHourEntry[0].padStart(2, '0')}:00` : '--:--'
 
-    // Trend
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
-    const yesterdayMovements = allMovements.filter((m: any) => m.entry_time?.startsWith(yesterday))
-    const trend = yesterdayMovements.length > 0 ? `${Math.round(((todayMovements.length - yesterdayMovements.length) / yesterdayMovements.length) * 100)}%` : '+0%'
+      // Trend
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+      const yesterdayMovements = allMovements.filter((m: any) => m.entry_time?.startsWith(yesterday))
+      const trend = yesterdayMovements.length > 0 ? `${Math.round(((todayMovements.length - yesterdayMovements.length) / yesterdayMovements.length) * 100)}%` : '+0%'
 
-    // Hourly chart data
-    const hourly = Array.from({ length: 10 }, (_, i) => i + 7).map(h => ({
-      hour: `${h}:00`,
-      count: hours[h] || 0
-    }))
-    setHourlyData(hourly)
+      // Hourly chart data
+      const hourly = Array.from({ length: 10 }, (_, i) => i + 7).map(h => ({
+        hour: `${h}:00`,
+        count: hours[h] || 0
+      }))
+      setHourlyData(hourly)
 
-    // Company breakdown
-    const companies: any = {}
-    inside.forEach((m: any) => {
-      const name = m.visitor?.company?.name || 'Unknown'
-      if (!companies[name]) companies[name] = { name, people: 0, vehicles: 0, color: '#22d3ee' }
-      companies[name].people += 1
-      if (m.visitor?.vehicles?.length > 0) companies[name].vehicles += 1
-    })
-    setCompanyData(Object.values(companies))
+      // Company breakdown
+      const companies: any = {}
+      inside.forEach((m: any) => {
+        const name = m.visitor?.company?.name || 'Unknown'
+        if (!companies[name]) companies[name] = { name, people: 0, vehicles: 0, color: '#22d3ee' }
+        companies[name].people += 1
+        if (m.visitor?.vehicles?.length > 0) companies[name].vehicles += 1
+      })
+      setCompanyData(Object.values(companies))
 
-    const staff = inside.filter((m: any) => m.visitor?.person?.person_category === 'employee').length
-    const guests = inside.filter((m: any) => m.visitor?.person?.person_category !== 'employee').length
-    const vehicles = inside.filter((m: any) => m.visitor?.vehicles?.length > 0).length
+      const staff = inside.filter((m: any) => m.visitor?.person?.person_category === 'employee').length
+      const guests = inside.filter((m: any) => m.visitor?.person?.person_category !== 'employee').length
+      const vehicles = inside.filter((m: any) => m.visitor?.vehicles?.length > 0).length
 
-    setKpis({
-      totalEntriesToday: todayMovements.length,
-      currentlyInside: inside.length,
-      totalExitsToday: exited.length,
-      vehiclesInside: vehicles,
-      visitorsInside: guests,
-      staffInside: staff,
-      guestsInside: guests,
-      avgDuration: `${avgMins}m`,
-      peakHour,
-      trend: trend.startsWith('-') ? trend : `+${Math.abs(parseInt(trend))}%`
-    })
-    setRecent(allMovements.slice(0, 10))
-    setLoading(false)
+      setKpis({
+        totalEntriesToday: todayMovements.length,
+        currentlyInside: inside.length,
+        totalExitsToday: exited.length,
+        vehiclesInside: vehicles,
+        visitorsInside: guests,
+        staffInside: staff,
+        guestsInside: guests,
+        avgDuration: `${avgMins}m`,
+        peakHour,
+        trend: trend.startsWith('-') ? trend : `+${Math.abs(parseInt(trend))}%`
+      })
+      setRecent(allMovements.slice(0, 10))
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -101,6 +106,17 @@ export default function DashboardPage() {
     channel.on('postgres_changes', { event: '*', schema: 'public', table: 'gate_movements' }, fetchData).subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [supabase])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-400">Loading Security Operations Center...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
