@@ -12,21 +12,38 @@ import type { Profile } from '@/lib/types'
 export default function SecurityOfficersPage() {
   const [officers, setOfficers] = useState<Profile[]>([])
   const [form, setForm] = useState({ email: '', password: '', full_name: '', role: 'security_officer' as Profile['role'] })
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
   const supabase = createClientComponentClient()
 
-  const fetch = async () => {
+  const fetchOfficers = async () => {
     const { data } = await supabase.from('profiles').select('*').in('role', ['security_officer', 'administrator']).order('full_name')
     setOfficers(data || [])
   }
-  useEffect(() => { fetch() }, [supabase])
+  useEffect(() => { fetchOfficers() }, [supabase])
 
   const createOfficer = async (e: React.FormEvent) => {
     e.preventDefault()
-    const { data, error } = await supabase.auth.admin.createUser({ email: form.email, password: form.password, email_confirm: true })
-    if (!error && data.user) {
-      await supabase.from('profiles').insert({ id: data.user.id, full_name: form.full_name, email: form.email, role: form.role, active: true })
-      setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
-      fetch()
+    setLoading(true)
+    setMessage('')
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.email, password: form.password, full_name: form.full_name, role: form.role }),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        setMessage(result.error || 'Failed to create user')
+      } else {
+        setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
+        setMessage('User created successfully!')
+        fetchOfficers()
+      }
+    } catch (err: any) {
+      setMessage(err.message || 'Error creating user')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -36,7 +53,7 @@ export default function SecurityOfficersPage() {
       <Card className="border-slate-700 bg-slate-800/50">
         <CardHeader><CardTitle>Create Officer</CardTitle></CardHeader>
         <CardContent>
-          <form onSubmit={createOfficer} className="flex gap-4 flex-wrap">
+          <form onSubmit={createOfficer} className="flex gap-4 flex-wrap items-end">
             <VoiceInput onTranscript={(text) => setForm({...form, full_name: text})}>
               <Input placeholder="Full name" value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required />
             </VoiceInput>
@@ -50,8 +67,9 @@ export default function SecurityOfficersPage() {
               <option value="security_officer">Security Officer</option>
               <option value="administrator">Administrator</option>
             </select>
-            <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700"><ShieldCheck className="w-4 h-4 mr-2" />Create</Button>
+            <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700" disabled={loading}><ShieldCheck className="w-4 h-4 mr-2" />{loading ? 'Creating...' : 'Create'}</Button>
           </form>
+          {message && <p className={`text-sm mt-2 ${message.includes('success') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
         </CardContent>
       </Card>
       <Card className="border-slate-700 bg-slate-800/50">

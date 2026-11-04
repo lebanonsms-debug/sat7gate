@@ -35,24 +35,18 @@ export default function UsersPage() {
     setLoading(true)
     setMessage('')
     try {
-      const { data, error } = await supabase.auth.admin.createUser({ 
-        email: form.email, 
-        password: form.password, 
-        email_confirm: true 
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.email, password: form.password, full_name: form.full_name, role: form.role }),
       })
-      if (!error && data.user) {
-        await supabase.from('profiles').insert({ 
-          id: data.user.id, 
-          full_name: form.full_name, 
-          email: form.email, 
-          role: form.role, 
-          active: true 
-        })
+      const result = await res.json()
+      if (!res.ok) {
+        setMessage(result.error || 'Failed to create user')
+      } else {
         setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
         setMessage('User created successfully!')
         fetchUsers()
-      } else {
-        setMessage(error?.message || 'Failed to create user')
       }
     } catch (err: any) {
       setMessage(err.message || 'Error creating user')
