@@ -71,17 +71,17 @@ export default function EmployeesPage() {
       <Card className="border-slate-700 bg-slate-800/50">
         <CardHeader><CardTitle>{editing ? 'Edit Employee' : 'Add Employee'}</CardTitle></CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="flex gap-4 flex-wrap items-end">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap items-stretch sm:items-end">
             <VoiceInput onTranscript={(text) => setForm({...form, full_name: text})}>
-              <Input placeholder="Full name" value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required className="flex-1" />
+              <Input placeholder="Full name" value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required className="flex-1 text-base" />
             </VoiceInput>
             <VoiceInput onTranscript={(text) => setForm({...form, identification_number: text})}>
-              <Input placeholder="ID Number" value={form.identification_number} onChange={e => setForm({...form, identification_number: e.target.value})} />
+              <Input placeholder="ID Number" value={form.identification_number} onChange={e => setForm({...form, identification_number: e.target.value})} className="text-base" />
             </VoiceInput>
-            <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700" disabled={loading}>
+            <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700 h-10 sm:h-auto" disabled={loading}>
               <Plus className="w-4 h-4 mr-2" />{loading ? 'Saving...' : (editing ? 'Update' : 'Add')}
             </Button>
-            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', person_category: 'employee', identification_number: '' }) }}><X className="w-4 h-4 mr-2" />Cancel</Button>}
+            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', person_category: 'employee', identification_number: '' }) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
           </form>
           {message && <p className={`text-sm mt-2 ${message.includes('success') || message.includes('added') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
         </CardContent>
@@ -102,16 +102,18 @@ export default function EmployeesPage() {
               <tbody className="divide-y divide-slate-700">
                 {employees.map(e => (
                   <tr key={e.id} className="hover:bg-slate-700/20">
-                    <td className="px-6 py-4 text-sm text-white font-medium">{e.full_name}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{e.identification_number || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{new Date(e.created_at).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-sm flex gap-2">
-                      <button onClick={() => startEdit(e)} className="text-cyan-400 hover:text-cyan-300 p-1" title="Edit employee">
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => deleteEmployee(e.id, e.full_name)} className="text-red-400 hover:text-red-300 p-1" title="Delete employee">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-white font-medium">{e.full_name}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300">{e.identification_number || '-'}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{new Date(e.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm">
+                      <div className="flex gap-2">
+                        <button onClick={() => startEdit(e)} className="text-cyan-400 hover:text-cyan-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Edit employee">
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => deleteEmployee(e.id, e.full_name)} className="text-red-400 hover:text-red-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Delete employee">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

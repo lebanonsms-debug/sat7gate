@@ -109,7 +109,7 @@ export default function DashboardLayout({
       {/* Main content area */}
       <div className="lg:ml-64 pt-14">
         <TopNav profile={profile} onMenuClick={() => setSidebarOpen(true)} />
-        <main className="p-4 md:p-6">
+        <main className="p-3 sm:p-4 md:p-6">
           {children}
         </main>
       </div>

@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import type { Profile } from '@/lib/types'
 import { Button } from '@/components/ui/button'
-import { Menu } from 'lucide-react'
+import { Menu, ChevronDown } from 'lucide-react'
 
 export function TopNav({ profile, onMenuClick }: { profile: Profile | null; onMenuClick?: () => void }) {
   const [time, setTime] = useState(new Date())
   const supabase = createClientComponentClient()
   const [occupancy, setOccupancy] = useState({ people: 0, vehicles: 0, lanes: 0 })
+  const [statsOpen, setStatsOpen] = useState(false)
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000)
@@ -33,23 +34,28 @@ export function TopNav({ profile, onMenuClick }: { profile: Profile | null; onMe
   }, [supabase])
 
   return (
-    <header className="h-16 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
-      <div className="flex items-center gap-4">
-        {onMenuClick && (
-          <Button variant="ghost" size="sm" onClick={onMenuClick} className="lg:hidden text-slate-400 hover:text-white px-2">
-            <Menu className="w-5 h-5" />
-          </Button>
-        )}
-        <div>
-          <h2 className="text-sm font-medium text-white">
-            {time.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </h2>
-          <p className="text-xs text-slate-400">Security Operations Center</p>
+    <header className="h-auto bg-slate-950/80 backdrop-blur-md border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-8 sticky top-0 z-30">
+      <div className="flex items-center justify-between w-full md:w-auto gap-3 py-3 md:py-0">
+        <div className="flex items-center gap-3">
+          {onMenuClick && (
+            <Button variant="ghost" size="sm" onClick={onMenuClick} className="lg:hidden text-slate-400 hover:text-white px-2">
+              <Menu className="w-5 h-5" />
+            </Button>
+          )}
+          <div>
+            <h2 className="text-sm font-medium text-white">
+              {time.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </h2>
+            <p className="text-xs text-slate-400">Security Operations Center</p>
+          </div>
         </div>
+        <Button variant="ghost" size="sm" onClick={() => setStatsOpen(!statsOpen)} className="md:hidden text-slate-400 hover:text-white px-2">
+          <ChevronDown className={`w-4 h-4 transition-transform ${statsOpen ? 'rotate-180' : ''}`} />
+        </Button>
       </div>
-      <div className="hidden md:flex items-center gap-4">
-        <div className="h-8 w-px bg-slate-800" />
-        <div className="flex items-center gap-4 text-xs">
+      <div className={`${statsOpen ? 'flex' : 'hidden'} md:flex items-center gap-3 md:gap-4 pb-3 md:pb-0`}>
+        <div className="h-8 w-px bg-slate-800 hidden md:block" />
+        <div className="flex flex-wrap items-center gap-3 text-xs">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -63,10 +69,10 @@ export function TopNav({ profile, onMenuClick }: { profile: Profile | null; onMe
           <div className="text-slate-400">
             Inside: <span className="text-white font-medium">{occupancy.people} People / {occupancy.vehicles} Vehicles</span>
           </div>
-          <div className="text-slate-600">build-20261103135239</div>
+          <div className="text-slate-600 hidden sm:block">build-20261103135239</div>
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="hidden md:flex items-center gap-4">
         <div className="text-right">
           <p className="text-sm font-medium text-white">{profile?.full_name || 'Officer'}</p>
           <p className="text-xs text-slate-400">ID: SG-104</p>

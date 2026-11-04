@@ -65,15 +65,15 @@ export default function LiveGatePage() {
                   <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-400">No one currently inside</td></tr>
                 ) : movements.map((m: any) => (
                   <tr key={m.id} className="hover:bg-slate-700/20 transition-colors">
-                    <td className="px-6 py-4 text-sm font-medium text-white">{m.visitor?.person?.full_name}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300 capitalize">{m.visitor?.person?.person_category?.replace('_', ' ')}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{m.visitor?.company?.name}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{m.visitor?.vehicles?.[0] ? `${m.visitor.vehicles[0].manufacturer} ${m.visitor.vehicles[0].model}` : '-'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300 font-mono">{m.visitor?.vehicles?.[0]?.plate_number || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{new Date(m.entry_time).toLocaleString()}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{m.entry_officer_id.slice(0, 8)}...</td>
-                    <td className="px-6 py-4">
-                      <Button size="sm" variant="destructive" onClick={() => markExit(m.id)} className="gap-1">
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm font-medium text-white">{m.visitor?.person?.full_name}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 capitalize hidden sm:table-cell">{m.visitor?.person?.person_category?.replace('_', ' ')}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden md:table-cell">{m.visitor?.company?.name}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden lg:table-cell">{m.visitor?.vehicles?.[0] ? `${m.visitor.vehicles[0].manufacturer} ${m.visitor.vehicles[0].model}` : '-'}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 font-mono">{m.visitor?.vehicles?.[0]?.plate_number || '-'}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{new Date(m.entry_time).toLocaleString()}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden md:table-cell">{m.entry_officer_id.slice(0, 8)}...</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4">
+                      <Button size="sm" variant="destructive" onClick={() => markExit(m.id)} className="gap-1 min-h-[36px] min-w-[36px]">
                         <LogOut className="w-3 h-3" /> Exit
                       </Button>
                     </td>

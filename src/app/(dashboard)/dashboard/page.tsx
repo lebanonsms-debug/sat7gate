@@ -130,26 +130,26 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="flex gap-3">
-        <Link href="/register-entry"><Button className="bg-cyan-600 hover:bg-cyan-700 gap-2"><UserPlus className="w-4 h-4" />New Gate Entry</Button></Link>
-        <Link href="/live-gate"><Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800 gap-2"><Activity className="w-4 h-4" />Live Gate Monitor</Button></Link>
-        <Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800 gap-2"><Camera className="w-4 h-4" />LPR Console</Button>
+      <div className="flex flex-wrap gap-2 sm:gap-3">
+        <Link href="/register-entry"><Button className="bg-cyan-600 hover:bg-cyan-700 gap-2 text-sm"><UserPlus className="w-4 h-4" />New Gate Entry</Button></Link>
+        <Link href="/live-gate"><Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800 gap-2 text-sm"><Activity className="w-4 h-4" />Live Gate Monitor</Button></Link>
+        <Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800 gap-2 text-sm"><Camera className="w-4 h-4" />LPR Console</Button>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
         <Card className="border-slate-700 bg-slate-800/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
-          <CardContent className="p-6 relative">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-400">Currently Inside</p>
-              <Users className="w-5 h-5 text-cyan-400" />
+          <CardContent className="p-4 sm:p-6 relative">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <p className="text-xs sm:text-sm text-slate-400">Currently Inside</p>
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
             </div>
             <div className="space-y-1">
-              <p className="text-4xl font-bold text-white">{loading ? '...' : kpis.currentlyInside}</p>
+              <p className="text-2xl sm:text-4xl font-bold text-white">{loading ? '...' : kpis.currentlyInside}</p>
               <div className="flex gap-3 text-xs text-slate-400">
                 <span>Vehicles: <span className="text-white">{kpis.vehiclesInside}</span></span>
-                <span>Walk-ins: <span className="text-white">{kpis.currentlyInside - kpis.vehiclesInside}</span></span>
+                <span className="hidden sm:inline">Walk-ins: <span className="text-white">{kpis.currentlyInside - kpis.vehiclesInside}</span></span>
               </div>
             </div>
           </CardContent>
@@ -157,17 +157,17 @@ export default function DashboardPage() {
 
         <Card className="border-slate-700 bg-slate-800/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
-          <CardContent className="p-6 relative">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-400">Entries Today</p>
-              <Activity className="w-5 h-5 text-emerald-400" />
+          <CardContent className="p-4 sm:p-6 relative">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <p className="text-xs sm:text-sm text-slate-400">Entries Today</p>
+              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
             </div>
             <div className="space-y-1">
-              <p className="text-4xl font-bold text-white">{loading ? '...' : kpis.totalEntriesToday}</p>
-              <div className="flex items-center gap-2 text-xs">
+              <p className="text-2xl sm:text-4xl font-bold text-white">{loading ? '...' : kpis.totalEntriesToday}</p>
+              <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="text-emerald-400">{kpis.trend}</span>
                 <span className="text-slate-400">vs avg</span>
-                <span className="text-slate-500">Peak: {kpis.peakHour}</span>
+                <span className="text-slate-500 hidden sm:inline">Peak: {kpis.peakHour}</span>
               </div>
             </div>
           </CardContent>
@@ -175,13 +175,13 @@ export default function DashboardPage() {
 
         <Card className="border-slate-700 bg-slate-800/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
-          <CardContent className="p-6 relative">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-400">Exits Cleared</p>
-              <TrendingUp className="w-5 h-5 text-amber-400" />
+          <CardContent className="p-4 sm:p-6 relative">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <p className="text-xs sm:text-sm text-slate-400">Exits Cleared</p>
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
             </div>
             <div className="space-y-1">
-              <p className="text-4xl font-bold text-white">{loading ? '...' : kpis.totalExitsToday}</p>
+              <p className="text-2xl sm:text-4xl font-bold text-white">{loading ? '...' : kpis.totalExitsToday}</p>
               <p className="text-xs text-slate-400">Avg Duration: <span className="text-white">{kpis.avgDuration}</span></p>
             </div>
           </CardContent>
@@ -189,39 +189,41 @@ export default function DashboardPage() {
 
         <Card className="border-slate-700 bg-slate-800/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
-          <CardContent className="p-6 relative">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-400">Breakdown Today</p>
-              <Users className="w-5 h-5 text-purple-400" />
+          <CardContent className="p-4 sm:p-6 relative">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <p className="text-xs sm:text-sm text-slate-400">Breakdown Today</p>
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
             </div>
             <div className="space-y-1">
-              <p className="text-2xl font-bold text-white">{kpis.staffInside} Staff / {kpis.guestsInside} Guests</p>
-              <p className="text-xs text-slate-400">Deliveries: <span className="text-white">1</span></p>
+              <p className="text-xl sm:text-2xl font-bold text-white">{kpis.staffInside} Staff / {kpis.guestsInside} Guests</p>
+              <p className="text-xs text-slate-400 hidden sm:inline">Deliveries: <span className="text-white">1</span></p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
         {/* Peak Hours Chart */}
         <Card className="border-slate-700 bg-slate-800/50 lg:col-span-2">
           <CardHeader>
             <CardTitle>Peak Entrance Hours</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={hourlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="hour" stroke="#64748b" fontSize={12} />
-                <YAxis stroke="#64748b" fontSize={12} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
-                  labelStyle={{ color: '#e2e8f0' }}
-                />
-                <Bar dataKey="count" fill="#22d3ee" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="w-full overflow-x-auto">
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={hourlyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                  <XAxis dataKey="hour" stroke="#64748b" fontSize={11} />
+                  <YAxis stroke="#64748b" fontSize={11} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
+                    labelStyle={{ color: '#e2e8f0' }}
+                  />
+                  <Bar dataKey="count" fill="#22d3ee" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
             <p className="text-xs text-slate-500 mt-2">Vehicle & pedestrian intake volume per hour</p>
           </CardContent>
         </Card>
@@ -269,7 +271,7 @@ export default function DashboardPage() {
         <CardContent>
           <div className="space-y-3">
             {recent.map((m: any) => (
-              <div key={m.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-900/50 border border-slate-700">
+              <div key={m.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-slate-900/50 border border-slate-700 gap-2 sm:gap-3">
                 <div className="flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full ${m.status === 'inside' ? 'bg-emerald-400 shadow-lg shadow-emerald-500/50' : 'bg-slate-500'}`} />
                   <div>
@@ -277,7 +279,7 @@ export default function DashboardPage() {
                     <p className="text-xs text-slate-400">{m.visitor?.company?.name || 'Unknown company'}</p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="flex sm:flex-col items-center sm:items-end justify-between sm:text-right pl-5 sm:pl-0">
                   <p className="text-xs text-slate-400">{formatInTimezone(m.entry_time, timezone, { timeStyle: 'short' })}</p>
                   <p className={`text-xs capitalize ${m.status === 'inside' ? 'text-emerald-400' : 'text-slate-400'}`}>{m.status}</p>
                 </div>
