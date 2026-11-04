@@ -10,11 +10,30 @@ import { ClipboardList } from 'lucide-react'
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const { timezone } = useTimezone()
   const supabase = createClientComponentClient()
 
   useEffect(() => {
-    supabase.from('audit_logs').select('*, user:profiles(full_name)').order('created_at', { ascending: false }).limit(200).then(({ data }) => { setLogs(data || []); setLoading(false) })
+    const load = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { setError('Not authenticated'); setLoading(false); return }
+
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+        if (!profile || profile.role !== 'administrator') { setError('Forbidden'); setLoading(false); return }
+
+        const res = await fetch('/api/audit-logs')
+        if (!res.ok) { const txt = await res.text(); setError(txt || 'Failed to load audit logs'); setLoading(false); return }
+        const json = await res.json()
+        setLogs(Array.isArray(json.data) ? json.data : [])
+      } catch (err: any) {
+        setError(err.message || 'Error loading audit logs')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
   }, [supabase])
 
   return (
@@ -38,6 +57,8 @@ export default function AuditLogsPage() {
               <tbody className="divide-y divide-slate-700">
                 {loading ? (
                   <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400">Loading...</td></tr>
+                ) : error ? (
+                  <tr><td colSpan={5} className="px-6 py-8 text-center text-red-400">{error}</td></tr>
                 ) : logs.length === 0 ? (
                   <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400">No audit logs found</td></tr>
                 ) : logs.map(l => (
