@@ -5,9 +5,10 @@ import { createClientComponentClient } from '@/lib/supabase/client'
 import type { Profile } from '@/lib/types'
 import { Sidebar } from '@/components/layout/sidebar'
 import { TopNav } from '@/components/layout/top-nav'
-import { Menu, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
 
 export default function DashboardLayout({
   children,
@@ -43,9 +44,11 @@ export default function DashboardLayout({
     return () => subscription.unsubscribe()
   }, [supabase])
 
+  const router = useRouter()
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    window.location.href = '/login'
+    router.push('/login')
   }
 
   if (loading) {

@@ -1,30 +1,42 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Plus, Pencil, Trash2, X } from 'lucide-react'
+import { Pencil, Trash2, X } from 'lucide-react'
+import type { Person } from '@/lib/types'
+
+interface Vehicle {
+  id: string
+  plate_number?: string
+  manufacturer?: string
+  model?: string
+  color?: string
+  person_id?: string
+  person?: { full_name?: string }
+}
 
 export default function VehiclesPage() {
-  const [vehicles, setVehicles] = useState<any[]>([])
-  const [persons, setPersons] = useState<any[]>([])
-  const [editing, setEditing] = useState<any>(null)
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [persons, setPersons] = useState<Person[]>([])
+  const [editing, setEditing] = useState<{ id: string; plate_number?: string; manufacturer?: string; model?: string; color?: string; person_id?: string } | null>(null)
   const [form, setForm] = useState({ plate_number: '', manufacturer: '', model: '', color: '', person_id: '' })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const supabase = createClientComponentClient()
 
-  const fetch = async () => {
+  const fetch = useCallback(async () => {
     const [{ data: v }, { data: p }] = await Promise.all([
       supabase.from('vehicles').select('*, person:persons(*)').order('plate_number'),
       supabase.from('persons').select('id, full_name, person_category').order('full_name')
     ])
     setVehicles(v || [])
-    setPersons(p || [])
-  }
-  useEffect(() => { fetch() }, [supabase])
+    setPersons((p as Person[]) || [])
+  }, [supabase])
+
+  useEffect(() => { fetch() }, [fetch]) // eslint-disable-line react-hooks/set-state-in-effect
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,20 +58,22 @@ export default function VehiclesPage() {
       setForm({ plate_number: '', manufacturer: '', model: '', color: '', person_id: '' })
       setEditing(null)
       fetch()
-    } catch (err: any) {
-      setMessage(err.message || 'Error saving vehicle')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error saving vehicle'
+      setMessage(message)
     } finally {
       setLoading(false)
     }
   }
 
-  const startEdit = (v: any) => {
+  const startEdit = (v: { id: string; plate_number?: string; manufacturer?: string; model?: string; color?: string; person_id?: string }) => {
     setEditing(v)
-    setForm({ plate_number: v.plate_number, manufacturer: v.manufacturer, model: v.model, color: v.color, person_id: v.person_id })
+    setForm({ plate_number: v.plate_number || '', manufacturer: v.manufacturer || '', model: v.model || '', color: v.color || '', person_id: v.person_id || '' })
   }
 
-  const deleteVehicle = async (id: string, plate: string) => {
-    if (!confirm(`Delete vehicle "${plate}"?`)) return
+  const deleteVehicle = async (id: string, plate?: string) => {
+    const label = plate || 'this vehicle'
+    if (!confirm(`Delete vehicle "${label}"?`)) return
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     await supabase.from('vehicles').delete().eq('id', id)

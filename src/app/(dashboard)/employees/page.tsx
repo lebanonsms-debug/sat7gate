@@ -1,26 +1,28 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { VoiceInput } from '@/components/ui/voice-input'
 import { Plus, Trash2, Pencil, X } from 'lucide-react'
+import type { Person } from '@/lib/types'
 
 export default function EmployeesPage() {
-  const [employees, setEmployees] = useState<any[]>([])
-  const [editing, setEditing] = useState<any>(null)
-  const [form, setForm] = useState({ full_name: '', person_category: 'employee' as any, identification_number: '' })
+  const [employees, setEmployees] = useState<Person[]>([])
+  const [editing, setEditing] = useState<Person | null>(null)
+  const [form, setForm] = useState({ full_name: '', person_category: 'employee', identification_number: '' })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const supabase = createClientComponentClient()
 
-  const fetch = async () => {
+  const fetch = useCallback(async () => {
     const { data } = await supabase.from('persons').select('*').eq('person_category', 'employee').order('full_name')
-    setEmployees(data || [])
-  }
-  useEffect(() => { fetch() }, [supabase])
+    setEmployees((data as Person[]) || [])
+  }, [supabase])
+
+  useEffect(() => { fetch() }, [fetch]) // eslint-disable-line react-hooks/set-state-in-effect
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,14 +45,15 @@ export default function EmployeesPage() {
       setForm({ full_name: '', person_category: 'employee', identification_number: '' })
       setEditing(null)
       fetch()
-    } catch (err: any) {
-      setMessage(err.message || 'Error saving employee')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error saving employee'
+      setMessage(message)
     } finally {
       setLoading(false)
     }
   }
 
-  const startEdit = (emp: any) => {
+  const startEdit = (emp: Person) => {
     setEditing(emp)
     setForm({ full_name: emp.full_name, person_category: emp.person_category, identification_number: emp.identification_number || '' })
   }

@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Activity, Users, Car, UserPlus, TrendingUp, Clock, Camera } from 'lucide-react'
+import { Activity, Users, UserPlus, Camera, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { formatInTimezone } from '@/lib/utils/timezone'
@@ -26,24 +26,24 @@ interface KPIs {
 export default function DashboardPage() {
   const { timezone } = useTimezone()
   const [kpis, setKpis] = useState<KPIs>({ totalEntriesToday: 0, currentlyInside: 0, totalExitsToday: 0, vehiclesInside: 0, visitorsInside: 0, staffInside: 0, guestsInside: 0, avgDuration: '0m', peakHour: '--:--', trend: '+0%' })
-  const [recent, setRecent] = useState<any[]>([])
-  const [hourlyData, setHourlyData] = useState<any[]>([])
-  const [companyData, setCompanyData] = useState<any[]>([])
+  const [recent, setRecent] = useState<{ id: string; status?: string; entry_time?: string; visitor?: { person?: { full_name?: string }; company?: { name?: string } } }[]>([])
+  const [hourlyData, setHourlyData] = useState<{ hour: string; count: number }[]>([])
+  const [companyData, setCompanyData] = useState<{ name: string; people: number; vehicles: number; color: string }[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = useMemo(() => createClientComponentClient(), [])
 
-  const fetchData = async () => {
+  const fetchData = useMemo(() => async () => {
     try {
       const today = new Date().toISOString().split('T')[0]
       const { data: movements } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))')
       const allMovements = movements || []
-      const todayMovements = allMovements.filter((m: any) => m.entry_time?.startsWith(today))
-      const inside = allMovements.filter((m: any) => m.status === 'inside')
-      const exited = allMovements.filter((m: any) => m.status === 'exited')
+      const todayMovements = allMovements.filter((m: { entry_time?: string }) => m.entry_time?.startsWith(today))
+      const inside = allMovements.filter((m: { status?: string }) => m.status === 'inside')
+      const exited = allMovements.filter((m: { status?: string }) => m.status === 'exited')
 
       // Calculate average duration
       let totalDuration = 0
-      exited.forEach((m: any) => {
+      exited.forEach((m: { exit_time?: string; entry_time?: string }) => {
         if (m.exit_time && m.entry_time) {
           totalDuration += (new Date(m.exit_time).getTime() - new Date(m.entry_time).getTime())
         }
@@ -53,13 +53,13 @@ export default function DashboardPage() {
 
       // Peak hour
       const hours: Record<number, number> = {}
-      todayMovements.forEach((m: any) => { const h = new Date(m.entry_time).getHours(); hours[h] = (hours[h] || 0) + 1 })
+      todayMovements.forEach((m: { entry_time?: string }) => { const h = m.entry_time ? new Date(m.entry_time).getHours() : 0; hours[h] = (hours[h] || 0) + 1 })
       const peakHourEntry = Object.entries(hours).sort((a, b) => b[1] - a[1])[0]
       const peakHour = peakHourEntry ? `${peakHourEntry[0].padStart(2, '0')}:00` : '--:--'
 
       // Trend
       const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
-      const yesterdayMovements = allMovements.filter((m: any) => m.entry_time?.startsWith(yesterday))
+      const yesterdayMovements = allMovements.filter((m: { entry_time?: string }) => m.entry_time?.startsWith(yesterday))
       const trend = yesterdayMovements.length > 0 ? `${Math.round(((todayMovements.length - yesterdayMovements.length) / yesterdayMovements.length) * 100)}%` : '+0%'
 
       // Hourly chart data
@@ -70,18 +70,18 @@ export default function DashboardPage() {
       setHourlyData(hourly)
 
       // Company breakdown
-      const companies: any = {}
-      inside.forEach((m: any) => {
+      const companies: Record<string, { name: string; people: number; vehicles: number; color: string }> = {}
+      inside.forEach((m: { visitor?: { company?: { name?: string }; vehicles?: unknown[] } }) => {
         const name = m.visitor?.company?.name || 'Unknown'
         if (!companies[name]) companies[name] = { name, people: 0, vehicles: 0, color: '#22d3ee' }
         companies[name].people += 1
-        if (m.visitor?.vehicles?.length > 0) companies[name].vehicles += 1
+        if (m.visitor?.vehicles?.length) companies[name].vehicles += 1
       })
       setCompanyData(Object.values(companies))
 
-      const staff = inside.filter((m: any) => m.visitor?.person?.person_category === 'employee').length
-      const guests = inside.filter((m: any) => m.visitor?.person?.person_category !== 'employee').length
-      const vehicles = inside.filter((m: any) => m.visitor?.vehicles?.length > 0).length
+      const staff = inside.filter((m: { visitor?: { person?: { person_category?: string } } }) => m.visitor?.person?.person_category === 'employee').length
+      const guests = inside.filter((m: { visitor?: { person?: { person_category?: string } } }) => m.visitor?.person?.person_category !== 'employee').length
+      const vehicles = inside.filter((m: { visitor?: { vehicles?: unknown[] } }) => m.visitor?.vehicles?.length).length
 
       setKpis({
         totalEntriesToday: todayMovements.length,
@@ -101,14 +101,18 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
 
+  const initialized = useRef(false)
   useEffect(() => {
-    fetchData()
+    if (!initialized.current) {
+      initialized.current = true
+      fetchData()
+    }
     const channel = supabase.channel('dashboard-realtime')
     channel.on('postgres_changes', { event: '*', schema: 'public', table: 'gate_movements' }, fetchData).subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [supabase])
+  }, [supabase, fetchData])
 
   if (loading) {
     return (
@@ -126,7 +130,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-white tracking-tight">Security Operations Center</h1>
-        <p className="text-slate-400 mt-1">Real-time access oversight for SAT-7, Blue Sun, Different Production, and NBC complex</p>
+        <p className="text-slate-400 mt-1">Real-time access oversight for SAT-7</p>
       </div>
 
       {/* Quick Actions */}
@@ -235,9 +239,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {companyData.map((company: any) => {
+              {companyData.map((company) => {
                 const total = company.people + company.vehicles
-                const max = Math.max(...companyData.map((c: any) => c.people + c.vehicles), 1)
+                const max = Math.max(...companyData.map((c) => c.people + c.vehicles), 1)
                 const width = (total / max) * 100
                 return (
                   <div key={company.name} className="space-y-1">
@@ -270,7 +274,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {recent.map((m: any) => (
+            {recent.map((m) => (
               <div key={m.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-slate-900/50 border border-slate-700 gap-2 sm:gap-3">
                 <div className="flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full ${m.status === 'inside' ? 'bg-emerald-400 shadow-lg shadow-emerald-500/50' : 'bg-slate-500'}`} />

@@ -4,14 +4,13 @@ import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { FileText } from 'lucide-react'
 
 const COLORS = ['#22d3ee', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b']
 
 export default function ReportsPage() {
-  const [daily, setDaily] = useState<any[]>([])
-  const [byCompany, setByCompany] = useState<any[]>([])
-  const [byCategory, setByCategory] = useState<any[]>([])
+  const [daily, setDaily] = useState<{ hour: string; count: number }[]>([])
+  const [byCompany, setByCompany] = useState<{ name: string; count: number }[]>([])
+  const [byCategory, setByCategory] = useState<{ name: string; count: number }[]>([])
   const supabase = createClientComponentClient()
 
   useEffect(() => {
@@ -22,18 +21,18 @@ export default function ReportsPage() {
       
       // Hourly distribution
       const hours: Record<number, number> = {}
-      list.forEach((m: any) => { const h = new Date(m.entry_time).getHours(); hours[h] = (hours[h] || 0) + 1 })
+      list.forEach((m) => { const h = new Date((m as { entry_time?: string }).entry_time || '').getHours(); hours[h] = (hours[h] || 0) + 1 })
       const hourly = Object.entries(hours).map(([hour, count]) => ({ hour: `${hour}:00`, count })).sort((a, b) => parseInt(a.hour) - parseInt(b.hour))
       setDaily(hourly)
 
       // By company
       const companies: Record<string, number> = {}
-      list.forEach((m: any) => { const name = m.visitor?.company?.name || 'Unknown'; companies[name] = (companies[name] || 0) + 1 })
+      list.forEach((m) => { const name = (m as { visitor?: { company?: { name?: string } } }).visitor?.company?.name || 'Unknown'; companies[name] = (companies[name] || 0) + 1 })
       setByCompany(Object.entries(companies).map(([name, count]) => ({ name, count })))
 
       // By category
       const categories: Record<string, number> = {}
-      list.forEach((m: any) => { const cat = m.visitor?.person?.person_category?.replace('_', ' ') || 'unknown'; categories[cat] = (categories[cat] || 0) + 1 })
+      list.forEach((m) => { const cat = (m as { visitor?: { person?: { person_category?: string } } }).visitor?.person?.person_category?.replace('_', ' ') || 'unknown'; categories[cat] = (categories[cat] || 0) + 1 })
       setByCategory(Object.entries(categories).map(([name, count]) => ({ name, count })))
     }
     fetchReports()

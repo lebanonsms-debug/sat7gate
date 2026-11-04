@@ -7,7 +7,18 @@ function parseCookies(cookieHeader: string | null) {
   const parsed = cookie.parse(cookieHeader)
   return Object.entries(parsed)
     .filter(([name]) => !['Path', 'Domain', 'Expires', 'Max-Age', 'Secure', 'HttpOnly', 'SameSite'].includes(name))
-    .map(([name, value]) => ({ name, value }))
+    .map(([name, value]) => ({ name, value: value ?? '' }))
+}
+
+interface CookieOptions {
+  name: string
+  value: string
+  options?: Record<string, unknown>
+}
+
+interface CookieManager {
+  getAll(): Promise<{ name: string; value: string }[]>
+  setAll(cookiesToSet: CookieOptions[]): void
 }
 
 export function createSupabaseServerClient(request: Request) {
@@ -20,12 +31,12 @@ export function createSupabaseServerClient(request: Request) {
         async getAll() {
           return parseCookies(request.headers.get('Cookie'))
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
+        setAll(cookiesToSet: CookieOptions[]) {
           cookiesToSet.forEach(({ name, value, options }) => {
             response.cookies.set(name, value, options)
           })
         },
-      } as any,
+      } satisfies CookieManager,
     }
   )
   return { supabase, response }

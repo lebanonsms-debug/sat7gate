@@ -70,8 +70,9 @@ export default function RegisterEntryPage() {
       setMessage('Entry registered successfully!')
       setForm({ fullName: '', category: 'guest', companyId: '', hostName: '', purpose: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', idNumber: '' })
       setTimeout(() => router.push('/live-gate'), 1000)
-    } catch (err: any) {
-      setMessage(err.message || 'Error registering entry')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error registering entry'
+      setMessage(message)
     } finally {
       setLoading(false)
     }

@@ -11,11 +11,12 @@ interface VoiceInputProps {
 
 export function VoiceInput({ onTranscript, placeholder = 'Listening...', className = '', children }: VoiceInputProps) {
   const [isListening, setIsListening] = useState(false)
-  const recognitionRef = useRef<any>(null)
+  const recognitionRef = useRef<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognition) {
       console.warn('Speech recognition not supported')
@@ -27,6 +28,7 @@ export function VoiceInput({ onTranscript, placeholder = 'Listening...', classNa
     recognition.interimResults = false
     recognition.lang = 'en-US'
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript
       onTranscript(transcript)

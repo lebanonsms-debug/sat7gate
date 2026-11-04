@@ -14,15 +14,15 @@ export default function LiveOccupancyPage() {
       const { data: movements } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))').eq('status', 'inside')
       const list = movements || []
       const byCompany: Record<string, number> = {}
-      list.forEach((m: any) => {
-        const name = m.visitor?.company?.name || 'Unknown'
+      list.forEach((m) => {
+        const name = (m as { visitor?: { company?: { name?: string } } }).visitor?.company?.name || 'Unknown'
         byCompany[name] = (byCompany[name] || 0) + 1
       })
       setStats({
         total: list.length,
-        employees: list.filter((m: any) => m.visitor?.person?.person_category === 'employee').length,
-        guests: list.filter((m: any) => m.visitor?.person?.person_category !== 'employee').length,
-        vehicles: list.filter((m: any) => m.visitor?.vehicles?.length > 0).length,
+        employees: list.filter((m) => (m as { visitor?: { person?: { person_category?: string } } }).visitor?.person?.person_category === 'employee').length,
+        guests: list.filter((m) => (m as { visitor?: { person?: { person_category?: string } } }).visitor?.person?.person_category !== 'employee').length,
+        vehicles: list.filter((m) => (m as { visitor?: { vehicles?: unknown[] } }).visitor?.vehicles?.length).length,
         companies: byCompany,
       })
     }

@@ -8,7 +8,7 @@ import {
   LayoutDashboard, UserPlus, Activity, Users, Car,
   Building2, FileText, Settings, LogOut,
   ShieldCheck, BarChart3, History as HistoryIcon,
-  Camera, ClipboardList, UsersRound
+  ClipboardList, UsersRound
 } from 'lucide-react'
 import type { Profile } from '@/lib/types'
 

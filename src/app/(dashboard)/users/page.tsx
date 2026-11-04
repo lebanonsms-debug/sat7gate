@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,12 +23,12 @@ export default function UsersPage() {
   const [message, setMessage] = useState('')
   const supabase = createClientComponentClient()
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     const { data } = await supabase.from('profiles').select('*').order('full_name')
     setUsers(data || [])
-  }
+  }, [supabase])
 
-  useEffect(() => { fetchUsers() }, [supabase])
+  useEffect(() => { fetchUsers() }, [fetchUsers]) // eslint-disable-line react-hooks/set-state-in-effect
 
   const createUser = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,8 +48,9 @@ export default function UsersPage() {
         setMessage('User created successfully!')
         fetchUsers()
       }
-    } catch (err: any) {
-      setMessage(err.message || 'Error creating user')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error creating user'
+      setMessage(message)
     } finally {
       setLoading(false)
     }

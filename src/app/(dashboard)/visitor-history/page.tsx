@@ -3,11 +3,23 @@
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Search, Filter } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Search } from 'lucide-react'
 
 export default function VisitorHistoryPage() {
-  const [records, setRecords] = useState<any[]>([])
+  type HistoryRecord = {
+    id: string
+    status?: string
+    entry_time?: string
+    exit_time?: string
+    entry_officer_id?: string
+    visitor?: {
+      person?: { full_name?: string; person_category?: string }
+      company?: { name?: string }
+      vehicles?: Array<{ plate_number?: string }>
+    }
+  }
+  const [records, setRecords] = useState<HistoryRecord[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const supabase = createClientComponentClient()
@@ -21,10 +33,10 @@ export default function VisitorHistoryPage() {
     fetch()
   }, [supabase])
 
-  const filtered = records.filter((m: any) => {
+  const filtered = records.filter((m) => {
     if (!search) return true
-    const name = m.visitor?.person?.full_name?.toLowerCase() || ''
-    const plate = m.visitor?.vehicles?.[0]?.plate_number?.toLowerCase() || ''
+    const name = (m as { visitor?: { person?: { full_name?: string } } }).visitor?.person?.full_name?.toLowerCase() || ''
+    const plate = (m as { visitor?: { vehicles?: Array<{ plate_number?: string }> } }).visitor?.vehicles?.[0]?.plate_number?.toLowerCase() || ''
     return name.includes(search.toLowerCase()) || plate.includes(search.toLowerCase())
   })
 
@@ -62,15 +74,15 @@ export default function VisitorHistoryPage() {
                   <tr><td colSpan={7} className="px-6 py-8 text-center text-slate-400">Loading...</td></tr>
                 ) : filtered.length === 0 ? (
                   <tr><td colSpan={7} className="px-6 py-8 text-center text-slate-400">No records found</td></tr>
-                ) : filtered.map((m: any) => (
+                ) : filtered.map((m) => (
                   <tr key={m.id} className="hover:bg-slate-700/20">
-                    <td className="px-6 py-4 text-sm font-medium text-white">{m.visitor?.person?.full_name}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300 capitalize">{m.visitor?.person?.person_category?.replace('_', ' ')}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{m.visitor?.company?.name}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{new Date(m.entry_time).toLocaleString()}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{m.exit_time ? new Date(m.exit_time).toLocaleString() : '-'}</td>
-                    <td className="px-6 py-4"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${m.status === 'inside' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10 text-slate-400'}`}>{m.status}</span></td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{m.entry_officer_id.slice(0, 8)}...</td>
+                    <td className="px-4 py-3 text-sm font-medium text-white">{m.visitor?.person?.full_name}</td>
+                    <td className="px-4 py-3 text-sm text-slate-300 capitalize">{m.visitor?.person?.person_category?.replace('_', ' ')}</td>
+                    <td className="px-4 py-3 text-sm text-slate-300">{m.visitor?.company?.name}</td>
+                    <td className="px-4 py-3 text-sm text-slate-300">{m.entry_time ? new Date(m.entry_time).toLocaleString() : '-'}</td>
+                    <td className="px-4 py-3 text-sm text-slate-300">{m.exit_time ? new Date(m.exit_time).toLocaleString() : '-'}</td>
+                    <td className="px-4 py-3"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${m.status === 'inside' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10 text-slate-400'}`}>{m.status}</span></td>
+                    <td className="px-4 py-3 text-sm text-slate-300">{(m.entry_officer_id || '').slice(0, 8)}...</td>
                   </tr>
                 ))}
               </tbody>

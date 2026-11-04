@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import type { Company } from '@/lib/types'
 
 export default function CompaniesPage() {
@@ -14,11 +14,12 @@ export default function CompaniesPage() {
   const [form, setForm] = useState({ name: '', identifier: '', color: '#22d3ee', active: true })
   const supabase = createClientComponentClient()
 
-  const fetch = async () => {
+  const fetch = useCallback(async () => {
     const { data } = await supabase.from('companies').select('*').order('name')
     setCompanies(data || [])
-  }
-  useEffect(() => { fetch() }, [supabase])
+  }, [supabase])
+
+  useEffect(() => { fetch() }, [fetch]) // eslint-disable-line react-hooks/set-state-in-effect
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

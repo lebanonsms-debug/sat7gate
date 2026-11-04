@@ -2,13 +2,22 @@
 
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { formatInTimezone } from '@/lib/utils/timezone'
 import { useTimezone } from '@/hooks/use-timezone'
 import { ClipboardList } from 'lucide-react'
 
 export default function AuditLogsPage() {
-  const [logs, setLogs] = useState<any[]>([])
+  type AuditLog = {
+    id: string
+    action?: string
+    entity_type?: string
+    entity_id?: string
+    details?: string
+    user?: { full_name?: string }
+    created_at?: string
+  }
+  const [logs, setLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const { timezone } = useTimezone()
@@ -27,8 +36,9 @@ export default function AuditLogsPage() {
         if (!res.ok) { const txt = await res.text(); setError(txt || 'Failed to load audit logs'); setLoading(false); return }
         const json = await res.json()
         setLogs(Array.isArray(json.data) ? json.data : [])
-      } catch (err: any) {
-        setError(err.message || 'Error loading audit logs')
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Error loading audit logs'
+        setError(message)
       } finally {
         setLoading(false)
       }

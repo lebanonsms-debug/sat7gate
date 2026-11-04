@@ -47,8 +47,9 @@ export default function SettingsPage() {
       await supabase.from('profiles').update({ timezone }).eq('id', user.id)
       await supabase.from('audit_logs').insert({ user_id: user.id, action: 'update_settings', entity_type: 'settings', details: `Timezone: ${timezone}` })
       setMessage('Settings saved')
-    } catch (err: any) {
-      setMessage(err.message || 'Error saving settings')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error saving settings'
+      setMessage(message)
     } finally {
       setSaving(false)
     }

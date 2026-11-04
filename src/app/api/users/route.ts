@@ -1,50 +1,33 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { createServerClient } from '@supabase/ssr'
-import * as cookie from 'cookie'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
-function parseCookies(cookieHeader: string | null) {
-  if (!cookieHeader) return []
-  const parsed = cookie.parse(cookieHeader)
-  return Object.entries(parsed)
-    .filter(([name]) => !['Path', 'Domain', 'Expires', 'Max-Age', 'Secure', 'HttpOnly', 'SameSite'].includes(name))
-    .map(([name, value]) => ({ name, value }))
+async function getAdminSupabase(request: Request) {
+  const { supabase } = createSupabaseServerClient(request)
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || profile.role !== 'administrator') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  return { supabase, adminClient: createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!) }
 }
 
 export async function GET(request: Request) {
   try {
-    const response = NextResponse.json({})
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          async getAll() {
-            return parseCookies(request.headers.get('Cookie'))
-          },
-          setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options)
-            })
-          },
-        } as any,
-      }
-    )
-
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || profile.role !== 'administrator') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const result = await getAdminSupabase(request)
+    if (result instanceof Response) return result
+    const { supabase } = result
 
     const { data: users } = await supabase.from('profiles').select('*').order('full_name')
     return NextResponse.json({ users })
@@ -61,23 +44,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const response = NextResponse.json({})
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          async getAll() {
-            return parseCookies(request.headers.get('Cookie'))
-          },
-          setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options)
-            })
-          },
-        } as any,
-      }
-    )
+    const { supabase } = createSupabaseServerClient(request)
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -134,23 +101,7 @@ export async function PATCH(request: Request) {
   try {
     const { id, full_name, role, active } = await request.json()
 
-    const response = NextResponse.json({})
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          async getAll() {
-            return parseCookies(request.headers.get('Cookie'))
-          },
-          setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options)
-            })
-          },
-        } as any,
-      }
-    )
+    const { supabase } = createSupabaseServerClient(request)
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -167,7 +118,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const updates: any = { updated_at: new Date().toISOString() }
+    const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
     if (full_name !== undefined) updates.full_name = full_name
     if (role !== undefined) updates.role = role
     if (active !== undefined) updates.active = active
@@ -198,23 +149,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Missing user id' }, { status: 400 })
     }
 
-    const response = NextResponse.json({})
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          async getAll() {
-            return parseCookies(request.headers.get('Cookie'))
-          },
-          setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options)
-            })
-          },
-        } as any,
-      }
-    )
+    const { supabase } = createSupabaseServerClient(request)
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

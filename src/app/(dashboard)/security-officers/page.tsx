@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,11 +17,12 @@ export default function SecurityOfficersPage() {
   const [message, setMessage] = useState('')
   const supabase = createClientComponentClient()
 
-  const fetchOfficers = async () => {
+  const fetchOfficers = useCallback(async () => {
     const { data } = await supabase.from('profiles').select('*').in('role', ['security_officer', 'administrator']).order('full_name')
     setOfficers(data || [])
-  }
-  useEffect(() => { fetchOfficers() }, [supabase])
+  }, [supabase])
+
+  useEffect(() => { fetchOfficers() }, [fetchOfficers]) // eslint-disable-line react-hooks/set-state-in-effect
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,8 +59,9 @@ export default function SecurityOfficersPage() {
           fetchOfficers()
         }
       }
-    } catch (err: any) {
-      setMessage(err.message || 'Error saving user')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error saving user'
+      setMessage(message)
     } finally {
       setLoading(false)
     }
