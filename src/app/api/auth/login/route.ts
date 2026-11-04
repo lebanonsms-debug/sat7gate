@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       })
       await supabase.auth.getSession()
     }
-    return NextResponse.json({ data })
+    return response
   } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
