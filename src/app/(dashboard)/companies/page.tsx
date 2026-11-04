@@ -71,7 +71,7 @@ export default function CompaniesPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div><label className="block text-sm font-medium text-slate-300 mb-1">Name</label><Input value={form.name} onChange={e => setForm({...form, name: e.target.value})} required /></div>
               <div><label className="block text-sm font-medium text-slate-300 mb-1">Identifier</label><Input value={form.identifier} onChange={e => setForm({...form, identifier: e.target.value})} required /></div>
-              <div><label className="block text-sm font-medium text-slate-300 mb-1">Color</label><Input type="color" value={form.color} onChange={e => setForm({...form, color: e.target.value})} /></div>
+              <div><label className="block text-sm font-medium text-slate-300 mb-1">Color</label><div className="flex items-center gap-3"><Input type="color" value={form.color} onChange={e => setForm({...form, color: e.target.value})} className="w-16 h-10 p-1 cursor-pointer" /><span className="text-sm text-slate-400 font-mono">{form.color}</span></div></div>
               <div className="flex items-center gap-2"><input type="checkbox" checked={form.active} onChange={e => setForm({...form, active: e.target.checked})} /><label className="text-sm text-slate-300">Active</label></div>
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1 bg-cyan-600 hover:bg-cyan-700">{editing ? 'Update' : 'Add'}</Button>

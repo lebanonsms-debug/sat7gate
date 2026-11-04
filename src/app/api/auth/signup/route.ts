@@ -9,26 +9,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
     }
 
-    // Use anon key for signup
+    // Use service role key to bypass RLS and create both auth user and profile
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
     // Create user in Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.admin.createUser({
       email,
       password,
-      options: {
-        data: { full_name }
-      }
+      email_confirm: true,
+      user_metadata: { full_name }
     })
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    // Create profile with anon client
+    // Create profile
     if (data.user) {
       const { error: profileError } = await supabase
         .from('profiles')
@@ -41,6 +40,7 @@ export async function POST(request: Request) {
 
       if (profileError) {
         console.error('Profile creation error:', profileError)
+        return NextResponse.json({ error: profileError.message }, { status: 400 })
       }
     }
 
