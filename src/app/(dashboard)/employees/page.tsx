@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { VoiceInput } from '@/components/ui/voice-input'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, Pencil, X } from 'lucide-react'
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<any[]>([])
+  const [editing, setEditing] = useState<any>(null)
   const [form, setForm] = useState({ full_name: '', person_category: 'employee' as any, identification_number: '' })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -21,7 +22,7 @@ export default function EmployeesPage() {
   }
   useEffect(() => { fetch() }, [supabase])
 
-  const addEmployee = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setMessage('')
@@ -29,19 +30,29 @@ export default function EmployeesPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { data, error } = await supabase.from('persons').insert({ ...form, updated_at: new Date().toISOString() }).select().single()
-      if (error) throw error
-
-      await supabase.from('audit_logs').insert({ user_id: user.id, action: 'create_employee', entity_type: 'person', entity_id: data.id, details: `Created employee ${form.full_name}` })
-
+      if (editing) {
+        await supabase.from('persons').update({ ...form, updated_at: new Date().toISOString() }).eq('id', editing.id)
+        await supabase.from('audit_logs').insert({ user_id: user.id, action: 'update_employee', entity_type: 'person', entity_id: editing.id, details: `Updated employee ${form.full_name}` })
+        setMessage('Employee updated')
+      } else {
+        const { data, error } = await supabase.from('persons').insert({ ...form, updated_at: new Date().toISOString() }).select().single()
+        if (error) throw error
+        await supabase.from('audit_logs').insert({ user_id: user.id, action: 'create_employee', entity_type: 'person', entity_id: data.id, details: `Created employee ${form.full_name}` })
+        setMessage('Employee added')
+      }
       setForm({ full_name: '', person_category: 'employee', identification_number: '' })
-      setMessage('Employee added successfully')
+      setEditing(null)
       fetch()
     } catch (err: any) {
-      setMessage(err.message || 'Error adding employee')
+      setMessage(err.message || 'Error saving employee')
     } finally {
       setLoading(false)
     }
+  }
+
+  const startEdit = (emp: any) => {
+    setEditing(emp)
+    setForm({ full_name: emp.full_name, person_category: emp.person_category, identification_number: emp.identification_number || '' })
   }
 
   const deleteEmployee = async (id: string, name: string) => {
@@ -58,9 +69,9 @@ export default function EmployeesPage() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-white">Employees</h1>
       <Card className="border-slate-700 bg-slate-800/50">
-        <CardHeader><CardTitle>Add Employee</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{editing ? 'Edit Employee' : 'Add Employee'}</CardTitle></CardHeader>
         <CardContent>
-          <form onSubmit={addEmployee} className="flex gap-4 flex-wrap items-end">
+          <form onSubmit={handleSubmit} className="flex gap-4 flex-wrap items-end">
             <VoiceInput onTranscript={(text) => setForm({...form, full_name: text})}>
               <Input placeholder="Full name" value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required className="flex-1" />
             </VoiceInput>
@@ -68,8 +79,9 @@ export default function EmployeesPage() {
               <Input placeholder="ID Number" value={form.identification_number} onChange={e => setForm({...form, identification_number: e.target.value})} />
             </VoiceInput>
             <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700" disabled={loading}>
-              <Plus className="w-4 h-4 mr-2" />{loading ? 'Adding...' : 'Add'}
+              <Plus className="w-4 h-4 mr-2" />{loading ? 'Saving...' : (editing ? 'Update' : 'Add')}
             </Button>
+            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', person_category: 'employee', identification_number: '' }) }}><X className="w-4 h-4 mr-2" />Cancel</Button>}
           </form>
           {message && <p className={`text-sm mt-2 ${message.includes('success') || message.includes('added') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
         </CardContent>
@@ -92,7 +104,10 @@ export default function EmployeesPage() {
                     <td className="px-6 py-4 text-sm text-white font-medium">{e.full_name}</td>
                     <td className="px-6 py-4 text-sm text-slate-300">{e.identification_number || '-'}</td>
                     <td className="px-6 py-4 text-sm text-slate-300">{new Date(e.created_at).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 text-sm">
+                    <td className="px-6 py-4 text-sm flex gap-2">
+                      <button onClick={() => startEdit(e)} className="text-cyan-400 hover:text-cyan-300 p-1" title="Edit employee">
+                        <Pencil className="w-4 h-4" />
+                      </button>
                       <button onClick={() => deleteEmployee(e.id, e.full_name)} className="text-red-400 hover:text-red-300 p-1" title="Delete employee">
                         <Trash2 className="w-4 h-4" />
                       </button>

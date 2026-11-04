@@ -5,7 +5,7 @@ import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Plus, Pencil } from 'lucide-react'
+import { Plus, Pencil, Trash2 } from 'lucide-react'
 import type { Company } from '@/lib/types'
 
 export default function CompaniesPage() {
@@ -38,6 +38,15 @@ export default function CompaniesPage() {
   }
 
   const startEdit = (c: Company) => { setEditing(c); setForm({ name: c.name, identifier: c.identifier, color: c.color, active: c.active }) }
+  const deleteCompany = async (id: string, name: string) => {
+    if (!confirm(`Delete company "${name}"? This cannot be undone.`)) return
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase.from('companies').delete().eq('id', id)
+    await supabase.from('audit_logs').insert({ user_id: user.id, action: 'delete_company', entity_type: 'company', entity_id: id, details: `Deleted company ${name}` })
+    if (editing?.id === id) { setEditing(null); setForm({ name: '', identifier: '', color: '#22d3ee', active: true }) }
+    fetch()
+  }
   const toggleActive = async (c: Company) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -86,6 +95,7 @@ export default function CompaniesPage() {
                       <td className="px-6 py-4"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${c.active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>{c.active ? 'Active' : 'Inactive'}</span></td>
                       <td className="px-6 py-4 flex gap-2">
                         <Button size="sm" variant="ghost" onClick={() => startEdit(c)}><Pencil className="w-4 h-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => deleteCompany(c.id, c.name)} className="text-red-400 hover:text-red-300"><Trash2 className="w-4 h-4" /></Button>
                         <Button size="sm" variant="ghost" onClick={() => toggleActive(c)}>{c.active ? 'Disable' : 'Enable'}</Button>
                       </td>
                     </tr>
