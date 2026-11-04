@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { VoiceInput } from '@/components/ui/voice-input'
-import { useRouter } from 'next/navigation'
 import type { PersonCategory, Company } from '@/lib/types'
 
 const CATEGORIES: { value: PersonCategory; label: string }[] = [
