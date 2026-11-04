@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import type { Profile } from '@/lib/types'
+import { Button } from '@/components/ui/button'
+import { Menu } from 'lucide-react'
 
-export function TopNav({ profile }: { profile: Profile | null }) {
+export function TopNav({ profile, onMenuClick }: { profile: Profile | null; onMenuClick?: () => void }) {
   const [time, setTime] = useState(new Date())
   const supabase = createClientComponentClient()
   const [occupancy, setOccupancy] = useState({ people: 0, vehicles: 0, lanes: 0 })
@@ -31,14 +33,21 @@ export function TopNav({ profile }: { profile: Profile | null }) {
   }, [supabase])
 
   return (
-    <header className="h-16 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 z-30">
-      <div className="flex items-center gap-6">
+    <header className="h-16 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
+      <div className="flex items-center gap-4">
+        {onMenuClick && (
+          <Button variant="ghost" size="sm" onClick={onMenuClick} className="lg:hidden text-slate-400 hover:text-white px-2">
+            <Menu className="w-5 h-5" />
+          </Button>
+        )}
         <div>
           <h2 className="text-sm font-medium text-white">
             {time.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </h2>
           <p className="text-xs text-slate-400">Security Operations Center</p>
         </div>
+      </div>
+      <div className="hidden md:flex items-center gap-4">
         <div className="h-8 w-px bg-slate-800" />
         <div className="flex items-center gap-4 text-xs">
           <div className="flex items-center gap-2">

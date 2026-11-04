@@ -43,8 +43,12 @@ const navSections = [
   }
 ]
 
-export function Sidebar({ profile, onLogout }: { profile: Profile | null; onLogout: () => void }) {
+export function Sidebar({ profile, onLogout, onNavigate }: { profile: Profile | null; onLogout: () => void; onNavigate?: () => void }) {
   const pathname = usePathname()
+
+  const handleClick = () => {
+    onNavigate?.()
+  }
 
   return (
     <aside className="w-64 h-screen bg-slate-950 border-r border-slate-800 flex flex-col fixed left-0 top-0 z-40">
@@ -71,7 +75,7 @@ export function Sidebar({ profile, onLogout }: { profile: Profile | null; onLogo
                 const Icon = item.icon
                 const active = pathname === item.href
                 return (
-                  <Link key={item.href} href={item.href}>
+                  <Link key={item.href} href={item.href} onClick={handleClick}>
                     <Button
                       variant={active ? 'default' : 'ghost'}
                       className={cn(

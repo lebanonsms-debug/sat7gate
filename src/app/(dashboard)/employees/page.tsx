@@ -94,6 +94,7 @@ export default function EmployeesPage() {
               <p className="text-slate-500 text-sm mt-1">Add your first employee using the form above</p>
             </div>
           ) : (
+          <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-900/50 border-b border-slate-700">
                 <tr><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">ID Number</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Created</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th></tr>
@@ -116,7 +117,8 @@ export default function EmployeesPage() {
                 ))}
               </tbody>
             </table>
-          )}
+          </div>
+        )}
         </CardContent>
       </Card>
     </div>
