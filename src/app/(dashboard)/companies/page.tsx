@@ -12,6 +12,7 @@ export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([])
   const [editing, setEditing] = useState<Company | null>(null)
   const [form, setForm] = useState({ name: '', identifier: '', color: '#22d3ee', active: true })
+  const [message, setMessage] = useState('')
   const supabase = createClientComponentClient()
 
   const fetch = useCallback(async () => {
@@ -23,14 +24,18 @@ export default function CompaniesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setMessage('')
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) { setMessage('You must be logged in to update companies'); return }
 
     if (editing) {
-      await supabase.from('companies').update({ ...form, updated_at: new Date().toISOString() }).eq('id', editing.id)
+      const { error } = await supabase.from('companies').update({ ...form, updated_at: new Date().toISOString() }).eq('id', editing.id)
+      if (error) { setMessage(error.message); return }
       await supabase.from('audit_logs').insert({ user_id: user.id, action: 'update_company', entity_type: 'company', entity_id: editing.id, details: `Updated company ${form.name}` })
     } else {
-      const { data } = await supabase.from('companies').insert(form).select('id').single()
+      const { error } = await supabase.from('companies').insert(form)
+      if (error) { setMessage(error.message); return }
+      const { data } = await supabase.from('companies').select('id').eq('name', form.name).single()
       if (data) await supabase.from('audit_logs').insert({ user_id: user.id, action: 'create_company', entity_type: 'company', entity_id: data.id, details: `Created company ${form.name}` })
     }
     setForm({ name: '', identifier: '', color: '#22d3ee', active: true })
@@ -42,22 +47,25 @@ export default function CompaniesPage() {
   const deleteCompany = async (id: string, name: string) => {
     if (!confirm(`Delete company "${name}"? This cannot be undone.`)) return
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    await supabase.from('companies').delete().eq('id', id)
+    if (!user) { setMessage('You must be logged in'); return }
+    const { error } = await supabase.from('companies').delete().eq('id', id)
+    if (error) { setMessage(error.message); return }
     await supabase.from('audit_logs').insert({ user_id: user.id, action: 'delete_company', entity_type: 'company', entity_id: id, details: `Deleted company ${name}` })
     if (editing?.id === id) { setEditing(null); setForm({ name: '', identifier: '', color: '#22d3ee', active: true }) }
     fetch()
   }
   const toggleActive = async (c: Company) => {
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    await supabase.from('companies').update({ active: !c.active }).eq('id', c.id)
+    if (!user) { setMessage('You must be logged in'); return }
+    const { error } = await supabase.from('companies').update({ active: !c.active }).eq('id', c.id)
+    if (error) { setMessage(error.message); return }
     await supabase.from('audit_logs').insert({ user_id: user.id, action: !c.active ? 'enable_company' : 'disable_company', entity_type: 'company', entity_id: c.id, details: `${!c.active ? 'Enabled' : 'Disabled'} company ${c.name}` })
     fetch()
   }
 
   return (
     <div className="space-y-6">
+      {message && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">{message}</div>}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Companies</h1>
