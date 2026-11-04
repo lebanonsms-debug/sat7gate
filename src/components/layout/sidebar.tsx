@@ -17,7 +17,7 @@ const navSections = [
     title: 'Operational Gate',
     items: [
       { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['security_officer', 'administrator', 'management', 'viewer'] },
-      { href: '/register-entry', label: 'Register Entry', icon: UserPlus, roles: ['security_officer', 'administrator'], badge: 'Quick' },
+      { href: '/register-entry', label: 'NEW ENTRY', icon: UserPlus, roles: ['security_officer', 'administrator'], badge: 'Quick' },
       { href: '/live-gate', label: 'Live Gate', icon: Activity, roles: ['security_officer', 'administrator', 'management', 'viewer'], badge: 'Live' },
       { href: '/live-occupancy', label: 'Live Occupancy', icon: BarChart3, roles: ['security_officer', 'administrator', 'management', 'viewer'] },
     ]
