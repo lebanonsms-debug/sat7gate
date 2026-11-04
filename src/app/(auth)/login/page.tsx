@@ -58,7 +58,7 @@ export default function LoginPage() {
         </form>
         <p className="text-center text-slate-500 text-sm mt-6">
           SAT7 GATE v1.0 — Secure Access Control
-          <span className="ml-2 text-slate-600">build-20261103135239</span>
+          <span className="ml-2 text-slate-600">build-20261104084714</span>
         </p>
       </div>
     </div>
