@@ -5,6 +5,8 @@ import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Activity, LogOut, Car } from 'lucide-react'
+import { formatInTimezone } from '@/lib/utils/timezone'
+import { useTimezone } from '@/hooks/use-timezone'
 
 export default function LiveGatePage() {
   const [movements, setMovements] = useState<any[]>([])

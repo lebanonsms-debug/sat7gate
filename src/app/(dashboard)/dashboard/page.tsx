@@ -7,6 +7,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Activity, Users, Car, UserPlus, TrendingUp, Clock, Camera } from 'lucide-react'
 import Link from 'next/link'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { formatInTimezone } from '@/lib/utils/timezone'
+import { useTimezone } from '@/hooks/use-timezone'
 
 interface KPIs {
   totalEntriesToday: number
@@ -22,6 +24,7 @@ interface KPIs {
 }
 
 export default function DashboardPage() {
+  const { timezone } = useTimezone()
   const [kpis, setKpis] = useState<KPIs>({ totalEntriesToday: 0, currentlyInside: 0, totalExitsToday: 0, vehiclesInside: 0, visitorsInside: 0, staffInside: 0, guestsInside: 0, avgDuration: '0m', peakHour: '--:--', trend: '+0%' })
   const [recent, setRecent] = useState<any[]>([])
   const [hourlyData, setHourlyData] = useState<any[]>([])
@@ -275,7 +278,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-slate-400">{new Date(m.entry_time).toLocaleTimeString()}</p>
+                  <p className="text-xs text-slate-400">{formatInTimezone(m.entry_time, timezone, { timeStyle: 'short' })}</p>
                   <p className={`text-xs capitalize ${m.status === 'inside' ? 'text-emerald-400' : 'text-slate-400'}`}>{m.status}</p>
                 </div>
               </div>
