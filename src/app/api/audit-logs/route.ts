@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getServerUser, isAdmin } from '@/lib/auth'
 
-export async function GET() {
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
-  const { data } = await supabase.from('audit_logs').select('*, user:profiles(full_name)').order('created_at', { ascending: false }).limit(100)
-  return NextResponse.json({ data })
+export async function GET(request: Request) {
+  try {
+    const { supabase, profile, response } = await getServerUser(request)
+    if (response) return response
+    if (!isAdmin(profile)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    const { data } = await supabase.from('audit_logs').select('*, user:profiles(full_name)').order('created_at', { ascending: false }).limit(100)
+    return NextResponse.json({ data })
+  } catch {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  }
 }
