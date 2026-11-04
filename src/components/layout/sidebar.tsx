@@ -79,7 +79,7 @@ export function Sidebar({ profile, onLogout, onNavigate }: { profile: Profile | 
                     <Button
                       variant={active ? 'default' : 'ghost'}
                       className={cn(
-                        'w-full justify-start gap-3 relative',
+                        'w-full justify-start gap-3 relative min-h-[44px] px-2 sm:px-4 py-2 sm:py-3 touch-manipulation',
                         active
                           ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/20'
                           : 'text-slate-400 hover:text-white hover:bg-slate-900'
