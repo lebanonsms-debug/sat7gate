@@ -27,6 +27,7 @@ export default function RegisterEntryPage() {
   const [foundEmployee, setFoundEmployee] = useState<{ id: string; full_name: string; identification_number: string; person_category: string } | null>(null)
   const [loadingEmployee, setLoadingEmployee] = useState(false)
   const [message, setMessage] = useState('')
+  const [searchingId, setSearchingId] = useState(false)  // ID number quick search
   const router = useRouter()
   const supabase = createClientComponentClient()
 
@@ -66,9 +67,39 @@ export default function RegisterEntryPage() {
     return () => clearTimeout(timer)
   }, [form.fullName, supabase])
 
+  // ID number quick select
+  const handleIdNumberSearch = async (idNumber: string) => {
+    if (!idNumber.trim()) return
+    setSearchingId(true)
+    try {
+      const { data } = await supabase.from('persons').select('id, full_name, identification_number, person_category').eq('identification_number', idNumber.trim()).eq('person_category', 'employee').maybeSingle()
+      if (data && typeof data !== 'undefined') {
+        setFoundEmployee(data)
+        setSearchingId(false)
+        setForm(prev => ({
+          ...prev,
+          fullName: data.full_name,
+          category: (data.person_category || 'employee') as PersonCategory,
+          idNumber: data.identification_number || '',
+        }))
+      } else {
+        setFoundEmployee(null)
+        setSearchingId(false)
+      }
+    } catch {
+      setFoundEmployee(null)
+      setSearchingId(false)
+    }
+  }
+
+  // Quick-select employee by ID number
+  const quickSelectEmployee = async (idNumber: string) => {
+    if (!idNumber.trim()) return
+    await handleIdNumberSearch(idNumber)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setMessage('')
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -164,12 +195,51 @@ export default function RegisterEntryPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">ID Number</label>
-                <VoiceInput onTranscript={(text) => setForm({...form, idNumber: text})}>
-                  <Input value={foundEmployee?.identification_number || form.idNumber} onChange={e => setForm({...form, idNumber: e.target.value})} disabled={!!foundEmployee} />
-                </VoiceInput>
+                <div className="relative">
+                  <Input
+                    value={searchingId ? form.idNumber : ''}
+                    onChange={(e) => { if (!form.idNumber) { setForm({ ...form, idNumber: e.target.value }) } }}
+                    placeholder="Type ID number and press Enter"
+                    disabled={!!foundEmployee}
+                    className="pe-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => quickSelectEmployee(searchingId ? form.idNumber : '')}
+                    className="absolute right-0 top-0 h-full px-3"
+                    disabled={!searchingId || searchingId}
+                  >
+                    {searchingId ? '🔍' : '🔎'}
+                  </Button>
+                </div>
                 {foundEmployee && (
                   <div className="mt-1 text-xs text-slate-500">{foundEmployee.identification_number || 'No ID number on file'} (from database)</div>
                 )}
+                {loadingEmployee && !foundEmployee && (
+                  <div className="mt-1 text-xs text-slate-400">Searching...</div>
+                )}
+                {searchingId && !searchingId && form.idNumber && !foundEmployee && (
+                  <div className="mt-1 text-xs text-slate-500">No employee found with this ID number</div>
+                )}
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-slate-300 mb-1">Quick-Select Employees (by ID No)</label>
+                <div className="flex flex-wrap gap-2">
+                  {['10452', '10453', '10454'].map((id) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => quickSelectEmployee(id)}
+                      className="text-xs px-3 py-1.5 rounded-lg border border-slate-600 text-slate-300 hover:bg-cyan-500/10 hover:border-cyan-500 hover:text-cyan-300 disabled:opacity-50"
+                      disabled={!!foundEmployee}
+                      title={`Select employee with ID ${id}`}
+                    >
+                      ID #{id}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Purpose</label>
