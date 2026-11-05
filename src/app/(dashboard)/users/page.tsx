@@ -21,6 +21,9 @@ export default function UsersPage() {
   const [form, setForm] = useState({ email: '', password: '', full_name: '', role: 'security_officer' as Profile['role'] })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [editingUser, setEditingUser] = useState<Profile | null>(null)
+  const [resettingUser, setResettingUser] = useState<Profile | null>(null)
+  const [showResetForm, setShowResetForm] = useState(false)
   const supabase = createClientComponentClient()
 
   const fetchUsers = useCallback(async () => {
