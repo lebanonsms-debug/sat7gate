@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -24,13 +24,47 @@ export default function RegisterEntryPage() {
   const [companies, setCompanies] = useState<Company[]>([])
   const [form, setForm] = useState({ fullName: '', category: 'guest' as PersonCategory, companyId: '', hostName: '', purpose: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', idNumber: '' })
   const [loading, setLoading] = useState(false)
+  const [foundEmployee, setFoundEmployee] = useState<{ id: string; full_name: string; identification_number: string; person_category: string } | null>(null)
+  const [loadingEmployee, setLoadingEmployee] = useState(false)
   const [message, setMessage] = useState('')
   const router = useRouter()
   const supabase = createClientComponentClient()
 
-  useEffect(() => {
-    supabase.from('companies').select('*').eq('active', true).then(({ data }) => setCompanies(data || []))
+  const fetchCompanies = useCallback(async () => {
+    const { data } = await supabase.from('companies').select('*').eq('active', true)
+    setCompanies(data || [])
   }, [supabase])
+
+  useEffect(() => { fetchCompanies() }, [fetchCompanies])
+
+  // Auto-search employee when name changes
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (form.fullName.trim().length < 2) {
+        setFoundEmployee(null)
+        return
+      }
+      setLoadingEmployee(true)
+      try {
+        const { data } = await supabase.from('persons').select('id, full_name, identification_number, person_category').eq('full_name', form.fullName.trim()).eq('person_category', 'employee').maybeSingle()
+        if (data && typeof data !== 'undefined') {
+          setFoundEmployee(data)
+          setForm(prev => ({
+            ...prev,
+            category: (data.person_category || 'employee') as PersonCategory,
+            idNumber: data.identification_number || '',
+          }))
+        } else {
+          setFoundEmployee(null)
+        }
+      } catch {
+        setFoundEmployee(null)
+      } finally {
+        setLoadingEmployee(false)
+      }
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [form.fullName, supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,14 +75,20 @@ export default function RegisterEntryPage() {
       if (!user) throw new Error('Not authenticated')
 
       // Upsert person
+      // If auto-filled from database, use that employee's ID
+      // Otherwise search by name and category
       let personId: string
-      const { data: existingPerson } = await supabase.from('persons').select('id').eq('full_name', form.fullName).eq('person_category', form.category).maybeSingle()
-      if (existingPerson) {
-        personId = existingPerson.id
+      if (foundEmployee) {
+        personId = foundEmployee.id
       } else {
-        const { data: newPerson } = await supabase.from('persons').insert({ full_name: form.fullName, person_category: form.category, identification_number: form.idNumber }).select('id').single()
-        if (!newPerson) throw new Error('Failed to create person')
-        personId = newPerson.id
+        const { data: existingPerson } = await supabase.from('persons').select('id').eq('full_name', form.fullName).eq('person_category', form.category).maybeSingle()
+        if (existingPerson) {
+          personId = existingPerson.id
+        } else {
+          const { data: newPerson } = await supabase.from('persons').insert({ full_name: form.fullName, person_category: form.category, identification_number: form.idNumber }).select('id').single()
+          if (!newPerson) throw new Error('Failed to create person')
+          personId = newPerson.id
+        }
       }
 
       // Create vehicle if provided
@@ -92,12 +132,24 @@ export default function RegisterEntryPage() {
                 <VoiceInput onTranscript={(text) => setForm({...form, fullName: text})}>
                   <Input value={form.fullName} onChange={e => setForm({...form, fullName: e.target.value})} required />
                 </VoiceInput>
+                {foundEmployee && (
+                  <div className="mt-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-sm text-emerald-400 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    Employee found in database — auto-filled
+                  </div>
+                )}
+                {loadingEmployee && !foundEmployee && (
+                  <div className="mt-2 text-sm text-slate-400">Searching employee...</div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Category *</label>
-                <Select value={form.category} onChange={e => setForm({...form, category: e.target.value as PersonCategory})}>
+                <Select value={foundEmployee?.person_category || form.category} onChange={e => setForm({...form, category: e.target.value as PersonCategory})} disabled={!!foundEmployee}>
                   {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </Select>
+                {foundEmployee && (
+                  <div className="mt-1 text-xs text-slate-500">{foundEmployee.person_category.replace('_', ' ')} (from database)</div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Destination Company *</label>
@@ -113,8 +165,11 @@ export default function RegisterEntryPage() {
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">ID Number</label>
                 <VoiceInput onTranscript={(text) => setForm({...form, idNumber: text})}>
-                  <Input value={form.idNumber} onChange={e => setForm({...form, idNumber: e.target.value})} />
+                  <Input value={foundEmployee?.identification_number || form.idNumber} onChange={e => setForm({...form, idNumber: e.target.value})} disabled={!!foundEmployee} />
                 </VoiceInput>
+                {foundEmployee && (
+                  <div className="mt-1 text-xs text-slate-500">{foundEmployee.identification_number || 'No ID number on file'} (from database)</div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Purpose</label>
