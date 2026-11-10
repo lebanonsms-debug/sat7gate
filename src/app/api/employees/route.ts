@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     }
     const { searchParams } = new URL(request.url)
     const fullName = searchParams.get('full_name')
-    let query = supabase.from('persons').select('*').eq('person_category', 'employee').order('full_name')
+    let query = supabase.from('persons').select('*').order('full_name')
     if (fullName) {
       query = query.ilike('full_name', `%${fullName}%`)
     }

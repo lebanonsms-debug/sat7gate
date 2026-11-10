@@ -26,7 +26,7 @@ const navSections = [
     title: 'Database & Lookup',
     items: [
       { href: '/visitor-history', label: 'Visitor History', icon: HistoryIcon, roles: ['security_officer', 'administrator', 'management', 'viewer'] },
-      { href: '/employees', label: 'Employees', icon: Users, roles: ['security_officer', 'administrator', 'management', 'viewer'] },
+      { href: '/people', label: 'People', icon: Users, roles: ['security_officer', 'administrator', 'management', 'viewer'] },
       { href: '/vehicles', label: 'Vehicles', icon: Car, roles: ['security_officer', 'administrator'] },
       { href: '/companies', label: 'Companies', icon: Building2, roles: ['administrator'] },
     ]
