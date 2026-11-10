@@ -84,7 +84,7 @@ export default function PeoplePage() {
 
         setMessage('Person added')
       }
-      setForm({ full_name: '', person_category: 'guest', company: '' })
+      setForm({ full_name: '', person_category: 'guest', company: '', notes: '' })
       setNewVehicle({ plate_number: '', manufacturer: '', model: '', color: '' })
       setVehicles([])
       setEditing(null)
@@ -167,7 +167,7 @@ export default function PeoplePage() {
             <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700 h-10 sm:h-auto" disabled={loading}>
               <Plus className="w-4 h-4 mr-2" />{loading ? 'Saving...' : (editing ? 'Update' : 'Add')}
             </Button>
-            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', person_category: 'guest', company: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
+            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', person_category: 'guest', company: '', notes: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
           </form>
           {message && <p className={`text-sm mt-2 ${message.includes('success') || message.includes('added') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
 
