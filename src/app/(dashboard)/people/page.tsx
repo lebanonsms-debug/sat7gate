@@ -22,9 +22,6 @@ export default function PeoplePage() {
   const [form, setForm] = useState({
     full_name: '',
     person_category: 'guest' as Person['person_category'],
-    identification_number: '',
-    email: '',
-    phone: '',
     notes: '',
     company: '',
   })
@@ -78,7 +75,7 @@ export default function PeoplePage() {
 
         setMessage('Person added')
       }
-      setForm({ full_name: '', person_category: 'guest', identification_number: '', email: '', phone: '', notes: '', company: '' })
+      setForm({ full_name: '', person_category: 'guest', notes: '', company: '' })
       setNewVehicle({ plate_number: '', manufacturer: '', model: '', color: '' })
       setVehicles([])
       setEditing(null)
@@ -96,9 +93,8 @@ export default function PeoplePage() {
     setForm({
       full_name: person.full_name,
       person_category: person.person_category,
-      identification_number: person.identification_number || '',
-      email: person.email || '',
-      phone: person.phone || '',
+      notes: person.notes || '',
+      company: person.company || '',
       notes: person.notes || '',
       company: person.company || '',
     })
@@ -139,9 +135,6 @@ export default function PeoplePage() {
               </select>
             </div>
 
-            <Input placeholder="ID Number" value={form.identification_number} onChange={e => setForm({...form, identification_number: e.target.value})} className="text-base" />
-            <Input placeholder="Email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="text-base" />
-            <Input placeholder="Phone" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="text-base" />
             <Input placeholder="Company" value={form.company} onChange={e => setForm({...form, company: e.target.value})} className="text-base" />
 
             <div className="flex-1 min-w-0">
@@ -162,7 +155,7 @@ export default function PeoplePage() {
             <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700 h-10 sm:h-auto" disabled={loading}>
               <Plus className="w-4 h-4 mr-2" />{loading ? 'Saving...' : (editing ? 'Update' : 'Add')}
             </Button>
-            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', person_category: 'guest', identification_number: '', email: '', phone: '', notes: '', company: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
+            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', person_category: 'guest', notes: '', company: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
           </form>
           {message && <p className={`text-sm mt-2 ${message.includes('success') || message.includes('added') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
 
@@ -191,9 +184,7 @@ export default function PeoplePage() {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Category</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">ID Number</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Company</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Email</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Created</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th>
                   </tr>
@@ -203,7 +194,7 @@ export default function PeoplePage() {
                     <tr key={p.id} className="hover:bg-slate-700/20">
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-white font-medium">{p.full_name}</td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300">{p.person_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300">{p.identification_number || '-'}</td>
+                      
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{p.company || '-'}</td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{p.email || '-'}</td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{new Date(p.created_at).toLocaleDateString()}</td>
