@@ -20,7 +20,6 @@ export default function PeoplePage() {
   const [persons, setPersons] = useState<Person[]>([])
   const [editing, setEditing] = useState<Person | null>(null)
   const [form, setForm] = useState({
-    full_name: '',
     given_name: '',
     family_name: '',
     person_category: 'guest' as Person['person_category'],
@@ -36,7 +35,7 @@ export default function PeoplePage() {
   const supabase = createClientComponentClient()
 
   const fetch = useCallback(async () => {
-    const { data } = await supabase.from('persons').select('*').order('full_name')
+    const { data } = await supabase.from('persons').select('*').order('given_name, family_name')
     setPersons((data as Person[]) || [])
   }, [supabase])
 
@@ -64,12 +63,12 @@ export default function PeoplePage() {
 
       if (editing) {
         await supabase.from('persons').update({ ...form, updated_at: new Date().toISOString() }).eq('id', editing.id)
-        await supabase.from('audit_logs').insert({ user_id: user.id, action: 'update_person', entity_type: 'person', entity_id: editing.id, details: `Updated person ${form.full_name} (${form.person_category})` })
+        await supabase.from('audit_logs').insert({ user_id: user.id, action: 'update_person', entity_type: 'person', entity_id: editing.id, details: `Updated person ${form.given_name || ""} ${form.family_name || ""} (${form.person_category})` })
         setMessage('Person updated')
       } else {
         const { data, error } = await supabase.from('persons').insert({ ...form, updated_at: new Date().toISOString() }).select().single()
         if (error) throw error
-        await supabase.from('audit_logs').insert({ user_id: user.id, action: 'create_person', entity_type: 'person', entity_id: data.id, details: `Created person ${form.full_name} (${form.person_category})` })
+        await supabase.from('audit_logs').insert({ user_id: user.id, action: 'create_person', entity_type: 'person', entity_id: data.id, details: `Created person ${form.given_name || ""} ${form.family_name || ""} (${form.person_category})` })
 
         if (newVehicle.plate_number) {
           const vehicle_data = {
@@ -86,7 +85,7 @@ export default function PeoplePage() {
 
         setMessage('Person added')
       }
-      setForm({ full_name: '', given_name: '', family_name: '', person_category: 'guest', company: '', notes: '' })
+      setForm({ given_name: '', family_name: '', person_category: 'guest', company: '', notes: '' })
       setNewVehicle({ plate_number: '', manufacturer: '', model: '', color: '' })
       setVehicles([])
       setEditing(null)
@@ -102,7 +101,6 @@ export default function PeoplePage() {
   const startEdit = (person: Person) => {
     setEditing(person)
     setForm({
-      full_name: person.full_name,
       given_name: person.given_name || '',
       family_name: person.family_name || '',
       person_category: person.person_category,
@@ -131,10 +129,7 @@ export default function PeoplePage() {
         <CardHeader><CardTitle>{editing ? 'Edit Person' : 'Add Person'}</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap items-stretch sm:items-end">
-            <div className='flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1 min-w-0'>
-              <VoiceInput onTranscript={(text) => setForm({...form, full_name: text})}>
-                <Input placeholder='Full Name' value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required className='flex-1 text-base' />
-              </VoiceInput>
+            <div className='flex flex-row gap-3 sm:gap-4 flex-1 min-w-0'>
               <Input placeholder='Create Name (Given Name)' value={form.given_name || ''} onChange={e => setForm({...form, given_name: e.target.value})} className='w-1/2 text-base' />
               <Input placeholder='Family Name (Surname)' value={form.family_name || ''} onChange={e => setForm({...form, family_name: e.target.value})} className='w-1/2 text-base' />
             </div>
@@ -175,7 +170,7 @@ export default function PeoplePage() {
             <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700 h-10 sm:h-auto" disabled={loading}>
               <Plus className="w-4 h-4 mr-2" />{loading ? 'Saving...' : (editing ? 'Update' : 'Add')}
             </Button>
-            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', given_name: '', family_name: '', person_category: 'guest', company: '', notes: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
+            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ given_name: '', family_name: '', person_category: 'guest', company: '', notes: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
           </form>
           {message && <p className={`text-sm mt-2 ${message.includes('success') || message.includes('added') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
 
@@ -212,7 +207,7 @@ export default function PeoplePage() {
                 <tbody className="divide-y divide-slate-700">
                   {persons.map(p => (
                     <tr key={p.id} className="hover:bg-slate-700/20">
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-white font-medium">{p.full_name}</td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-white font-medium">{p.given_name || p.family_name || '-'}</td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300">{p.person_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
                       
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{p.company || '-'}</td>
@@ -222,7 +217,7 @@ export default function PeoplePage() {
                           <button onClick={() => startEdit(p)} className="text-cyan-400 hover:text-cyan-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Edit person">
                             <Pencil className="w-4 h-4" />
                           </button>
-                          <button onClick={() => deletePerson(p.id, p.full_name, p.person_category)} className="text-red-400 hover:text-red-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Delete person">
+                          <button onClick={() => deletePerson(p.id, p, p.person_category)} className="text-red-400 hover:text-red-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Delete person">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
