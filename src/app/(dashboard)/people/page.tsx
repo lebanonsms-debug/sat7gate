@@ -13,6 +13,8 @@ const CATEGORIES = [
   { value: 'employee', label: 'Employee' },
   { value: 'rental_company', label: 'Rental Company' },
   { value: 'guest', label: 'Guest' },
+  { value: 'delivery', label: 'Delivery' },
+] as const
 ] as const
 
 export default function PeoplePage() {
