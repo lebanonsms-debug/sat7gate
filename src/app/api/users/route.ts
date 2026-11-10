@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { email, password, full_name, role, id } = await request.json()
+    const { email, password, full_name, role, id, shift } = await request.json()
     const { supabase } = createSupabaseServerClient(request)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     const { data, error } = await adminClient.auth.admin.createUser({ email, password, email_confirm: true })
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
     if (data.user) {
-      const { error: profileError } = await supabase.from('profiles').insert({ id: data.user.id, full_name, email, role, active: true })
+      const { error: profileError } = await supabase.from('profiles').insert({ id: data.user.id, full_name, email, role, active: true, shift: shift || 'day' })
       if (profileError) {
         await adminClient.auth.admin.deleteUser(data.user.id)
         return NextResponse.json({ error: profileError.message }, { status: 400 })
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { id, full_name, role, active } = await request.json()
+    const { id, full_name, role, active, shift } = await request.json()
     const { supabase } = createSupabaseServerClient(request)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -71,6 +71,7 @@ export async function PATCH(request: Request) {
     if (full_name !== undefined) updates.full_name = full_name
     if (role !== undefined) updates.role = role
     if (active !== undefined) updates.active = active
+    if (shift !== undefined) updates.shift = shift
     const { data, error } = await supabase.from('profiles').update(updates).eq('id', id).select().single()
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
     return NextResponse.json({ success: true, profile: data })

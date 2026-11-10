@@ -22,13 +22,14 @@ export default function PeoplePage() {
   const [form, setForm] = useState({
     full_name: '',
     person_category: 'guest' as Person['person_category'],
-    notes: '',
     company: '',
   })
   const [vehicles, setVehicles] = useState<{ plate_number: string; manufacturer: string; model: string; color: string }[]>([])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [newVehicle, setNewVehicle] = useState({ plate_number: '', manufacturer: '', model: '', color: '' })
+  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([])
+  const [loadingCompanies, setLoadingCompanies] = useState(true)
   const supabase = createClientComponentClient()
 
   const fetch = useCallback(async () => {
@@ -36,7 +37,14 @@ export default function PeoplePage() {
     setPersons((data as Person[]) || [])
   }, [supabase])
 
-  useEffect(() => { fetch() }, [fetch]) // eslint-disable-line react-hooks/set-state-in-effect
+  const fetchCompanies = useCallback(async () => {
+    const { data } = await supabase.from('companies').select('id, name').eq('active', true)
+    setCompanies(data || [])
+    setLoadingCompanies(false)
+  }, [supabase])
+
+  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { fetchCompanies() }, [fetchCompanies]) // eslint-disable-line react-hooks/set-state-in-effect
 
   const fetchVehicles = useCallback(async (personId: string) => {
     const { data } = await supabase.from('vehicles').select('*').eq('person_id', personId)
@@ -133,12 +141,17 @@ export default function PeoplePage() {
               </select>
             </div>
 
-            <Input placeholder="Company" value={form.company} onChange={e => setForm({...form, company: e.target.value})} className="text-base" />
+            <select
+              value={form.company}
+              onChange={e => setForm({ ...form, company: e.target.value })}
+              className="flex-1 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100 w-full min-w-[200px]"
+              disabled={loadingCompanies}
+            >
+              <option value=''>Select company</option>
+              {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
 
-            <div className="flex-1 min-w-0">
-              <label className="block text-sm font-medium text-slate-300 mb-1">Notes</label>
-              <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} className="flex-1 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" rows={2} />
-            </div>
+
 
             <div className="flex-1 min-w-0">
               <label className="block text-sm font-medium text-slate-300 mb-1">Vehicle (optional)</label>
@@ -153,7 +166,7 @@ export default function PeoplePage() {
             <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700 h-10 sm:h-auto" disabled={loading}>
               <Plus className="w-4 h-4 mr-2" />{loading ? 'Saving...' : (editing ? 'Update' : 'Add')}
             </Button>
-            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', person_category: 'guest', notes: '', company: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
+            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', person_category: 'guest', company: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
           </form>
           {message && <p className={`text-sm mt-2 ${message.includes('success') || message.includes('added') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
 
@@ -194,7 +207,6 @@ export default function PeoplePage() {
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300">{p.person_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
                       
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{p.company || '-'}</td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{p.email || '-'}</td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{new Date(p.created_at).toLocaleDateString()}</td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm">
                         <div className="flex gap-2">

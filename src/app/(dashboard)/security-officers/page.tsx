@@ -12,7 +12,7 @@ import type { Profile } from '@/lib/types'
 export default function SecurityOfficersPage() {
   const [officers, setOfficers] = useState<Profile[]>([])
   const [editing, setEditing] = useState<Profile | null>(null)
-  const [form, setForm] = useState({ email: '', password: '', full_name: '', role: 'security_officer' as Profile['role'] })
+  const [form, setForm] = useState({ email: '', password: '', full_name: '', role: 'security_officer' as Profile['role'], shift: 'day' as Profile['shift'] })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const supabase = createClientComponentClient()
@@ -48,13 +48,13 @@ export default function SecurityOfficersPage() {
         const res = await fetch('/api/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: form.email, password: form.password, full_name: form.full_name, role: form.role }),
+          body: JSON.stringify({ email: form.email, password: form.password, full_name: form.full_name, role: form.role, shift: form.shift }),
         })
         const result = await res.json()
         if (!res.ok) {
           setMessage(result.error || 'Failed to create user')
         } else {
-          setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
+          setForm({ email: '', password: '', full_name: '', role: 'security_officer', shift: 'day' })
           setMessage('User created successfully!')
           fetchOfficers()
         }
