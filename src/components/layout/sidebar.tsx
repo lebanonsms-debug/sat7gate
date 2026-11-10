@@ -36,6 +36,7 @@ const navSections = [
     items: [
       { href: '/reports', label: 'Reports & Analytics', icon: FileText, roles: ['administrator', 'management'] },
       { href: '/users', label: 'Users', icon: UsersRound, roles: ['administrator'] },
+      { href: '/security-officers', label: 'Security Officers', icon: ShieldCheck, roles: ['security_officer', 'administrator'] },
     ]
   }
 ]
