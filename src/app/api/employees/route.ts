@@ -8,7 +8,13 @@ export async function GET(request: Request) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    const { data } = await supabase.from('persons').select('*').eq('person_category', 'employee').order('full_name')
+    const { searchParams } = new URL(request.url)
+    const fullName = searchParams.get('full_name')
+    let query = supabase.from('persons').select('*').eq('person_category', 'employee').order('full_name')
+    if (fullName) {
+      query = query.ilike('full_name', `%${fullName}%`)
+    }
+    const { data } = await query
     return NextResponse.json({ data })
   } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })

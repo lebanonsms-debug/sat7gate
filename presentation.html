@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAT-7 GATE - Security Operations Center Dashboard</title>
+  <style>
+    :root {
+      --bg: #0B0F19;
+      --bg-card: #1A1F2E;
+      --bg-card-hover: #22283A;
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --accent: #06B6D4;
+      --accent-gold: #D4AF37;
+      --border: #2A2F3D;
+      --success: #10B981;
+      --danger: #EF4444;
+      --radius: 12px;
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .presentation {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Slide container */
+    .slide {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+
+    .nav-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+
+    .slide-counter {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Header */
+    .slide-header {
+      padding: 30px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 30px;
+    }
+
+    .slide-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), #3B82F6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .slide-header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    /* Content */
+    .content {
+      max-width: 900px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 20px 0;
+      transition: all 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.1);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Features list */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .feature-info h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .feature-info p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    /* Role badges */
+    .role-badge {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-block;
+      margin: 4px;
+    }
+
+    .role-administrator {
+      background: #7C3AED;
+      color: white;
+    }
+
+    .role-security-officer {
+      background: #06B6D4;
+      color: white;
+    }
+
+    .role-management {
+      background: #D4AF37;
+      color: #1F2937;
+    }
+
+    .role-viewer {
+      background: #6B7280;
+      color: white;
+    }
+
+    /* Flow diagram */
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .flow-arrow {
+      color: var(--accent);
+      font-size: 24px;
+    }
+
+    /* Tables */
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table th {
+      text-align: left;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .table tr:hover {
+      background: var(--bg-card-hover);
+    }
+
+    /* Code snippet */
+    .code-block {
+      background: #0F172A;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .code-block .keyword { color: #F59E0B; }
+    .code-block .string { color: #10B981; }
+    .code-block .comment { color: #6B7280; font-style: italic; }
+    .code-block .function { color: #818CF8; }
+    .code-block .variable { color: #E879F9; }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -28px;
+      top: 8px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+    }
+
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-date {
+      position: absolute;
+      left: -110px;
+      top: 2px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .timeline-content h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .timeline-content p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .slide-header h1 {
+        font-size: 1.8rem;
+      }
+
+      .nav-btn {
+        width: 40px;
+        height: 40px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* First slide */
+    .first-slide {
+      text-align: center;
+      padding: 60px 0;
+    }
+
+    .first-slide .logo {
+      font-size: 4rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--accent), #3B82F6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .first-slide .subtitle {
+      font-size: 1.3rem;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    .first-slide .badge {
+      display: inline-block;
+      padding: 8px 20px;
+      border-radius: 20px;
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 10px;
+    }
+
+    /* Last slide */
+    .last-slide {
+      text-align: center;
+      padding: 60px 0;
+    }
+
+    .last-slide .title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    .last-slide .actions {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 1rem;
+    }
+
+    .checklist li::before {
+      content: '✓';
+      color: var(--success);
+      font-weight: 800;
+      font-size: 1.2rem;
+    }
+
+    /*deployment */
+    .deploy-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .deploy-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .deploy-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .deploy-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+
+    .deploy-info h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .deploy-info p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="presentation">
+    <!-- Slide 1: Title -->
+    <div class="slide active first-slide">
+      <div class="logo">SAT-7 GATE</div>
+      <p class="subtitle">Security Operations Center Dashboard</p>
+      <div class="badge">🔐 Enterprise Security</div>
+      <div class="badge">📊 Real-Time Monitoring</div>
+      <div class="badge">👥 Role-Based Access</div>
+      <p style="color: var(--text-muted); margin-top: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Built with React + TypeScript + Vite + Tailwind CSS + Supabase<br>
+        Deployed on Vercel • Secure Cloud Infrastructure
+      </p>
+    </div>
+
+    <!-- Slide 2: Project Overview -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>Project Overview</h1>
+        <p>SAT-7 GATE – Security Entrance Management System</p>
+      </div>
+      <div class="content">
+        <div class="card">
+          <h2 class="card-title">🎯 Project Goal</h2>
+          <p>A comprehensive Security Operations Center (SOC) dashboard for managing access control, visitor entry, employee records, and real-time gate monitoring for the SAT-7 complex in Lebanon.</p>
+        </div>
+        <div class="card">
+          <h2 class="card-title">🏢 Company Profile</h2>
+          <div class="features-grid">
+            <div class="feature-item">
+              <div class="feature-icon" style="background: rgba(6,182,212,0.1); color: var(--accent);">🏢</div>
+              <div class="feature-info">
+                <h3>Company</h3>
+                <p>Ali Safa – President &amp; DG<br>
+                <span style="color: var(--text-muted); font-size: 0.9rem;">+242 06 822 22 20<br>Avenue Docteur Cardorelle, Songolo, Republic of the Congo</span></p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon" style="background: rgba(6,182,212,0.1); color: var(--accent);">🌐</div>
+              <div class="feature-info">
+                <h3>Domain</h3>
+                <p><a href="https://sat7-gate.vercel.app" style="color: var(--accent);">sat7-gate.vercel.app</a><br>
+                <span style="color: var(--text-muted); font-size: 0.9rem;">Vercel Platform • Production</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Technology Stack -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>Technology Stack</h1>
+        <p>Modern web technologies for enterprise security</p>
+      </div>
+      <div class="content">
+        <div class="grid grid-4">
+          <div class="card">
+            <div class="card-title">⚛ React</div>
+            <p style="color: var(--text-muted);">Component-based UI library for building interactive interfaces</p>
+          </div>
+          <div class="card">
+            <div class="card-title">📘 TypeScript</div>
+            <p style="color: var(--text-muted);">Type-safe JavaScript with full type checking</p>
+          </div>
+          <div class="card">
+            <div class="card-title">🎨 Tailwind CSS</div>
+            <p style="color: var(--text-muted);">Utility-first CSS framework (v4)</p>
+          </div>
+          <div class="card">
+            <div class="card-title">⚡ Vite</div>
+            <p style="color: var(--text-muted);">Fast build tool &amp; dev server</p>
+          </div>
+        </div>
+        <div class="grid grid-3" style="margin-top: 20px;">
+          <div class="card">
+            <div class="card-title">☁️ Supabase</div>
+            <p style="color: var(--text-muted);">Authentication, Database &amp; RLS</p>
+          </div>
+          <div class="card">
+            <div class="card-title">📦 Recharts</div>
+            <p style="color: var(--text-muted);">Interactive data visualization</p>
+          </div>
+          <div class="card">
+            <div class="card-title">🔊 Lucide Icons</div>
+            <p style="color: var(--text-muted);">Beautiful, consistent icon set</p>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top: 20px;">
+          <span class="comment">// Package.json dependencies</span><br>
+          <span class="keyword">dependencies</span>: {<br>
+          <span class="string">&quot;@supabase/supabase-js&quot;</span>: <span class="string">&quot;*&quot;</span>,<br>
+          <span class="string">&quot;recharts&quot;</span>: <span class="string">&quot;*&quot;</span>,<br>
+          <span class="string">&quot;lucide-react&quot;</span>: <span class="string">&quot;*&quot;</span>,<br>
+          <span class="string">&quot;date-fns&quot;</span>: <span class="string">&quot;*&quot;</span>,<br>
+          <span class="string">&quot;react-hook-form&quot;</span>: <span class="string">&quot;*&quot;</span><br>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Architecture -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>Architecture Overview</h1>
+        <p>Client-side UI + Server-side API + Supabase Backend</p>
+      </div>
+      <div class="content">
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--bg); display: flex; align-items: center; justify-content: center; font-weight: 700;">1</div>
+            <span style="font-weight: 700; font-size: 1.1rem;">User Browser</span>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--bg); display: flex; align-items: center; justify-content: center; font-weight: 700;">2</div>
+            <span style="font-weight: 700; font-size: 1.1rem;">Next.js / React App</span>
+            <span style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">SSR, client components, server actions</span>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--bg); display: flex; align-items: center; justify-content: center; font-weight: 700;">3</div>
+            <span style="font-weight: 700; font-size: 1.1rem;">API Routes</span>
+            <span style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">/api/* – Server-side auth enforcement</span>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--bg); display: flex; align-items: center; justify-content: center; font-weight: 700;">4</div>
+            <span style="font-weight: 700; font-size: 1.1rem;">Supabase</span>
+            <span style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Auth, Postgres DB, RLS Policies</span>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top: 20px;">
+          <span class="comment">// File structure</span><br>
+          <span class="function">src/</span><br>
+          <span class="string">├── app/</span><br>
+          <span class="string">│   ├── (dashboard)/</span><br>
+          <span class="string">│   │   ├── dashboard/</span><br>
+          <span class="string">│   │   ├── register-entry/</span><br>
+          <span class="string">│   │   ├── live-gate/</span><br>
+          <span class="string">│   │   ├── employees/</span><br>
+          <span class="string">│   │   └── ...</span><br>
+          <span class="string">│   └── api/</span><br>
+          <span class="string">│       └── */route.ts</span><br>
+          <span class="string">├── components/</span><br>
+          <span class="string">├── lib/</span><br>
+          <span class="string">└── hooks/</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 5: Dashboard Features -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>Dashboard Features</h1>
+        <p>Security Operations Center – Key Metrics &amp; Monitoring</p>
+      </div>
+      <div class="content">
+        <div class="stats">
+          <div class="stat-item">
+            <div class="stat-number" style="color: var(--accent);">24/7</div>
+            <div class="stat-label">Live Monitoring</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" style="color: var(--success);">🔒</div>
+            <div class="stat-label">Access Control</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" style="color: var(--accent-gold);">📊</div>
+            <div class="stat-label">Real-time Stats</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number" style="color: var(--danger);">✅</div>
+            <div class="stat-label">Audit Trail</div>
+          </div>
+        </div>
+        <div class="grid grid-2" style="margin-top: 20px;">
+          <div class="card">
+            <h3 style="color: var(--accent);">📈 Dashboard Metrics</h3>
+            <ul style="color: var(--text-muted); line-height: 1.8;">
+              <li>Total visitors this month</li>
+              <li>Currently inside / outside</li>
+              <li>Peak hours analysis</li>
+              <li>Staff vs visitor breakdown</li>
+              <li>Recent gate movements</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--success);">📊 Charts</h3>
+            <ul style="color: var(--text-muted); line-height: 1.8;">
+              <li>Today's breakdown (pie chart)</li>
+              <li>Peak hours (bar chart)</li>
+              <li>Recent activity timeline</li>
+              <li>Occupancy trends</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 6: New Entry -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>NEW ENTRY – Visitor Registration</h1>
+        <p>Quick and secure visitor registration with auto-fill</p>
+      </div>
+      <div class="content">
+        <div class="card">
+          <h3 style="color: var(--accent);">✨ Features</h3>
+          <ul style="color: var(--text-muted); line-height: 1.8;">
+            <li>🔍 Employee auto-fill by name (debounced search)</li>
+            <li>📋 Quick-select dropdown (scrollable list)</li>
+            <li>➕ Create new employees on-the-fly</li>
+            <li>🎤 Voice input for hands-free operation</li>
+            <li>🏢 Company destination selection</li>
+            <li>🚗 Vehicle information (optional)</li>
+            <li>📝 Purpose &amp; notes fields</li>
+          </ul>
+        </div>
+        <div class="code-block" style="margin-top: 20px;">
+          <span class="comment">// Auto-fill by name (400ms debounce)</span><br>
+          <span class="function">useEffect</span>(() =&gt; {<br>
+          &nbsp;&nbsp;<span class="keyword">const</span> timer = <span class="function">setTimeout</span>(<span class="keyword">async</span> () =&gt; {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> (form.fullName.trim().length &lt; 2) <span class="keyword">return</span>;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">const</span> { data } = <span class="keyword">await</span> supabase<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.from(<span class="string">'persons'</span>)<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.select(<span class="string">'id, full_name, identification_number'</span>)<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.ilike(<span class="string">'full_name'</span>, <span class="string">`%${form.fullName.trim()}%`</span>)<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.eq(<span class="string">'person_category'</span>, <span class="string">'employee'</span>);<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> (data &amp;&amp; data.length &gt; 0) {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;setForm(<span class="keyword">prev</span> =&gt; ({<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">...prev</span>,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;category: data[0].person_category,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;idNumber: data[0].identification_number<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}));<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;<span class="comment">// Auto-filled!</span><br>
+          &nbsp;&nbsp;});<br>
+          })
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 7: Role-Based Access Control -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>Role-Based Access Control</h1>
+        <p>4 roles with different permissions</p>
+      </div>
+      <div class="content">
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 style="color: #7C3AED;">👤 Administrator</h3>
+            <div style="margin-top: 12px;">
+              <span class="role-badge role-administrator">Administrator</span>
+              <ul style="color: var(--text-muted); margin-top: 12px; line-height: 1.8;">
+                <li>Manage users &amp; roles</li>
+                <li>Create &amp; edit companies</li>
+                <li>Manage vehicles</li>
+                <li>Generate reports</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--success);">🛡️ Security Officer</h3>
+            <div style="margin-top: 12px;">
+              <span class="role-badge role-security-officer">Security Officer</span>
+              <ul style="color: var(--text-muted); margin-top: 12px; line-height: 1.8;">
+                <li>Register entries</li>
+                <li>View live gate &amp; occupancy</li>
+                <li>Manage visitors</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--accent-gold);">📋 Management</h3>
+            <div style="margin-top: 12px;">
+              <span class="role-badge role-management">Management</span>
+              <ul style="color: var(--text-muted); margin-top: 12px; line-height: 1.8;">
+                <li>View reports &amp; analytics</li>
+                <li>View dashboard metrics</li>
+                <li>Manage employees</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--text-muted);">👁️ Viewer</h3>
+            <div style="margin-top: 12px;">
+              <span class="role-badge role-viewer">Viewer</span>
+              <ul style="color: var(--text-muted); margin-top: 12px; line-height: 1.8;">
+                <li>Read-only access</li>
+                <li>View dashboard</li>
+                <li>Live gate &amp; occupancy</li>
+                <li>Visitor history</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top: 20px;">
+          <span class="comment">// Sidebar role filtering</span><br>
+          <span class="keyword">const</span> visibleItems = items.<span class="function">filter</span>(item =&gt;<br>
+          &nbsp;&nbsp;item.roles.<span class="function">includes</span>(profile?.role || <span class="string">''</span>))<br>
+          <span class="keyword">return</span> (<br>
+          &nbsp;&nbsp;&lt;nav&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;{visibleItems.<span class="function">map</span>(item =&gt; (<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Link key={item.href} href={item.href}&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;Button&gt;{item.label}&lt;/Button&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Link&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;))
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 8: Database Schema -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>Database Schema</h1>
+        <p>Supabase Postgres tables with RLS policies</p>
+      </div>
+      <div class="content">
+        <div class="card">
+          <h3 style="color: var(--accent);">📋 Core Tables</h3>
+          <table class="table">
+            <tr><th>Table</th><th>Description</th></tr>
+            <tr><td>profiles</td><td>User profiles with roles</td></tr>
+            <tr><td>persons</td><td>People (employees, visitors, etc.)</td></tr>
+            <tr><td>companies</td><td>Destination companies</td></tr>
+            <tr><td>visitors</td><td>Visitor records</td></tr>
+            <tr><td>vehicles</td><td>Vehicle registrations</td></tr>
+            <tr><td>gate_movements</td><td>Entry/exit records</td></tr>
+            <tr><td>audit_logs</td><td>Action audit trail</td></tr>
+          </table>
+        </div>
+        <div class="card" style="margin-top: 20px;">
+          <h3 style="color: var(--success);">🔐 RLS Policies</h3>
+          <p style="color: var(--text-muted);">Row Level Security policies control data access:</p>
+          <ul style="color: var(--text-muted); line-height: 1.8;">
+            <li>• Administrator: Full access to all tables</li>
+            <li>• Security Officer: Read/insert to visitors, gate_movements</li>
+            <li>• Management: Read access to dashboard data</li>
+            <li>• Viewer: Read-only access</li>
+            <li>• SECURITY DEFINER functions: is_admin(), is_security_officer()</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 9: Responsive Design -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>Responsive Design</h1>
+        <p>Mobile-first, touch-friendly, cross-device compatible</p>
+      </div>
+      <div class="content">
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 style="color: var(--accent);">📱 Mobile (iPhone, Android)</h3>
+            <ul style="color: var(--text-muted); line-height: 1.8;">
+              <li>Slide-out sidebar drawer</li>
+              <li>Hamburger menu toggle</li>
+              <li>44px minimum touch targets</li>
+              <li>Overflow-x-auto on tables</li>
+              <li>Stacked card layout for mobile</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--success);">💻 Desktop (Tablets, Desktop, 2K/4K)</h3>
+            <ul style="color: var(--text-muted); line-height: 1.8;">
+              <li>Fixed sidebar (w-64)</li>
+              <li>Full data tables</li>
+              <li>KPI grid (4 columns)</li>
+              <li>Wide charts</li>
+              <li>No horizontal scrolling</li>
+            </ul>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top: 20px;">
+          <span class="comment">// Responsive breakpoints</span><br>
+          &lt;<span class="function">div</span> <span class="keyword">className</span>=<span class="string">"grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"</span>&gt;<br>
+          &nbsp;&nbsp;&lt;<span class="function">div</span> <span class="keyword">className</span>=<span class="string">"hidden sm:table-cell md:table-cell lg:table-cell"</span>&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;<span class="function">Button</span> <span class="keyword">className</span>=<span class="string">"min-h-[44px] min-w-[44px] touch-manipulation"</span>&gt;<br>
+          &nbsp;&nbsp;&lt;/<span class="function">div</span>&gt;
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 10: Security -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>Security &amp; Compliance</h1>
+        <p>No local dependencies, secure cloud architecture</p>
+      </div>
+      <div class="content">
+        <div class="grid grid-2">
+          <div class="card">
+            <h3 style="color: var(--accent);">🔒 Security Features</h3>
+            <ul style="color: var(--text-muted); line-height: 1.8;">
+              <li>Service role key never exposed client-side</li>
+              <li>Server-side API routes with auth</li>
+              <li>Row Level Security (RLS) policies</li>
+              <li>HTTPS enforced (Vercel)</li>
+              <li>Supabase authentication</li>
+              <li>SQL injection prevention (Supabase)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--success);">☁️ Zero Local Dependencies</h3>
+            <ul style="color: var(--text-muted); line-height: 1.8;">
+              <li>No localhost or file:// references</li>
+              <li>All backend on Supabase cloud</li>
+              <li>All API calls to Vercel/CDN</li>
+              <li>Environment variables on Vercel</li>
+              <li>Production SSL/TLS certificates</li>
+              <li>Cookie-based session management</li>
+            </ul>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top: 20px;">
+          <span class="comment">// Server-side API route</span><br>
+          <span class="keyword">export</span> <span class="keyword">async</span> <span class="function">GET</span>(request) {<br>
+          &nbsp;&nbsp;<span class="keyword">const</span> { supabase } = createSupabaseServerClient(request);<br>
+          &nbsp;&nbsp;<span class="keyword">const</span> { data: { user } } = <span class="keyword">await</span> supabase.auth.getUser();<br>
+          &nbsp;&nbsp;<span class="keyword">if</span> (!user) <span class="keyword">return</span> NextResponse.json({ error: <span class="string">'Unauthorized'</span> }, { status: 401 });<br>
+          &nbsp;&nbsp;<span class="keyword">const</span> { data } = <span class="keyword">await</span> supabase.from(<span class="string">'persons'</span>).select(<span class="string">'*'</span>);<br>
+          &nbsp;&nbsp;<span class="keyword">return</span> NextResponse.json({ data });
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 11: Deployment -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>Deployment &amp; DevOps</h1>
+        <p>Built on Vercel with GitHub CI/CD</p>
+      </div>
+      <div class="content">
+        <div class="deploy-list">
+          <div class="deploy-item">
+            <div class="deploy-icon" style="background: rgba(6,182,212,0.1); color: var(--accent);">📦</div>
+            <div class="deploy-info">
+              <h3>GitHub Repository</h3>
+              <p>github.com/lebanonsms-debug/sat7gate.git<br>
+              <span style="color: var(--text-muted); font-size: 0.85rem;">Primary source code repository</span></p>
+            </div>
+          </div>
+          <div class="deploy-item">
+            <div class="deploy-icon" style="background: rgba(6,182,212,0.1); color: var(--accent);">🌐</div>
+            <div class="deploy-info">
+              <h3>Vercel Deployment</h3>
+              <p>sat7-gate.vercel.app<br>
+              <span style="color: var(--text-muted); font-size: 0.85rem;">Production deployment with auto-deployment on push</span></p>
+            </div>
+          </div>
+          <div class="deploy-item">
+            <div class="deploy-icon" style="background: rgba(6,182,212,0.1); color: var(--accent);">🗄️</div>
+            <div class="deploy-info">
+              <h3>Supabase Database</h3>
+              <p>klazebnttcpszdjkulrq.supabase.co<br>
+              <span style="color: var(--text-muted); font-size: 0.85rem;">Region: us-east-1 • Free plan</span></p>
+            </div>
+          </div>
+          <div class="deploy-item">
+            <div class="deploy-icon" style="background: rgba(6,182,212,0.1); color: var(--accent);">🔑</div>
+            <div class="deploy-info">
+              <h3>Environment Variables</h3>
+              <p>NEXT_PUBLIC_SUPABASE_URL<br>
+              NEXT_PUBLIC_SUPABASE_ANON_KEY<br>
+              SUPABASE_SERVICE_ROLE_KEY<br>
+              <span style="color: var(--text-muted); font-size: 0.85rem;">Set in Vercel production env</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top: 20px;">
+          <h3 style="color: var(--accent);">✅ Deployment Checklist</h3>
+          <ul class="checklist">
+            <li>npm run build → exit 0</li>
+            <li>npx tsc --noEmit → exit 0</li>
+            <li>npm run lint → exit 0</li>
+            <li>No localhost references in runtime</li>
+            <li>API auth enforcement verified</li>
+            <li>Mobile responsiveness verified</li>
+            <li>All routes return 200 or expected errors</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 12: Key Achievements -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>Key Achievements</h1>
+        <p>What was built and verified</p>
+      </div>
+      <div class="content">
+        <div class="card">
+          <h3 style="color: var(--accent);">📋 Completed Features</h3>
+          <ul class="checklist">
+            <li>SOC dashboard with KPIs, charts, and live stats</li>
+            <li>NEW ENTRY with auto-fill and voice input</li>
+            <li>Live gate with timestamp quick-select buttons</li>
+            <li>Live occupancy statistics</li>
+            <li>Employee management (CRUD + audit logging)</li>
+            <li>Company management (admin-only)</li>
+            <li>User management with role-based access</li>
+            <li>Vehicle management with full CRUD</li>
+            <li>Visitor history with search</li>
+            <li>Reports &amp; analytics page</li>
+            <li>Settings page with timezone (Asia/Beirut)</li>
+            <li>Mobile-responsive design</li>
+            <li>Real-time gate updates (Supabase channel)</li>
+            <li>Push/live-update mechanism (optional)</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top: 20px;">
+          <h3 style="color: var(--success);">🧪 Verification</h3>
+          <div class="grid grid-2">
+            <div class="card">
+              <h4 style="color: var(--accent);">Build</h4>
+              <p style="color: var(--text-muted);">npm run build → exit 0</p>
+            </div>
+            <div class="card">
+              <h4 style="color: var(--success);">TypeScript</h4>
+              <p style="color: var(--text-muted);">npx tsc --noEmit → 0 errors</p>
+            </div>
+            <div class="card">
+              <h4 style="color: var(--accent-gold);">Lint</h4>
+              <p style="color: var(--text-muted);">npm run lint → exit 0</p>
+            </div>
+            <div class="card">
+              <h4 style="color: var(--success);">Production</h4>
+              <p style="color: var(--text-muted);">All routes return 200 or expected errors</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 13: Next Steps -->
+    <div class="slide">
+      <div class="slide-header">
+        <h1>Next Steps</h1>
+        <p>Future enhancements and improvements</p>
+      </div>
+      <div class="content">
+        <div class="card">
+          <h3 style="color: var(--accent);">🚀 Planned Enhancements</h3>
+          <ul style="color: var(--text-muted); line-height: 1.8;">
+            <li>✅ Push/live-update mechanism (Supabase channel)</li>
+            <li>📂 Bulk import/export (CSV, Excel)</li>
+            <li>📱 PWA support (installable app)</li>
+            <li>⚡ API rate limiting</li>
+            <li>🔔 Notifications (email, SMS)</li>
+            <li>📧 Email verification flows</li>
+            <li>🔐 2FA support</li>
+            <li>📊 Advanced analytics &amp; reporting</li>
+            <li>🌍 Multi-language (FR + EN)</li>
+            <li>📱 Android/iOS mobile app</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-top: 20px;">
+          <h3 style="color: var(--success);">📝 Notes</h3>
+          <ul style="color: var(--text-muted); line-height: 1.8;">
+            <li>• QR visitor passes feature was removed per user request</li>
+            <li>• Audit logs removed from sidebar navigation</li>
+            <li>• Default timezone: Asia/Beirut (Beirut, Lebanon)</li>
+            <li>• Dashboard subtitle: "Real-time access oversight for SAT-7"</li>
+            <li>• Email: samirabikheir@sat7.org still registered in Supabase auth</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 14: Thank You -->
+    <div class="slide last-slide">
+      <div class="title">Thank You!</div>
+      <p style="color: var(--text-muted); font-size: 1.2rem;">SAT-7 GATE – Security Operations Center Dashboard</p>
+      <p style="color: var(--text-muted); margin-top: 20px;">
+        Built with React + TypeScript + Vite + Tailwind CSS<br>
+        Powered by Supabase • Deployed on Vercel
+      </p>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="navigateToSlide(0)">← Back</button>
+        <button class="btn btn-outline" onclick="navigateToSlide(14)">Next →</button>
+      </div>
+      <p style="color: var(--text-muted); margin-top: 40px; font-size: 0.9rem;">
+        © 2026 SAT-7 GATE Security Operations Center
+      </p>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav">
+      <button class="nav-btn" onclick="navigateToSlide(-1)" id="prevBtn">←</button>
+      <button class="nav-btn" onclick="navigateToSlide(1)" id="nextBtn">→</button>
+    </div>
+    <div class="slide-counter"><span id="slideCount">1</span> / <span id="totalSlides">14</span></div>
+
+    <script>
+      let currentSlide = 0;
+      const totalSlides = document.querySelectorAll('.slide').length;
+
+      function navigateToSlide(direction) {
+        const slides = document.querySelectorAll('.slide');
+        slides[currentSlide].classList.remove('active');
+        currentSlide += direction;
+        if (currentSlide < 0) currentSlide = totalSlides - 1;
+        if (currentSlide >= totalSlides) currentSlide = 0;
+        slides[currentSlide].classList.add('active');
+        document.getElementById('slideCount').textContent = currentSlide + 1;
+        document.getElementById('prevBtn').classList.toggle('active', currentSlide > 0);
+        document.getElementById('nextBtn').classList.toggle('active', currentSlide < totalSlides - 1);
+      }
+
+      document.getElementById('nextBtn').addEventListener('click', () => navigateToSlide(1));
+      document.getElementById('prevBtn').addEventListener('click', () => navigateToSlide(-1));
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') navigateToSlide(1);
+        if (e.key === 'ArrowLeft') navigateToSlide(-1);
+      });
+
+      // Auto-slide every 30 seconds
+      setInterval(() => {
+        if (currentSlide < totalSlides - 1) {
+          navigateToSlide(1);
+        }
+      }, 30000);
+    </script>
+  </div>
+</body>
+</html>

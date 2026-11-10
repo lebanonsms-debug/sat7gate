@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.1",
-    "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
     "date-fns": "^4.4.0",
     "lucide-react": "^1.67.0",
@@ -23,6 +22,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@supabase/ssr": "^0.12.7",
     "@tailwindcss/postcss": "^4.3.4",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",

@@ -18,13 +18,20 @@ export interface Company {
   created_at: string
 }
 
-export type PersonCategory = 'employee' | 'guest' | 'rental_company' | 'delivery' | 'contractor' | 'supplier' | 'other'
+export type PersonCategory = 'employee' | 'freelancer' | 'contractor' | 'guest' | 'delivery' | 'supplier' | 'rental_company' | 'other'
 
 export interface Person {
   id: string
   full_name: string
   person_category: PersonCategory
   identification_number?: string
+  email?: string
+  phone?: string
+  company?: string
+  notes?: string
+  access_level?: string
+  access_start?: string
+  access_end?: string
   created_at: string
   updated_at: string
 }

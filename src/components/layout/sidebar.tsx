@@ -36,9 +36,6 @@ const navSections = [
     items: [
       { href: '/reports', label: 'Reports & Analytics', icon: FileText, roles: ['administrator', 'management'] },
       { href: '/users', label: 'Users', icon: UsersRound, roles: ['administrator'] },
-      { href: '/security-officers', label: 'Security Officers', icon: ShieldCheck, roles: ['administrator'] },
-      { href: '/audit-logs', label: 'Audit Logs', icon: ClipboardList, roles: ['administrator'] },
-      { href: '/settings', label: 'Settings', icon: Settings, roles: ['administrator'] },
     ]
   }
 ]

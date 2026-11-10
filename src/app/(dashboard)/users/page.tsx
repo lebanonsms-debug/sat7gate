@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { VoiceInput } from '@/components/ui/voice-input'
-import { ShieldCheck, UserPlus, Trash2 } from 'lucide-react'
+import { ShieldCheck, UserPlus, Trash2, Lock } from 'lucide-react'
 import type { Profile } from '@/lib/types'
 
 const ROLES = [
@@ -59,6 +59,62 @@ export default function UsersPage() {
     }
   }
 
+  const updateUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingUser) return
+    setLoading(true)
+    setMessage('')
+    try {
+      const res = await fetch('/api/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editingUser.id, full_name: form.full_name, role: form.role }),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        setMessage(result.error || 'Failed to update user')
+      } else {
+        setEditingUser(null)
+        setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
+        setMessage('User updated successfully!')
+        fetchUsers()
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error updating user'
+      setMessage(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!resettingUser) return
+    setLoading(true)
+    setMessage('')
+    try {
+      const res = await fetch('/api/users/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: resettingUser.id, password: form.password }),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        setMessage(result.error || 'Failed to reset password')
+      } else {
+        setResettingUser(null)
+        setShowResetForm(false)
+        setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
+        setMessage('Password reset successfully! New password sent to email.')
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error resetting password'
+      setMessage(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const deleteUser = async (id: string) => {
     if (!confirm('Are you sure you want to delete this user?')) return
     await supabase.auth.admin.deleteUser(id)
@@ -69,6 +125,16 @@ export default function UsersPage() {
   const toggleActive = async (user: Profile) => {
     await supabase.from('profiles').update({ active: !user.active }).eq('id', user.id)
     fetchUsers()
+  }
+
+  const startEdit = (user: Profile) => {
+    setEditingUser(user)
+    setForm({ email: user.email, password: '', full_name: user.full_name, role: user.role })
+  }
+
+  const cancelEdit = () => {
+    setEditingUser(null)
+    setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
   }
 
   return (
@@ -123,6 +189,50 @@ export default function UsersPage() {
               <UserPlus className="w-4 h-4 mr-2" />
               {loading ? 'Creating...' : 'Create User'}
             </Button>
+            {(editingUser || resettingUser) && (
+              <div className="mt-4 p-4 bg-slate-700/30 rounded-lg space-y-4">
+                <h4 className="text-sm font-medium text-slate-300">
+                  {editingUser ? 'Edit User' : 'Reset Password'}
+                  <button type="button" onClick={cancelEdit} className="ml-2 text-xs text-slate-400 hover:text-white">Cancel</button>
+                </h4>
+                <form onSubmit={editingUser ? updateUser : resetPassword} className="space-y-4">
+                  {editingUser && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-1">Full Name *</label>
+                        <Input value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-1">Role *</label>
+                        <select
+                          className="flex h-10 w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100"
+                          value={form.role}
+                          onChange={e => setForm({...form, role: e.target.value as Profile['role']})}
+                        >
+                          {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                  {resettingUser && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-1">New Password *</label>
+                      <Input type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700" disabled={loading}>
+                      {editingUser ? 'Save Changes' : 'Reset Password'}
+                    </Button>
+                    {(editingUser || resettingUser) && (
+                      <Button type="button" variant="outline" onClick={cancelEdit}>
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
@@ -166,13 +276,29 @@ export default function UsersPage() {
                         </button>
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <button 
-                          onClick={() => deleteUser(user.id)}
-                          className="text-red-400 hover:text-red-300 p-1"
-                          title="Delete user"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => startEdit(user)}
+                            className="text-cyan-400 hover:text-cyan-300 p-1"
+                            title="Edit user"
+                          >
+                            <ShieldCheck className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setResettingUser(user)}
+                            className="text-amber-400 hover:text-amber-300 p-1"
+                            title="Reset password"
+                          >
+                            <Lock className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => deleteUser(user.id)}
+                            className="text-red-400 hover:text-red-300 p-1"
+                            title="Delete user"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )

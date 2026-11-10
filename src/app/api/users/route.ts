@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
-async function getAdminSupabase(request: Request) {
+async function requireAdmin(request: Request) {
   const { supabase } = createSupabaseServerClient(request)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -27,13 +27,22 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { email, password, full_name, role } = await request.json()
-    if (!email || !password || !full_name || !role) return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    const { email, password, full_name, role, id } = await request.json()
     const { supabase } = createSupabaseServerClient(request)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     if (!profile || profile.role !== 'administrator') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+    if (id && password) {
+      // Reset password for existing user
+      const adminClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+      const { error } = await adminClient.auth.admin.updateUserById(id, { password })
+      if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+      return NextResponse.json({ success: true })
+    }
+
+    if (!email || !password || !full_name || !role) return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     const adminClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
     const { data, error } = await adminClient.auth.admin.createUser({ email, password, email_confirm: true })
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })

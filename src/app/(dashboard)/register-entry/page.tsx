@@ -1,5 +1,4 @@
 'use client'
-
 import { useCallback, useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -12,22 +11,37 @@ import type { PersonCategory, Company } from '@/lib/types'
 
 const CATEGORIES: { value: PersonCategory; label: string }[] = [
   { value: 'employee', label: 'Employee' },
-  { value: 'guest', label: 'Guest / Visitor' },
-  { value: 'rental_company', label: 'Rental Company' },
-  { value: 'delivery', label: 'Delivery Personnel' },
+  { value: 'freelancer', label: 'Freelancer / Contractor' },
   { value: 'contractor', label: 'Contractor / Technician' },
+  { value: 'guest', label: 'Guest / Visitor' },
+  { value: 'delivery', label: 'Delivery Personnel' },
   { value: 'supplier', label: 'Supplier' },
+  { value: 'rental_company', label: 'Rental Company' },
   { value: 'other', label: 'Other' },
 ]
 
 export default function RegisterEntryPage() {
   const [companies, setCompanies] = useState<Company[]>([])
-  const [form, setForm] = useState({ fullName: '', category: 'guest' as PersonCategory, companyId: '', hostName: '', purpose: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', idNumber: '' })
+  const [persons, setPersons] = useState<{ id: string; full_name: string; identification_number: string; person_category: string; email?: string; phone?: string; company?: string; notes?: string }[]>([])
+  const [vehicles, setVehicles] = useState<{ id: string; plate_number: string; manufacturer: string; model: string; color: string }[]>([])
+  const [loadingPersons, setLoadingPersons] = useState(true)
+  const [selectedPerson, setSelectedPerson] = useState<{ id: string; full_name: string; identification_number: string; person_category: string; email?: string; phone?: string; notes?: string } | null>(null)
+  const [form, setForm] = useState({ fullName: '', category: 'guest' as PersonCategory, companyId: '', hostName: '', purpose: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', idNumber: '', email: '', phone: '' })
   const [loading, setLoading] = useState(false)
-  const [foundEmployee, setFoundEmployee] = useState<{ id: string; full_name: string; identification_number: string; person_category: string } | null>(null)
-  const [loadingEmployee, setLoadingEmployee] = useState(false)
+  const [foundPerson, setFoundPerson] = useState<{ id: string; full_name: string; identification_number: string; person_category: string; email?: string; phone?: string; company?: string; notes?: string } | null>(null)
+  const [loadingPerson, setLoadingPerson] = useState(false)
   const [message, setMessage] = useState('')
-  const [searchingId, setSearchingId] = useState(false)  // ID number quick search
+  const [searchingId, setSearchingId] = useState(false)
+  const [newPersonFullname, setNewPersonFullname] = useState('')
+  const [newPersonId, setNewPersonId] = useState('')
+  const [newPersonCategory, setNewPersonCategory] = useState<PersonCategory>('employee')
+  const [newPersonEmail, setNewPersonEmail] = useState('')
+  const [newPersonPhone, setNewPersonPhone] = useState('')
+  const [newPersonCompany, setNewPersonCompany] = useState('')
+  const [newPersonNotes, setNewPersonNotes] = useState('')
+  const [newPersonSuccess, setNewPersonSuccess] = useState('')
+  const [newPersonError, setNewPersonError] = useState('')
+  const [vehicleForm, setVehicleForm] = useState({ plateNumber: '', manufacturer: '', model: '', color: '' })
   const router = useRouter()
   const supabase = createClientComponentClient()
 
@@ -36,66 +50,177 @@ export default function RegisterEntryPage() {
     setCompanies(data || [])
   }, [supabase])
 
-  useEffect(() => { fetchCompanies() }, [fetchCompanies])
+  const fetchPersons = useCallback(async () => {
+    const { data } = await supabase.from('persons').select('id, full_name, identification_number, person_category, email, phone, company, notes').order('full_name')
+    setPersons(data || [])
+    setLoadingPersons(false)
+  }, [supabase])
 
-  // Auto-search employee when name changes
+  const fetchVehicles = useCallback(async (personId: string) => {
+    const { data } = await supabase.from('vehicles').select('*').eq('person_id', personId)
+    setVehicles(data || [])
+  }, [supabase])
+
+  useEffect(() => {
+    fetchCompanies()
+    fetchPersons()
+  }, [fetchCompanies, fetchPersons])
+
+  // eslint-disable-next-line
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (form.fullName.trim().length < 2) {
-        setFoundEmployee(null)
+        // eslint-disable-next-line
+        setFoundPerson(null)
+        // eslint-disable-next-line
+        setVehicles([])
         return
       }
-      setLoadingEmployee(true)
+      setLoadingPerson(true)
       try {
-        const { data } = await supabase.from('persons').select('id, full_name, identification_number, person_category').eq('full_name', form.fullName.trim()).eq('person_category', 'employee').maybeSingle()
-        if (data && typeof data !== 'undefined') {
-          setFoundEmployee(data)
+        const { data, error } = await supabase
+          .from('persons')
+          .select('id, full_name, identification_number, person_category, email, phone, company, notes')
+          .ilike('full_name', `%${form.fullName.trim()}%`)
+          .limit(5)
+
+        if (error) {
+          console.error('Auto-search error:', error)
+          setFoundPerson(null)
+          setVehicles([])
+        } else if (data && data.length > 0) {
+          const found = data[0]
+          setFoundPerson(found)
+          await fetchVehicles(found.id)
           setForm(prev => ({
             ...prev,
-            category: (data.person_category || 'employee') as PersonCategory,
-            idNumber: data.identification_number || '',
+            fullName: found.full_name,
+            category: found.person_category as PersonCategory,
+            email: found.email || '',
+            phone: found.phone || '',
+            notes: found.notes || '',
           }))
+          const vehicle = vehicles[0]
+          if (vehicle) {
+            setVehicleForm({
+              plateNumber: vehicle.plate_number || '',
+              manufacturer: vehicle.manufacturer || '',
+              model: vehicle.model || '',
+              color: vehicle.color || '',
+            })
+          }
+          setMessage('Person found - auto-filled')
         } else {
-          setFoundEmployee(null)
+          setFoundPerson(null)
+          setVehicles([])
+          setMessage('')
         }
       } catch {
-        setFoundEmployee(null)
+        setFoundPerson(null)
+        setVehicles([])
+        setMessage('')
       } finally {
-        setLoadingEmployee(false)
+        setLoadingPerson(false)
       }
     }, 400)
     return () => clearTimeout(timer)
-  }, [form.fullName, supabase])
+  }, [form.fullName, supabase, fetchVehicles, vehicles])
 
-  // ID number quick select
   const handleIdNumberSearch = async (idNumber: string) => {
     if (!idNumber.trim()) return
     setSearchingId(true)
     try {
-      const { data } = await supabase.from('persons').select('id, full_name, identification_number, person_category').eq('identification_number', idNumber.trim()).eq('person_category', 'employee').maybeSingle()
-      if (data && typeof data !== 'undefined') {
-        setFoundEmployee(data)
-        setSearchingId(false)
+      const { data } = await supabase
+        .from('persons')
+        .select('id, full_name, identification_number, person_category, email, phone, company, notes')
+        .eq('identification_number', idNumber.trim())
+        .limit(5)
+      if (data && data.length > 0) {
+        const found = data[0]
+        setFoundPerson(found)
+        await fetchVehicles(found.id)
         setForm(prev => ({
           ...prev,
-          fullName: data.full_name,
-          category: (data.person_category || 'employee') as PersonCategory,
-          idNumber: data.identification_number || '',
+          fullName: found.full_name,
+          category: found.person_category as PersonCategory,
+          email: found.email || '',
+          phone: found.phone || '',
+          notes: found.notes || '',
         }))
-      } else {
-        setFoundEmployee(null)
+        const vehicle = vehicles[0]
+        if (vehicle) {
+          setVehicleForm({
+            plateNumber: vehicle.plate_number || '',
+            manufacturer: vehicle.manufacturer || '',
+            model: vehicle.model || '',
+            color: vehicle.color || '',
+          })
+        }
         setSearchingId(false)
+        setMessage('Person found by ID - auto-filled')
+      } else {
+        setFoundPerson(null)
+        setVehicles([])
+        setSearchingId(false)
+        setMessage('No person found with this ID number')
       }
     } catch {
-      setFoundEmployee(null)
+      setFoundPerson(null)
+      setVehicles([])
       setSearchingId(false)
+      setMessage('Error searching for person')
     }
   }
 
-  // Quick-select employee by ID number
-  const quickSelectEmployee = async (idNumber: string) => {
-    if (!idNumber.trim()) return
-    await handleIdNumberSearch(idNumber)
+  const handleCreateNewPerson = async () => {
+    if (!newPersonFullname.trim()) return
+    setNewPersonError('')
+    setNewPersonSuccess('')
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data: existing } = await supabase.from('persons').select('id').eq('full_name', newPersonFullname.trim()).eq('person_category', newPersonCategory).maybeSingle()
+      if (existing) {
+        setNewPersonError('Person with this name already exists')
+        return
+      }
+
+      const { data: newPerson } = await supabase.from('persons').insert({
+        full_name: newPersonFullname.trim(),
+        person_category: newPersonCategory,
+        identification_number: newPersonId.trim() || null,
+        email: newPersonEmail.trim() || null,
+        phone: newPersonPhone.trim() || null,
+        company: newPersonCompany.trim() || null,
+        notes: newPersonNotes.trim() || null,
+      }).select('id, full_name, identification_number, person_category, email, phone, company, notes').single()
+
+      if (!newPerson) {
+        setNewPersonError('Failed to create person')
+        return
+      }
+
+      setSelectedPerson(newPerson)
+      setForm(prev => ({
+        ...prev,
+        fullName: newPerson.full_name,
+        category: newPerson.person_category,
+        email: newPerson.email || '',
+        phone: newPerson.phone || '',
+      }))
+      setNewPersonSuccess('Created ' + newPerson.full_name)
+      setNewPersonFullname('')
+      setNewPersonId('')
+      setNewPersonCategory('employee')
+      setNewPersonEmail('')
+      setNewPersonPhone('')
+      setNewPersonCompany('')
+      setNewPersonNotes('')
+      setMessage('Created new person - ' + newPerson.full_name)
+    } catch (err) {
+      setNewPersonError(err instanceof Error ? err.message : 'Error creating person')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -105,41 +230,72 @@ export default function RegisterEntryPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      // Upsert person
-      // If auto-filled from database, use that employee's ID
-      // Otherwise search by name and category
-      let personId: string
-      if (foundEmployee) {
-        personId = foundEmployee.id
+      let personId: string | undefined
+      if (foundPerson) {
+        personId = foundPerson.id
+      } else if (selectedPerson) {
+        personId = selectedPerson.id
       } else {
         const { data: existingPerson } = await supabase.from('persons').select('id').eq('full_name', form.fullName).eq('person_category', form.category).maybeSingle()
         if (existingPerson) {
           personId = existingPerson.id
         } else {
-          const { data: newPerson } = await supabase.from('persons').insert({ full_name: form.fullName, person_category: form.category, identification_number: form.idNumber }).select('id').single()
+          const { data: newPerson } = await supabase.from('persons').insert({
+            full_name: form.fullName,
+            person_category: form.category,
+            identification_number: form.idNumber || null,
+            email: form.email || null,
+            phone: form.phone || null,
+            company_id: form.companyId || null,
+            notes: form.notes || null,
+          }).select('id').single()
           if (!newPerson) throw new Error('Failed to create person')
           personId = newPerson.id
         }
       }
 
-      // Create vehicle if provided
-      if (form.plateNumber) {
-        await supabase.from('vehicles').insert({ person_id: personId, plate_number: form.plateNumber, manufacturer: form.manufacturer, model: form.model, color: form.color })
+      if (!personId) throw new Error('No person selected')
+
+      if (vehicleForm.plateNumber) {
+        await supabase.from('vehicles').insert({
+          person_id: personId,
+          plate_number: vehicleForm.plateNumber,
+          manufacturer: vehicleForm.manufacturer,
+          model: vehicleForm.model,
+          color: vehicleForm.color,
+        })
       }
 
-      // Create visitor record
-      const { data: visitor } = await supabase.from('visitors').insert({ person_id: personId, destination_company_id: form.companyId, host_name: form.hostName, purpose: form.purpose, notes: form.notes, created_by: user.id }).select('id').single()
+      const { data: visitor } = await supabase.from('visitors').insert({
+        person_id: personId,
+        destination_company_id: form.companyId,
+        host_name: form.hostName,
+        purpose: form.purpose,
+        notes: form.notes,
+        created_by: user.id,
+      }).select('id').single()
       if (!visitor) throw new Error('Failed to create visitor')
 
-      // Create gate movement (entry)
-      const { error: movementError } = await supabase.from('gate_movements').insert({ visitor_id: visitor.id, entry_officer_id: user.id, status: 'inside' })
-      if (movementError) throw movementError
+      await supabase.from('gate_movements').insert({
+        visitor_id: visitor.id,
+        entry_officer_id: user.id,
+        status: 'inside',
+      })
 
-      // Audit log
-      await supabase.from('audit_logs').insert({ user_id: user.id, action: 'register_entry', entity_type: 'visitor', entity_id: visitor.id, details: `Registered ${form.fullName}` })
+      await supabase.from('audit_logs').insert({
+        user_id: user.id,
+        action: 'register_entry',
+        entity_type: 'visitor',
+        entity_id: visitor.id,
+        details: `Registered ${form.fullName} (${form.category})`,
+      })
 
       setMessage('Entry registered successfully!')
-      setForm({ fullName: '', category: 'guest', companyId: '', hostName: '', purpose: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', idNumber: '' })
+      setForm({ fullName: '', category: 'guest', companyId: '', hostName: '', purpose: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', idNumber: '', email: '', phone: '' })
+      setVehicleForm({ plateNumber: '', manufacturer: '', model: '', color: '' })
+      setSelectedPerson(null)
+      setVehicles([])
+      setFoundPerson(null)
       setTimeout(() => router.push('/live-gate'), 1000)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error registering entry'
@@ -152,7 +308,7 @@ export default function RegisterEntryPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="text-3xl font-bold text-white mb-2">NEW ENTRY</h1>
-      <p className="text-slate-400 mb-6">Create a new gate entry record</p>
+      <p className="text-slate-400 mb-6">Create a new gate entry record for employee, freelancer, contractor, guest, delivery, or rental company</p>
       <Card className="border-slate-700 bg-slate-800/50">
         <CardHeader><CardTitle>Visitor Information</CardTitle></CardHeader>
         <CardContent>
@@ -160,99 +316,185 @@ export default function RegisterEntryPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Full Name *</label>
-                <VoiceInput onTranscript={(text) => setForm({...form, fullName: text})}>
-                  <Input value={form.fullName} onChange={e => setForm({...form, fullName: e.target.value})} required />
+                <VoiceInput onTranscript={(text) => setForm({ ...form, fullName: text })}>
+                  <Input value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} placeholder="Type person name" required />
                 </VoiceInput>
-                {foundEmployee && (
-                  <div className="mt-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-sm text-emerald-400 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    Employee found in database — auto-filled
-                  </div>
-                )}
-                {loadingEmployee && !foundEmployee && (
-                  <div className="mt-2 text-sm text-slate-400">Searching employee...</div>
-                )}
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Category *</label>
-                <Select value={foundEmployee?.person_category || form.category} onChange={e => setForm({...form, category: e.target.value as PersonCategory})} disabled={!!foundEmployee}>
-                  {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-                </Select>
-                {foundEmployee && (
-                  <div className="mt-1 text-xs text-slate-500">{foundEmployee.person_category.replace('_', ' ')} (from database)</div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Destination Company *</label>
-                <Select value={form.companyId} onChange={e => setForm({...form, companyId: e.target.value})}>
-                  <option value="">Select company</option>
-                  {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Host / Contact</label>
-                <Input value={form.hostName} onChange={e => setForm({...form, hostName: e.target.value})} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">ID Number</label>
-                <div className="relative">
-                  <Input
-                    value={searchingId ? form.idNumber : ''}
-                    onChange={(e) => { if (!form.idNumber) { setForm({ ...form, idNumber: e.target.value }) } }}
-                    placeholder="Type ID number and press Enter"
-                    disabled={!!foundEmployee}
-                    className="pe-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => quickSelectEmployee(searchingId ? form.idNumber : '')}
-                    className="absolute right-0 top-0 h-full px-3"
-                    disabled={!searchingId || searchingId}
-                  >
-                    {searchingId ? '🔍' : '🔎'}
-                  </Button>
-                </div>
-                {foundEmployee && (
-                  <div className="mt-1 text-xs text-slate-500">{foundEmployee.identification_number || 'No ID number on file'} (from database)</div>
-                )}
-                {loadingEmployee && !foundEmployee && (
-                  <div className="mt-1 text-xs text-slate-400">Searching...</div>
-                )}
-                {searchingId && !searchingId && form.idNumber && !foundEmployee && (
-                  <div className="mt-1 text-xs text-slate-500">No employee found with this ID number</div>
-                )}
-              </div>
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-300 mb-1">Quick-Select Employees (by ID No)</label>
-                <div className="flex flex-wrap gap-2">
-                  {['10452', '10453', '10454'].map((id) => (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => quickSelectEmployee(id)}
-                      className="text-xs px-3 py-1.5 rounded-lg border border-slate-600 text-slate-300 hover:bg-cyan-500/10 hover:border-cyan-500 hover:text-cyan-300 disabled:opacity-50"
-                      disabled={!!foundEmployee}
-                      title={`Select employee with ID ${id}`}
-                    >
-                      ID #{id}
-                    </button>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Select Person or Search *</label>
+                <Select
+                  value={selectedPerson?.id || ''}
+                  onChange={(e) => {
+                    const person = persons.find(p => p.id === e.target.value)
+                    if (person) {
+                      setSelectedPerson(person)
+                      setForm(prev => ({
+                        ...prev,
+                        fullName: person.full_name,
+                        category: person.person_category as PersonCategory,
+                        email: person.email || '',
+                        phone: person.phone || '',
+                        notes: person.notes || '',
+                      }))
+                      setMessage('Person selected')
+                    }
+                  }}
+                  className="w-full"
+                >
+                  <option>Search people...</option>
+                  {persons.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.full_name} ({p.person_category}) - ID: {p.identification_number || 'No ID'}
+                    </option>
                   ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Purpose</label>
-                <VoiceInput onTranscript={(text) => setForm({...form, purpose: text})}>
-                  <Input value={form.purpose} onChange={e => setForm({...form, purpose: e.target.value})} />
-                </VoiceInput>
+                </Select>
+                {loadingPersons && <div className="mt-1 text-xs text-slate-400">Loading people...</div>}
+                {selectedPerson && !loadingPersons && (
+                  <div className="mt-1 text-xs text-emerald-400">Person selected</div>
+                )}
+                {foundPerson && !selectedPerson && (
+                  <div className="mt-1 text-xs text-emerald-400">Person found - auto-filled</div>
+                )}
+                {loadingPerson && !foundPerson && !selectedPerson && <div className="mt-1 text-xs text-slate-400">Searching...</div>}
               </div>
             </div>
+
+            {foundPerson && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Person Information (from database)</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <div><span className="text-xs text-slate-500">Name:</span><p className="text-white font-medium">{foundPerson.full_name}</p></div>
+                    <div><span className="text-xs text-slate-500">Category:</span><p className="text-white">{foundPerson.person_category.replace('_', ' ').replace(/\w/g, l => l.toUpperCase())}</p></div>
+                    <div><span className="text-xs text-slate-500">ID Number:</span><p className="text-white">{foundPerson.identification_number || 'No ID'}</p></div>
+                    {foundPerson.email && <div><span className="text-xs text-slate-500">Email:</span><p className="text-white">{foundPerson.email}</p></div>}
+                    {foundPerson.phone && <div><span className="text-xs text-slate-500">Phone:</span><p className="text-white">{foundPerson.phone}</p></div>}
+                    {foundPerson.company && <div><span className="text-xs text-slate-500">Company:</span><p className="text-white">{foundPerson.company}</p></div>}
+                    {foundPerson.notes && <div><span className="text-xs text-slate-500">Notes:</span><p className="text-white text-xs">{foundPerson.notes}</p></div>}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Category *</label>
+              <Select value={foundPerson?.person_category || form.category} onChange={e => setForm({ ...form, category: e.target.value as PersonCategory })}>
+                {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">ID Number</label>
+              <div className="relative">
+                <Input
+                  value={searchingId ? form.idNumber : ''}
+                  onChange={(e) => { if (!form.idNumber) { setForm({ ...form, idNumber: e.target.value }) } }}
+                  placeholder="Type ID number and press Enter"
+                  className="pe-10"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleIdNumberSearch(searchingId ? form.idNumber : '')}
+                  className="absolute right-0 top-0 h-full px-3"
+                  disabled={!searchingId || searchingId}
+                >
+                  {searchingId ? '🔍' : '🔎'}
+                </Button>
+              </div>
+              {foundPerson && (
+                <div className="mt-1 text-xs text-slate-500">{foundPerson.identification_number || 'No ID number on file'} (from database)</div>
+              )}
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-slate-300 mb-1">Quick-Select (by ID No)</label>
+              <div className="flex flex-wrap gap-2">
+                {['10452', '10453', '10454'].map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => handleIdNumberSearch(id)}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-slate-600 text-slate-300 hover:bg-cyan-500/10 hover:border-cyan-500 hover:text-cyan-300 disabled:opacity-50"
+                    disabled={!!foundPerson}
+                    title={`Select person with ID ${id}`}
+                  >
+                    ID #{id}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Destination Company *</label>
+              <Select value={form.companyId} onChange={e => setForm({ ...form, companyId: e.target.value })}>
+                <option value="">Select company</option>
+                {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </Select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Host / Contact</label>
+              <Input value={form.hostName} onChange={e => setForm({ ...form, hostName: e.target.value })} placeholder="Who is hosting this person?" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Purpose</label>
+              <VoiceInput onTranscript={(text) => setForm({ ...form, purpose: text })}>
+                <Input value={form.purpose} onChange={e => setForm({ ...form, purpose: e.target.value })} placeholder="Reason for visit" />
+              </VoiceInput>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Notes</label>
-              <VoiceInput onTranscript={(text) => setForm({...form, notes: form.notes ? form.notes + ' ' + text : text})}>
-                <textarea className="flex w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500" rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
+              <VoiceInput onTranscript={(text) => setForm({ ...form, notes: form.notes ? form.notes + ' ' + text : text })}>
+                <textarea className="flex w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" rows={3} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
               </VoiceInput>
+            </div>
+
+            <div className="border-t border-slate-700 pt-4">
+              <h3 className="text-lg font-medium text-white mb-4">Create New Person</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Full Name *</label>
+                  <Input value={newPersonFullname} onChange={e => setNewPersonFullname(e.target.value)} placeholder="Full name" />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">ID Number</label>
+                  <Input value={newPersonId} onChange={e => setNewPersonId(e.target.value)} placeholder="ID number (optional)" />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Category *</label>
+                  <Select value={newPersonCategory} onChange={e => setNewPersonCategory(e.target.value as PersonCategory)}>
+                    {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                  </Select>
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Email (optional)</label>
+                  <Input type="email" value={newPersonEmail} onChange={e => setNewPersonEmail(e.target.value)} placeholder="email@example.com" />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Phone (optional)</label>
+                  <Input value={newPersonPhone} onChange={e => setNewPersonPhone(e.target.value)} placeholder="Phone number" />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Company (optional)</label>
+                  <Input value={newPersonCompany} onChange={e => setNewPersonCompany(e.target.value)} placeholder="Company name (if applicable)" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Notes (optional)</label>
+                  <Input value={newPersonNotes} onChange={e => setNewPersonNotes(e.target.value)} placeholder="Additional notes" />
+                </div>
+                <div className="col-span-2 flex gap-3">
+                  <Button type="button" className="flex-1 bg-cyan-600 hover:bg-cyan-700" onClick={handleCreateNewPerson} disabled={!newPersonFullname}>
+                    Create Person
+                  </Button>
+                  {newPersonError && <p className="text-sm text-red-400">{newPersonError}</p>}
+                  {newPersonSuccess && <p className="text-sm text-emerald-400">{newPersonSuccess}</p>}
+                </div>
+              </div>
             </div>
 
             <div className="border-t border-slate-700 pt-4">
@@ -260,38 +502,46 @@ export default function RegisterEntryPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">License Plate</label>
-                  <VoiceInput onTranscript={(text) => setForm({...form, plateNumber: text.toUpperCase()})}>
-                    <Input value={form.plateNumber} onChange={e => setForm({...form, plateNumber: e.target.value.toUpperCase()})} placeholder="e.g. 1234 ABC" />
-                  </VoiceInput>
+                  <Input value={vehicleForm.plateNumber} onChange={e => setVehicleForm({ ...vehicleForm, plateNumber: e.target.value })} placeholder="e.g. 1234 ABC" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">Manufacturer</label>
-                  <VoiceInput onTranscript={(text) => setForm({...form, manufacturer: text})}>
-                    <Input value={form.manufacturer} onChange={e => setForm({...form, manufacturer: e.target.value})} />
-                  </VoiceInput>
+                  <Input value={vehicleForm.manufacturer} onChange={e => setVehicleForm({ ...vehicleForm, manufacturer: e.target.value })} placeholder="e.g. Toyota" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">Model</label>
-                  <VoiceInput onTranscript={(text) => setForm({...form, model: text})}>
-                    <Input value={form.model} onChange={e => setForm({...form, model: e.target.value})} />
-                  </VoiceInput>
+                  <Input value={vehicleForm.model} onChange={e => setVehicleForm({ ...vehicleForm, model: e.target.value })} placeholder="e.g. Camry" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">Color</label>
-                  <VoiceInput onTranscript={(text) => setForm({...form, color: text})}>
-                    <Input value={form.color} onChange={e => setForm({...form, color: e.target.value})} />
-                  </VoiceInput>
+                  <Input value={vehicleForm.color} onChange={e => setVehicleForm({ ...vehicleForm, color: e.target.value })} placeholder="e.g. Blue" />
                 </div>
               </div>
             </div>
 
-            {message && <p className={`text-sm ${message.includes('success') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
+            {vehicles.length > 0 && (
+              <div className="mt-4 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
+                <h4 className="text-sm font-medium text-cyan-400 mb-2">Existing Vehicles ({vehicles.length})</h4>
+                <div className="space-y-2">
+                  {vehicles.map(v => (
+                    <div key={v.id} className="text-xs text-slate-300 flex items-center gap-2">
+                      <span className="font-medium">{String(v.plate_number || 'N/A').toUpperCase()}</span>
+                      {v.manufacturer && <span className="text-slate-500">{v.manufacturer}</span>}
+                      {v.model && <span className="text-slate-500">{v.model}</span>}
+                      {v.color && <span className="text-slate-500">{v.color}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {message && <p className={`text-sm ${message.includes('✓') || message.includes('successfully') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
 
             <div className="flex gap-3">
               <Button type="submit" className="flex-1 bg-cyan-600 hover:bg-cyan-700" disabled={loading}>
                 {loading ? 'Registering...' : 'Register Entry'}
               </Button>
-              <Button type="button" variant="outline" onClick={() => setForm({ fullName: '', category: 'guest', companyId: '', hostName: '', purpose: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', idNumber: '' })}>
+              <Button type="button" variant="outline" onClick={() => setForm({ fullName: '', category: 'guest', companyId: '', hostName: '', purpose: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', idNumber: '', email: '', phone: '' })}>
                 Clear
               </Button>
             </div>
