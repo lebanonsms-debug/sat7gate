@@ -110,14 +110,16 @@ export default function PeoplePage() {
     fetchVehicles(person.id)
   }
 
-  const deletePerson = async (id: string, name: string, category: string) => {
-    if (!confirm(`Delete ${category} "${name}"?`)) return
-    const { data: { user } } = await supabase.auth.getUser()
+  const deletePerson = async (id: string, person: Person, category: string) => {
+    const displayName = person.given_name && person.family_name
+      ? `${person.given_name} ${person.family_name}`
+      : person.given_name || person.family_name || 'Unknown'
+    if (!confirm(`Delete ${category} "${displayName}"? This cannot be undone.`)) return
     if (!user) return
 
     await supabase.from('vehicles').delete().eq('person_id', id)
     await supabase.from('persons').delete().eq('id', id)
-    await supabase.from('audit_logs').insert({ user_id: user.id, action: 'delete_person', entity_type: 'person', entity_id: id, details: `Deleted ${category} ${name}` })
+    await supabase.from('audit_logs').insert({ user_id: user.id, action: 'delete_person', entity_type: 'person', entity_id: id, details: `Deleted ${category} ${person.given_name || person.family_name || 'Unknown'}` })
     setVehicles([])
     fetch()
   }
