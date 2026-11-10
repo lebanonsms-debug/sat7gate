@@ -66,7 +66,8 @@ export default function PeoplePage() {
         await supabase.from('audit_logs').insert({ user_id: user.id, action: 'update_person', entity_type: 'person', entity_id: editing.id, details: `Updated person ${form.given_name || ""} ${form.family_name || ""} (${form.person_category})` })
         setMessage('Person updated')
       } else {
-        const { data, error } = await supabase.from('persons').insert({ ...form, updated_at: new Date().toISOString() }).select().single()
+        const fullName = [form.given_name, form.family_name].filter(Boolean).join(' ').trim() || 'Unknown Person'
+        const { data, error } = await supabase.from('persons').insert({ ...form, full_name: fullName, updated_at: new Date().toISOString() }).select().single()
         if (error) throw error
         await supabase.from('audit_logs').insert({ user_id: user.id, action: 'create_person', entity_type: 'person', entity_id: data.id, details: `Created person ${form.given_name || ""} ${form.family_name || ""} (${form.person_category})` })
 
