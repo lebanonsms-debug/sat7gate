@@ -114,9 +114,7 @@ export default function PeoplePage() {
     const displayName = person.given_name && person.family_name
       ? `${person.given_name} ${person.family_name}`
       : person.given_name || person.family_name || 'Unknown'
-    if (!confirm(`Delete ${category} "${displayName}"? This cannot be undone.`)) return
     if (!user) return
-
     await supabase.from('vehicles').delete().eq('person_id', id)
     await supabase.from('persons').delete().eq('id', id)
     await supabase.from('audit_logs').insert({ user_id: user.id, action: 'delete_person', entity_type: 'person', entity_id: id, details: `Deleted ${category} ${person.given_name || person.family_name || 'Unknown'}` })
