@@ -15,7 +15,6 @@ const CATEGORIES = [
   { value: 'guest', label: 'Guest' },
   { value: 'delivery', label: 'Delivery' },
 ] as const
-] as const
 
 export default function PeoplePage() {
   const [persons, setPersons] = useState<Person[]>([])
