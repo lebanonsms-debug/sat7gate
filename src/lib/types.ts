@@ -24,6 +24,8 @@ export type PersonCategory = 'employee' | 'freelancer' | 'contractor' | 'guest' 
 export interface Person {
   id: string
   full_name: string
+  given_name?: string
+  family_name?: string
   person_category: PersonCategory
   identification_number?: string
   email?: string

@@ -21,6 +21,8 @@ export default function PeoplePage() {
   const [editing, setEditing] = useState<Person | null>(null)
   const [form, setForm] = useState({
     full_name: '',
+    given_name: '',
+    family_name: '',
     person_category: 'guest' as Person['person_category'],
     company: '',
     notes: '',
@@ -101,9 +103,11 @@ export default function PeoplePage() {
     setEditing(person)
     setForm({
       full_name: person.full_name,
+      given_name: person.given_name || '',
+      family_name: person.family_name || '',
       person_category: person.person_category,
-      notes: person.notes || '',
       company: person.company || '',
+      notes: person.notes || '',
     })
     fetchVehicles(person.id)
   }
@@ -127,9 +131,13 @@ export default function PeoplePage() {
         <CardHeader><CardTitle>{editing ? 'Edit Person' : 'Add Person'}</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap items-stretch sm:items-end">
-            <VoiceInput onTranscript={(text) => setForm({...form, full_name: text})}>
-              <Input placeholder="Full name" value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required className="flex-1 text-base" />
-            </VoiceInput>
+            <div className='flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1 min-w-0'>
+              <VoiceInput onTranscript={(text) => setForm({...form, full_name: text})}>
+                <Input placeholder='Full Name' value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required className='flex-1 text-base' />
+              </VoiceInput>
+              <Input placeholder='Create Name (Given Name)' value={form.given_name || ''} onChange={e => setForm({...form, given_name: e.target.value})} className='w-1/2 text-base' />
+              <Input placeholder='Family Name (Surname)' value={form.family_name || ''} onChange={e => setForm({...form, family_name: e.target.value})} className='w-1/2 text-base' />
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Type *</label>
@@ -167,7 +175,7 @@ export default function PeoplePage() {
             <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700 h-10 sm:h-auto" disabled={loading}>
               <Plus className="w-4 h-4 mr-2" />{loading ? 'Saving...' : (editing ? 'Update' : 'Add')}
             </Button>
-            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', person_category: 'guest', company: '', notes: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
+            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ full_name: '', given_name: '', family_name: '', person_category: 'guest', company: '', notes: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
           </form>
           {message && <p className={`text-sm mt-2 ${message.includes('success') || message.includes('added') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
 
