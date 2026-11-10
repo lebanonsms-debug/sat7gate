@@ -24,7 +24,6 @@ export default function PeoplePage() {
     family_name: '',
     person_category: 'guest' as Person['person_category'],
     company: '',
-    notes: '',
   })
   const [vehicles, setVehicles] = useState<{ plate_number: string; manufacturer: string; model: string; color: string }[]>([])
   const [loading, setLoading] = useState(false)
@@ -86,7 +85,7 @@ export default function PeoplePage() {
 
         setMessage('Person added')
       }
-      setForm({ given_name: '', family_name: '', person_category: 'guest', company: '', notes: '' })
+      setForm({ given_name: '', family_name: '', person_category: 'guest', company: '' })
       setNewVehicle({ plate_number: '', manufacturer: '', model: '', color: '' })
       setVehicles([])
       setEditing(null)
@@ -106,7 +105,6 @@ export default function PeoplePage() {
       family_name: person.family_name || '',
       person_category: person.person_category,
       company: person.company || '',
-      notes: person.notes || '',
     })
     fetchVehicles(person.id)
   }
@@ -173,7 +171,7 @@ export default function PeoplePage() {
             <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700 h-10 sm:h-auto" disabled={loading}>
               <Plus className="w-4 h-4 mr-2" />{loading ? 'Saving...' : (editing ? 'Update' : 'Add')}
             </Button>
-            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ given_name: '', family_name: '', person_category: 'guest', company: '', notes: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
+            {editing && <Button type="button" variant="outline" onClick={() => { setEditing(null); setForm({ given_name: '', family_name: '', person_category: 'guest', company: '' }); setVehicles([]) }} className="h-10 sm:h-auto"><X className="w-4 h-4 mr-2" />Cancel</Button>}
           </form>
           {message && <p className={`text-sm mt-2 ${message.includes('success') || message.includes('added') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
 
