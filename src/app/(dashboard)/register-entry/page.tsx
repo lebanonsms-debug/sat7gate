@@ -26,12 +26,11 @@ export default function RegisterEntryPage() {
   const [vehicles, setVehicles] = useState<{ id: string; plate_number: string; manufacturer: string; model: string; color: string }[]>([])
   const [loadingPersons, setLoadingPersons] = useState(true)
   const [selectedPerson, setSelectedPerson] = useState<{ id: string; full_name: string; identification_number: string; person_category: string; email?: string; phone?: string; notes?: string } | null>(null)
-  const [form, setForm] = useState({ fullName: '', category: 'guest' as PersonCategory, companyId: '', hostName: '', purpose: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', idNumber: '', email: '', phone: '' })
+  const [form, setForm] = useState({ fullName: '', category: 'guest' as PersonCategory, companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', email: '', phone: '' })
   const [loading, setLoading] = useState(false)
   const [foundPerson, setFoundPerson] = useState<{ id: string; full_name: string; identification_number: string; person_category: string; email?: string; phone?: string; company?: string; notes?: string } | null>(null)
   const [loadingPerson, setLoadingPerson] = useState(false)
   const [message, setMessage] = useState('')
-  const [searchingId, setSearchingId] = useState(false)
   const [newPersonFullname, setNewPersonFullname] = useState('')
   const [newPersonId, setNewPersonId] = useState('')
   const [newPersonCategory, setNewPersonCategory] = useState<PersonCategory>('employee')
@@ -126,52 +125,6 @@ export default function RegisterEntryPage() {
     return () => clearTimeout(timer)
   }, [form.fullName, supabase, fetchVehicles, vehicles])
 
-  const handleIdNumberSearch = async (idNumber: string) => {
-    if (!idNumber.trim()) return
-    setSearchingId(true)
-    try {
-      const { data } = await supabase
-        .from('persons')
-        .select('id, full_name, identification_number, person_category, email, phone, company, notes')
-        .eq('identification_number', idNumber.trim())
-        .limit(5)
-      if (data && data.length > 0) {
-        const found = data[0]
-        setFoundPerson(found)
-        await fetchVehicles(found.id)
-        setForm(prev => ({
-          ...prev,
-          fullName: found.full_name,
-          category: found.person_category as PersonCategory,
-          email: found.email || '',
-          phone: found.phone || '',
-          notes: found.notes || '',
-        }))
-        const vehicle = vehicles[0]
-        if (vehicle) {
-          setVehicleForm({
-            plateNumber: vehicle.plate_number || '',
-            manufacturer: vehicle.manufacturer || '',
-            model: vehicle.model || '',
-            color: vehicle.color || '',
-          })
-        }
-        setSearchingId(false)
-        setMessage('Person found by ID - auto-filled')
-      } else {
-        setFoundPerson(null)
-        setVehicles([])
-        setSearchingId(false)
-        setMessage('No person found with this ID number')
-      }
-    } catch {
-      setFoundPerson(null)
-      setVehicles([])
-      setSearchingId(false)
-      setMessage('Error searching for person')
-    }
-  }
-
   const handleCreateNewPerson = async () => {
     if (!newPersonFullname.trim()) return
     setNewPersonError('')
@@ -243,7 +196,7 @@ export default function RegisterEntryPage() {
           const { data: newPerson } = await supabase.from('persons').insert({
             full_name: form.fullName,
             person_category: form.category,
-            identification_number: form.idNumber || null,
+            identification_number: null,
             email: form.email || null,
             phone: form.phone || null,
             company_id: form.companyId || null,
@@ -269,8 +222,6 @@ export default function RegisterEntryPage() {
       const { data: visitor } = await supabase.from('visitors').insert({
         person_id: personId,
         destination_company_id: form.companyId,
-        host_name: form.hostName,
-        purpose: form.purpose,
         notes: form.notes,
         created_by: user.id,
       }).select('id').single()
@@ -291,7 +242,7 @@ export default function RegisterEntryPage() {
       })
 
       setMessage('Entry registered successfully!')
-      setForm({ fullName: '', category: 'guest', companyId: '', hostName: '', purpose: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', idNumber: '', email: '', phone: '' })
+      setForm({ fullName: '', category: 'guest', companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', email: '', phone: '' })
       setVehicleForm({ plateNumber: '', manufacturer: '', model: '', color: '' })
       setSelectedPerson(null)
       setVehicles([])
@@ -385,66 +336,11 @@ export default function RegisterEntryPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">ID Number</label>
-              <div className="relative">
-                <Input
-                  value={searchingId ? form.idNumber : ''}
-                  onChange={(e) => { if (!form.idNumber) { setForm({ ...form, idNumber: e.target.value }) } }}
-                  placeholder="Type ID number and press Enter"
-                  className="pe-10"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleIdNumberSearch(searchingId ? form.idNumber : '')}
-                  className="absolute right-0 top-0 h-full px-3"
-                  disabled={!searchingId || searchingId}
-                >
-                  {searchingId ? '🔍' : '🔎'}
-                </Button>
-              </div>
-              {foundPerson && (
-                <div className="mt-1 text-xs text-slate-500">{foundPerson.identification_number || 'No ID number on file'} (from database)</div>
-              )}
-            </div>
-
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-slate-300 mb-1">Quick-Select (by ID No)</label>
-              <div className="flex flex-wrap gap-2">
-                {['10452', '10453', '10454'].map((id) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => handleIdNumberSearch(id)}
-                    className="text-xs px-3 py-1.5 rounded-lg border border-slate-600 text-slate-300 hover:bg-cyan-500/10 hover:border-cyan-500 hover:text-cyan-300 disabled:opacity-50"
-                    disabled={!!foundPerson}
-                    title={`Select person with ID ${id}`}
-                  >
-                    ID #{id}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Destination Company *</label>
               <Select value={form.companyId} onChange={e => setForm({ ...form, companyId: e.target.value })}>
                 <option value="">Select company</option>
                 {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Host / Contact</label>
-              <Input value={form.hostName} onChange={e => setForm({ ...form, hostName: e.target.value })} placeholder="Who is hosting this person?" />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Purpose</label>
-              <VoiceInput onTranscript={(text) => setForm({ ...form, purpose: text })}>
-                <Input value={form.purpose} onChange={e => setForm({ ...form, purpose: e.target.value })} placeholder="Reason for visit" />
-              </VoiceInput>
             </div>
 
             <div>
@@ -541,7 +437,7 @@ export default function RegisterEntryPage() {
               <Button type="submit" className="flex-1 bg-cyan-600 hover:bg-cyan-700" disabled={loading}>
                 {loading ? 'Registering...' : 'Register Entry'}
               </Button>
-              <Button type="button" variant="outline" onClick={() => setForm({ fullName: '', category: 'guest', companyId: '', hostName: '', purpose: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', idNumber: '', email: '', phone: '' })}>
+              <Button type="button" variant="outline" onClick={() => setForm({ fullName: '', category: 'guest', companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', email: '', phone: '' })}>
                 Clear
               </Button>
             </div>
