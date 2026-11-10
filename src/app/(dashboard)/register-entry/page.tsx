@@ -25,19 +25,15 @@ export default function RegisterEntryPage() {
   const [persons, setPersons] = useState<{ id: string; full_name: string; identification_number: string; person_category: string; email?: string; phone?: string; company?: string; notes?: string }[]>([])
   const [vehicles, setVehicles] = useState<{ id: string; plate_number: string; manufacturer: string; model: string; color: string }[]>([])
   const [loadingPersons, setLoadingPersons] = useState(true)
-  const [selectedPerson, setSelectedPerson] = useState<{ id: string; full_name: string; identification_number: string; person_category: string; email?: string; phone?: string; notes?: string } | null>(null)
+  const [selectedPerson, setSelectedPerson] = useState<{ id: string; full_name: string; identification_number?: string; person_category: string; email?: string; phone?: string; notes?: string } | null>(null)
   const [form, setForm] = useState({ fullName: '', category: 'guest' as PersonCategory, companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', email: '', phone: '' })
   const [loading, setLoading] = useState(false)
   const [foundPerson, setFoundPerson] = useState<{ id: string; full_name: string; identification_number: string; person_category: string; email?: string; phone?: string; company?: string; notes?: string } | null>(null)
   const [loadingPerson, setLoadingPerson] = useState(false)
   const [message, setMessage] = useState('')
   const [newPersonFullname, setNewPersonFullname] = useState('')
-  const [newPersonId, setNewPersonId] = useState('')
   const [newPersonCategory, setNewPersonCategory] = useState<PersonCategory>('employee')
-  const [newPersonEmail, setNewPersonEmail] = useState('')
-  const [newPersonPhone, setNewPersonPhone] = useState('')
   const [newPersonCompany, setNewPersonCompany] = useState('')
-  const [newPersonNotes, setNewPersonNotes] = useState('')
   const [newPersonSuccess, setNewPersonSuccess] = useState('')
   const [newPersonError, setNewPersonError] = useState('')
   const [vehicleForm, setVehicleForm] = useState({ plateNumber: '', manufacturer: '', model: '', color: '' })
@@ -142,34 +138,24 @@ export default function RegisterEntryPage() {
       const { data: newPerson } = await supabase.from('persons').insert({
         full_name: newPersonFullname.trim(),
         person_category: newPersonCategory,
-        identification_number: newPersonId.trim() || null,
-        email: newPersonEmail.trim() || null,
-        phone: newPersonPhone.trim() || null,
         company: newPersonCompany.trim() || null,
-        notes: newPersonNotes.trim() || null,
-      }).select('id, full_name, identification_number, person_category, email, phone, company, notes').single()
+      }).select('id, full_name, person_category').single()
 
       if (!newPerson) {
         setNewPersonError('Failed to create person')
         return
       }
 
-      setSelectedPerson(newPerson)
+      setSelectedPerson({ id: newPerson.id, full_name: newPerson.full_name, person_category: newPerson.person_category })
       setForm(prev => ({
         ...prev,
         fullName: newPerson.full_name,
         category: newPerson.person_category,
-        email: newPerson.email || '',
-        phone: newPerson.phone || '',
       }))
       setNewPersonSuccess('Created ' + newPerson.full_name)
       setNewPersonFullname('')
-      setNewPersonId('')
       setNewPersonCategory('employee')
-      setNewPersonEmail('')
-      setNewPersonPhone('')
       setNewPersonCompany('')
-      setNewPersonNotes('')
       setMessage('Created new person - ' + newPerson.full_name)
     } catch (err) {
       setNewPersonError(err instanceof Error ? err.message : 'Error creating person')
@@ -358,30 +344,14 @@ export default function RegisterEntryPage() {
                   <Input value={newPersonFullname} onChange={e => setNewPersonFullname(e.target.value)} placeholder="Full name" />
                 </div>
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-sm font-medium text-slate-300 mb-1">ID Number</label>
-                  <Input value={newPersonId} onChange={e => setNewPersonId(e.target.value)} placeholder="ID number (optional)" />
-                </div>
-                <div className="col-span-2 md:col-span-1">
                   <label className="block text-sm font-medium text-slate-300 mb-1">Category *</label>
                   <Select value={newPersonCategory} onChange={e => setNewPersonCategory(e.target.value as PersonCategory)}>
                     {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                   </Select>
                 </div>
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Email (optional)</label>
-                  <Input type="email" value={newPersonEmail} onChange={e => setNewPersonEmail(e.target.value)} placeholder="email@example.com" />
-                </div>
-                <div className="col-span-2 md:col-span-1">
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Phone (optional)</label>
-                  <Input value={newPersonPhone} onChange={e => setNewPersonPhone(e.target.value)} placeholder="Phone number" />
-                </div>
-                <div className="col-span-2 md:col-span-1">
                   <label className="block text-sm font-medium text-slate-300 mb-1">Company (optional)</label>
                   <Input value={newPersonCompany} onChange={e => setNewPersonCompany(e.target.value)} placeholder="Company name (if applicable)" />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Notes (optional)</label>
-                  <Input value={newPersonNotes} onChange={e => setNewPersonNotes(e.target.value)} placeholder="Additional notes" />
                 </div>
                 <div className="col-span-2 flex gap-3">
                   <Button type="button" className="flex-1 bg-cyan-600 hover:bg-cyan-700" onClick={handleCreateNewPerson} disabled={!newPersonFullname}>
