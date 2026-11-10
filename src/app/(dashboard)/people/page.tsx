@@ -95,8 +95,6 @@ export default function PeoplePage() {
       person_category: person.person_category,
       notes: person.notes || '',
       company: person.company || '',
-      notes: person.notes || '',
-      company: person.company || '',
     })
     fetchVehicles(person.id)
   }

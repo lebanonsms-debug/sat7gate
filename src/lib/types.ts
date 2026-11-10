@@ -7,6 +7,7 @@ export interface Profile {
   role: Role
   active: boolean
   created_at: string
+  shift?: 'night' | 'day'
 }
 
 export interface Company {
