@@ -69,7 +69,7 @@ export default function SecurityOfficersPage() {
 
   const startEdit = (officer: Profile) => {
     setEditing(officer)
-    setForm({ email: '', password: '', full_name: officer.full_name, role: officer.role })
+    setForm({ email: '', password: '', full_name: officer.full_name, role: officer.role, shift: officer.shift || 'day' })
   }
 
   const deleteOfficer = async (id: string, name: string) => {

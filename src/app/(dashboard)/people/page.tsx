@@ -23,6 +23,7 @@ export default function PeoplePage() {
     full_name: '',
     person_category: 'guest' as Person['person_category'],
     company: '',
+    notes: '',
   })
   const [vehicles, setVehicles] = useState<{ plate_number: string; manufacturer: string; model: string; color: string }[]>([])
   const [loading, setLoading] = useState(false)
