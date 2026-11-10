@@ -101,7 +101,7 @@ export default function PeoplePage() {
     setForm({
       full_name: person.full_name,
       person_category: person.person_category,
-      '',
+      notes: person.notes || '',
       company: person.company || '',
     })
     fetchVehicles(person.id)
