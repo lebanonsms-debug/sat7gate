@@ -41,7 +41,7 @@ export default function SecurityOfficersPage() {
         } else {
           setMessage('User updated successfully!')
           setEditing(null)
-          setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
+          setForm({ email: '', password: '', full_name: '', role: 'security_officer', shift: 'day' })
           fetchOfficers()
         }
       } else {
@@ -82,7 +82,7 @@ export default function SecurityOfficersPage() {
       setMessage('User deleted successfully!')
       if (editing?.id === id) {
         setEditing(null)
-        setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
+        setForm({ email: '', password: '', full_name: '', role: 'security_officer', shift: 'day' })
       }
       fetchOfficers()
     }
@@ -90,7 +90,7 @@ export default function SecurityOfficersPage() {
 
   const cancelEdit = () => {
     setEditing(null)
-    setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
+    setForm({ email: '', password: '', full_name: '', role: 'security_officer', shift: 'day' })
   }
 
   return (

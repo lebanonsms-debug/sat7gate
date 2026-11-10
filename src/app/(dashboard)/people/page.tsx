@@ -83,7 +83,7 @@ export default function PeoplePage() {
 
         setMessage('Person added')
       }
-      setForm({ full_name: '', person_category: 'guest', notes: '', company: '' })
+      setForm({ full_name: '', person_category: 'guest', company: '' })
       setNewVehicle({ plate_number: '', manufacturer: '', model: '', color: '' })
       setVehicles([])
       setEditing(null)
@@ -101,7 +101,7 @@ export default function PeoplePage() {
     setForm({
       full_name: person.full_name,
       person_category: person.person_category,
-      notes: person.notes || '',
+      '',
       company: person.company || '',
     })
     fetchVehicles(person.id)
