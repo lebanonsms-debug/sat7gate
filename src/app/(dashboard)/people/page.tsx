@@ -5,8 +5,7 @@ import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { VoiceInput } from '@/components/ui/voice-input'
-import { Plus, Trash2, Pencil, X, Users } from 'lucide-react'
+import { Plus, Trash2, Pencil, X } from 'lucide-react'
 import type { Person } from '@/lib/types'
 
 const CATEGORIES = [
@@ -44,7 +43,7 @@ export default function PeoplePage() {
     setLoadingCompanies(false)
   }, [supabase])
 
-  useEffect(() => { fetch() }, [fetch])
+  useEffect(() => { fetch() }, [fetch]) // eslint-disable-line react-hooks/set-state-in-effect
   useEffect(() => { fetchCompanies() }, [fetchCompanies]) // eslint-disable-line react-hooks/set-state-in-effect
 
   const fetchVehicles = useCallback(async (personId: string) => {
@@ -208,10 +207,10 @@ export default function PeoplePage() {
                 <tbody className="divide-y divide-slate-700">
                   {persons.map(p => (
                     <tr key={p.id} className="hover:bg-slate-700/20">
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-white font-medium">{p.given_name || p.family_name || '-'}</td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-white font-medium">{[p.given_name, p.family_name].filter(Boolean).join(' ') || p.full_name || '-'}</td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300">{p.person_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
                       
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{p.company || '-'}</td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{companies.find(c => c.id === p.company)?.name || p.company || '-'}</td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{new Date(p.created_at).toLocaleDateString()}</td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm">
                         <div className="flex gap-2">

@@ -56,10 +56,12 @@ export default function RegisterEntryPage() {
     setVehicles(data || [])
   }, [supabase])
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     fetchCompanies()
     fetchPersons()
   }, [fetchCompanies, fetchPersons])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // eslint-disable-next-line
   useEffect(() => {
