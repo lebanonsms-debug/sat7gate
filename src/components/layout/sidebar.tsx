@@ -8,7 +8,7 @@ import {
   LayoutDashboard, UserPlus, Activity, Users, Car,
   Building2, FileText, Settings, LogOut,
   ShieldCheck, BarChart3, History as HistoryIcon,
-  ClipboardList, UsersRound
+  ClipboardList, UsersRound, Clock
 } from 'lucide-react'
 import type { Profile } from '@/lib/types'
 
@@ -36,6 +36,7 @@ const navSections = [
     items: [
       { href: '/reports', label: 'Reports & Analytics', icon: FileText, roles: ['administrator', 'management'] },
       { href: '/users', label: 'Users', icon: UsersRound, roles: ['administrator'] },
+      { href: '/officer-entries', label: 'Security Officer', icon: Clock, roles: ['security_officer', 'administrator'] },
       { href: '/security-officers', label: 'Security Officers', icon: ShieldCheck, roles: ['security_officer', 'administrator'] },
     ]
   }
