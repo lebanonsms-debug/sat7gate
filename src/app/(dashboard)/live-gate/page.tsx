@@ -8,6 +8,7 @@ import { LogOut } from 'lucide-react'
 
 export default function LiveGatePage() {
   const [movements, setMovements] = useState<{ id: string; entry_time?: string; entry_officer_id?: string; visitor?: { person?: { full_name?: string; person_category?: string }; company?: { name?: string }; vehicles?: Array<{ manufacturer?: string; model?: string; plate_number?: string }> } }[]>([])
+  const [officers, setOfficers] = useState<{ id: string; full_name: string }[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClientComponentClient()
 
@@ -17,12 +18,18 @@ export default function LiveGatePage() {
     setLoading(false)
   }, [supabase])
 
+  const fetchOfficers = useCallback(async () => {
+    const { data } = await supabase.from('officer_directory').select('id, full_name')
+    setOfficers(data || [])
+  }, [supabase])
+
   useEffect(() => {
     fetchMovements() // eslint-disable-line react-hooks/set-state-in-effect
+    fetchOfficers() // eslint-disable-line react-hooks/set-state-in-effect
     const channel = supabase.channel('live-gate')
     channel.on('postgres_changes', { event: '*', schema: 'public', table: 'gate_movements' }, fetchMovements).subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [supabase, fetchMovements])
+  }, [supabase, fetchMovements, fetchOfficers])
 
   const markExit = async (id: string) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -69,7 +76,7 @@ export default function LiveGatePage() {
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden lg:table-cell">{m.visitor?.vehicles?.[0] ? `${m.visitor.vehicles[0].manufacturer} ${m.visitor.vehicles[0].model}` : '-'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 font-mono">{m.visitor?.vehicles?.[0]?.plate_number || '-'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{m.entry_time ? new Date(m.entry_time).toLocaleString() : '-'}</td>
-                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden md:table-cell">{(m.entry_officer_id || '').slice(0, 8)}...</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden md:table-cell">{officers.find(o => o.id === m.entry_officer_id)?.full_name || (m.entry_officer_id || '').slice(0, 8) + '...'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4">
                       <Button size="sm" variant="destructive" onClick={() => markExit(m.id)} className="gap-1 min-h-[36px] min-w-[36px]">
                         <LogOut className="w-3 h-3" /> Exit

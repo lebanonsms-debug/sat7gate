@@ -297,7 +297,7 @@ export default function RegisterEntryPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                     <div><span className="text-xs text-slate-500">Name:</span><p className="text-white font-medium">{[foundPerson.given_name, foundPerson.family_name].filter(Boolean).join(' ') || foundPerson.full_name}</p></div>
                     <div><span className="text-xs text-slate-500">Category:</span><p className="text-white">{foundPerson.person_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p></div>
-                    {foundPerson.company && <div><span className="text-xs text-slate-500">Company:</span><p className="text-white">{foundPerson.company}</p></div>}
+                    {foundPerson.company && <div><span className="text-xs text-slate-500">Company:</span><p className="text-white">{companies.find(c => c.id === foundPerson.company)?.name || foundPerson.company}</p></div>}
                   </div>
                 </div>
               </div>

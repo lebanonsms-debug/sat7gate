@@ -20,17 +20,22 @@ export default function VisitorHistoryPage() {
     }
   }
   const [records, setRecords] = useState<HistoryRecord[]>([])
+  const [officers, setOfficers] = useState<{ id: string; full_name: string }[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const supabase = createClientComponentClient()
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))').order('entry_time', { ascending: false }).limit(100)
+      const [{ data }, { data: officerData }] = await Promise.all([
+        supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))').order('entry_time', { ascending: false }).limit(100),
+        supabase.from('officer_directory').select('id, full_name'),
+      ])
       setRecords(data || [])
+      setOfficers(officerData || [])
       setLoading(false)
     }
-    fetch()
+    fetch() // eslint-disable-line react-hooks/set-state-in-effect
   }, [supabase])
 
   const filtered = records.filter((m) => {
@@ -82,7 +87,7 @@ export default function VisitorHistoryPage() {
                     <td className="px-4 py-3 text-sm text-slate-300">{m.entry_time ? new Date(m.entry_time).toLocaleString() : '-'}</td>
                     <td className="px-4 py-3 text-sm text-slate-300">{m.exit_time ? new Date(m.exit_time).toLocaleString() : '-'}</td>
                     <td className="px-4 py-3"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${m.status === 'inside' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10 text-slate-400'}`}>{m.status}</span></td>
-                    <td className="px-4 py-3 text-sm text-slate-300">{(m.entry_officer_id || '').slice(0, 8)}...</td>
+                    <td className="px-4 py-3 text-sm text-slate-300">{officers.find(o => o.id === m.entry_officer_id)?.full_name || (m.entry_officer_id || '').slice(0, 8) + '...'}</td>
                   </tr>
                 ))}
               </tbody>
