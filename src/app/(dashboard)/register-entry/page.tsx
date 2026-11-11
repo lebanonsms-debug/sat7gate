@@ -22,13 +22,13 @@ const CATEGORIES: { value: PersonCategory; label: string }[] = [
 
 export default function RegisterEntryPage() {
   const [companies, setCompanies] = useState<Company[]>([])
-  const [persons, setPersons] = useState<{ id: string; full_name: string; identification_number: string; person_category: string; email?: string; phone?: string; company?: string; notes?: string }[]>([])
+  const [persons, setPersons] = useState<{ id: string; full_name: string; given_name?: string; family_name?: string; person_category: string; identification_number?: string; company?: string }[]>([])
   const [vehicles, setVehicles] = useState<{ id: string; plate_number: string; manufacturer: string; model: string; color: string }[]>([])
   const [loadingPersons, setLoadingPersons] = useState(true)
-  const [selectedPerson, setSelectedPerson] = useState<{ id: string; full_name: string; identification_number?: string; person_category: string; email?: string; phone?: string; notes?: string } | null>(null)
-  const [form, setForm] = useState({ fullName: '', category: 'guest' as PersonCategory, companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', email: '', phone: '' })
+  const [selectedPerson, setSelectedPerson] = useState<{ id: string; full_name: string; person_category: string; company?: string } | null>(null)
+  const [form, setForm] = useState({ fullName: '', category: 'guest' as PersonCategory, companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })
   const [loading, setLoading] = useState(false)
-  const [foundPerson, setFoundPerson] = useState<{ id: string; full_name: string; identification_number: string; person_category: string; email?: string; phone?: string; company?: string; notes?: string } | null>(null)
+  const [foundPerson, setFoundPerson] = useState<{ id: string; full_name: string; given_name?: string; family_name?: string; person_category: string; identification_number?: string; company?: string } | null>(null)
   const [loadingPerson, setLoadingPerson] = useState(false)
   const [message, setMessage] = useState('')
   const [newPersonFullname, setNewPersonFullname] = useState('')
@@ -46,7 +46,7 @@ export default function RegisterEntryPage() {
   }, [supabase])
 
   const fetchPersons = useCallback(async () => {
-    const { data } = await supabase.from('persons').select('id, full_name, identification_number, person_category, email, phone, company, notes').order('full_name')
+    const { data } = await supabase.from('persons').select('id, full_name, given_name, family_name, person_category, identification_number, company').order('full_name')
     setPersons(data || [])
     setLoadingPersons(false)
   }, [supabase])
@@ -77,7 +77,7 @@ export default function RegisterEntryPage() {
       try {
         const { data, error } = await supabase
           .from('persons')
-          .select('id, full_name, identification_number, person_category, email, phone, company, notes')
+          .select('id, full_name, given_name, family_name, person_category, identification_number, company')
           .ilike('full_name', `%${form.fullName.trim()}%`)
           .limit(5)
 
@@ -93,9 +93,6 @@ export default function RegisterEntryPage() {
             ...prev,
             fullName: found.full_name,
             category: found.person_category as PersonCategory,
-            email: found.email || '',
-            phone: found.phone || '',
-            notes: found.notes || '',
           }))
           const vehicle = vehicles[0]
           if (vehicle) {
@@ -184,10 +181,7 @@ export default function RegisterEntryPage() {
           const { data: newPerson } = await supabase.from('persons').insert({
             full_name: form.fullName,
             person_category: form.category,
-            identification_number: null,
-            email: form.email || null,
-            phone: form.phone || null,
-            company_id: form.companyId || null,
+            company: form.companyId || null,
             notes: form.notes || null,
           }).select('id').single()
           if (!newPerson) throw new Error('Failed to create person')
@@ -230,7 +224,7 @@ export default function RegisterEntryPage() {
       })
 
       setMessage('Entry registered successfully!')
-      setForm({ fullName: '', category: 'guest', companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', email: '', phone: '' })
+      setForm({ fullName: '', category: 'guest', companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })
       setVehicleForm({ plateNumber: '', manufacturer: '', model: '', color: '' })
       setSelectedPerson(null)
       setVehicles([])
@@ -272,9 +266,6 @@ export default function RegisterEntryPage() {
                         ...prev,
                         fullName: person.full_name,
                         category: person.person_category as PersonCategory,
-                        email: person.email || '',
-                        phone: person.phone || '',
-                        notes: person.notes || '',
                       }))
                       setMessage('Person selected')
                     }
@@ -284,7 +275,7 @@ export default function RegisterEntryPage() {
                   <option>Search people...</option>
                   {persons.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.full_name} ({p.person_category}) - ID: {p.identification_number || 'No ID'}
+                      {p.full_name} ({p.person_category})
                     </option>
                   ))}
                 </Select>
@@ -304,13 +295,9 @@ export default function RegisterEntryPage() {
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-slate-300 mb-1">Person Information (from database)</label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                    <div><span className="text-xs text-slate-500">Name:</span><p className="text-white font-medium">{foundPerson.full_name}</p></div>
-                    <div><span className="text-xs text-slate-500">Category:</span><p className="text-white">{foundPerson.person_category.replace('_', ' ').replace(/\w/g, l => l.toUpperCase())}</p></div>
-                    <div><span className="text-xs text-slate-500">ID Number:</span><p className="text-white">{foundPerson.identification_number || 'No ID'}</p></div>
-                    {foundPerson.email && <div><span className="text-xs text-slate-500">Email:</span><p className="text-white">{foundPerson.email}</p></div>}
-                    {foundPerson.phone && <div><span className="text-xs text-slate-500">Phone:</span><p className="text-white">{foundPerson.phone}</p></div>}
+                    <div><span className="text-xs text-slate-500">Name:</span><p className="text-white font-medium">{[foundPerson.given_name, foundPerson.family_name].filter(Boolean).join(' ') || foundPerson.full_name}</p></div>
+                    <div><span className="text-xs text-slate-500">Category:</span><p className="text-white">{foundPerson.person_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p></div>
                     {foundPerson.company && <div><span className="text-xs text-slate-500">Company:</span><p className="text-white">{foundPerson.company}</p></div>}
-                    {foundPerson.notes && <div><span className="text-xs text-slate-500">Notes:</span><p className="text-white text-xs">{foundPerson.notes}</p></div>}
                   </div>
                 </div>
               </div>
@@ -409,7 +396,7 @@ export default function RegisterEntryPage() {
               <Button type="submit" className="flex-1 bg-cyan-600 hover:bg-cyan-700" disabled={loading}>
                 {loading ? 'Registering...' : 'Register Entry'}
               </Button>
-              <Button type="button" variant="outline" onClick={() => setForm({ fullName: '', category: 'guest', companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '', email: '', phone: '' })}>
+              <Button type="button" variant="outline" onClick={() => setForm({ fullName: '', category: 'guest', companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })}>
                 Clear
               </Button>
             </div>
