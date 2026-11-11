@@ -51,11 +51,6 @@ export default function RegisterEntryPage() {
     setLoadingPersons(false)
   }, [supabase])
 
-  const fetchVehicles = useCallback(async (personId: string) => {
-    const { data } = await supabase.from('vehicles').select('*').eq('person_id', personId)
-    setVehicles(data || [])
-  }, [supabase])
-
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     fetchCompanies()
@@ -63,13 +58,10 @@ export default function RegisterEntryPage() {
   }, [fetchCompanies, fetchPersons])
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  // eslint-disable-next-line
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (form.fullName.trim().length < 2) {
-        // eslint-disable-next-line
         setFoundPerson(null)
-        // eslint-disable-next-line
         setVehicles([])
         return
       }
@@ -88,13 +80,10 @@ export default function RegisterEntryPage() {
         } else if (data && data.length > 0) {
           const found = data[0]
           setFoundPerson(found)
-          await fetchVehicles(found.id)
-          setForm(prev => ({
-            ...prev,
-            fullName: found.full_name,
-            category: found.person_category as PersonCategory,
-          }))
-          const vehicle = vehicles[0]
+          const { data: personVehicles } = await supabase.from('vehicles').select('*').eq('person_id', found.id)
+          const vehicleList = personVehicles || []
+          setVehicles(vehicleList)
+          const vehicle = vehicleList[0]
           if (vehicle) {
             setVehicleForm({
               plateNumber: vehicle.plate_number || '',
@@ -103,6 +92,11 @@ export default function RegisterEntryPage() {
               color: vehicle.color || '',
             })
           }
+          setForm(prev => (
+            prev.fullName === found.full_name && prev.category === found.person_category
+              ? prev
+              : { ...prev, fullName: found.full_name, category: found.person_category as PersonCategory }
+          ))
           setMessage('Person found - auto-filled')
         } else {
           setFoundPerson(null)
@@ -118,7 +112,7 @@ export default function RegisterEntryPage() {
       }
     }, 400)
     return () => clearTimeout(timer)
-  }, [form.fullName, supabase, fetchVehicles, vehicles])
+  }, [form.fullName, supabase]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCreateNewPerson = async () => {
     if (!newPersonFullname.trim()) return
@@ -167,6 +161,7 @@ export default function RegisterEntryPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
+      if (!form.companyId) throw new Error('Please select a destination company')
 
       let personId: string | undefined
       if (foundPerson) {
@@ -192,36 +187,42 @@ export default function RegisterEntryPage() {
       if (!personId) throw new Error('No person selected')
 
       if (vehicleForm.plateNumber) {
-        await supabase.from('vehicles').insert({
-          person_id: personId,
-          plate_number: vehicleForm.plateNumber,
-          manufacturer: vehicleForm.manufacturer,
-          model: vehicleForm.model,
-          color: vehicleForm.color,
-        })
+        const { data: existingVehicle } = await supabase.from('vehicles').select('id').eq('person_id', personId).eq('plate_number', vehicleForm.plateNumber).maybeSingle()
+        if (!existingVehicle) {
+          const { error: vehicleError } = await supabase.from('vehicles').insert({
+            person_id: personId,
+            plate_number: vehicleForm.plateNumber,
+            manufacturer: vehicleForm.manufacturer,
+            model: vehicleForm.model,
+            color: vehicleForm.color,
+          })
+          if (vehicleError) console.error('Vehicle insert error:', vehicleError)
+        }
       }
 
-      const { data: visitor } = await supabase.from('visitors').insert({
+      const { data: visitor, error: visitorError } = await supabase.from('visitors').insert({
         person_id: personId,
         destination_company_id: form.companyId,
         notes: form.notes,
         created_by: user.id,
       }).select('id').single()
-      if (!visitor) throw new Error('Failed to create visitor')
+      if (!visitor) throw new Error(visitorError?.message || 'Failed to create visitor')
 
-      await supabase.from('gate_movements').insert({
+      const { error: movementError } = await supabase.from('gate_movements').insert({
         visitor_id: visitor.id,
         entry_officer_id: user.id,
         status: 'inside',
       })
+      if (movementError) throw new Error('Failed to create gate movement: ' + movementError.message)
 
-      await supabase.from('audit_logs').insert({
+      const { error: auditError } = await supabase.from('audit_logs').insert({
         user_id: user.id,
         action: 'register_entry',
         entity_type: 'visitor',
         entity_id: visitor.id,
         details: `Registered ${form.fullName} (${form.category})`,
       })
+      if (auditError) console.error('Audit log error:', auditError)
 
       setMessage('Entry registered successfully!')
       setForm({ fullName: '', category: 'guest', companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })
@@ -312,7 +313,7 @@ export default function RegisterEntryPage() {
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Destination Company *</label>
-              <Select value={form.companyId} onChange={e => setForm({ ...form, companyId: e.target.value })}>
+              <Select required value={form.companyId} onChange={e => setForm({ ...form, companyId: e.target.value })}>
                 <option value="">Select company</option>
                 {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </Select>
