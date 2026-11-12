@@ -26,7 +26,7 @@ export default function RegisterEntryPage() {
   const [vehicles, setVehicles] = useState<{ id: string; plate_number: string; manufacturer: string; model: string; color: string }[]>([])
   const [loadingPersons, setLoadingPersons] = useState(true)
   const [selectedPerson, setSelectedPerson] = useState<{ id: string; full_name: string; person_category: string; company?: string } | null>(null)
-  const [form, setForm] = useState({ fullName: '', category: 'guest' as PersonCategory, companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })
+  const [form, setForm] = useState({ fullName: '', category: 'guest' as PersonCategory, notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })
   const [loading, setLoading] = useState(false)
   const [foundPerson, setFoundPerson] = useState<{ id: string; full_name: string; given_name?: string; family_name?: string; person_category: string; identification_number?: string; company?: string } | null>(null)
   const [loadingPerson, setLoadingPerson] = useState(false)
@@ -131,7 +131,7 @@ export default function RegisterEntryPage() {
       const { data: newPerson } = await supabase.from('persons').insert({
         full_name: newPersonFullname.trim(),
         person_category: newPersonCategory,
-        company: newPersonCompany.trim() || null,
+        company: newPersonCompany || null,
       }).select('id, full_name, person_category').single()
 
       if (!newPerson) {
@@ -161,7 +161,6 @@ export default function RegisterEntryPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
-      if (!form.companyId) throw new Error('Please select a destination company')
 
       let personId: string | undefined
       if (foundPerson) {
@@ -176,7 +175,6 @@ export default function RegisterEntryPage() {
           const { data: newPerson } = await supabase.from('persons').insert({
             full_name: form.fullName,
             person_category: form.category,
-            company: form.companyId || null,
             notes: form.notes || null,
           }).select('id').single()
           if (!newPerson) throw new Error('Failed to create person')
@@ -202,7 +200,7 @@ export default function RegisterEntryPage() {
 
       const { data: visitor, error: visitorError } = await supabase.from('visitors').insert({
         person_id: personId,
-        destination_company_id: form.companyId,
+        destination_company_id: null,
         notes: form.notes,
         created_by: user.id,
       }).select('id').single()
@@ -225,7 +223,7 @@ export default function RegisterEntryPage() {
       if (auditError) console.error('Audit log error:', auditError)
 
       setMessage('Entry registered successfully!')
-      setForm({ fullName: '', category: 'guest', companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })
+      setForm({ fullName: '', category: 'guest', notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })
       setVehicleForm({ plateNumber: '', manufacturer: '', model: '', color: '' })
       setSelectedPerson(null)
       setVehicles([])
@@ -305,21 +303,6 @@ export default function RegisterEntryPage() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Category *</label>
-              <Select value={foundPerson?.person_category || form.category} onChange={e => setForm({ ...form, category: e.target.value as PersonCategory })}>
-                {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Destination Company *</label>
-              <Select required value={form.companyId} onChange={e => setForm({ ...form, companyId: e.target.value })}>
-                <option value="">Select company</option>
-                {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </Select>
-            </div>
-
-            <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Notes</label>
               <VoiceInput onTranscript={(text) => setForm({ ...form, notes: form.notes ? form.notes + ' ' + text : text })}>
                 <textarea className="flex w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" rows={3} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
@@ -340,8 +323,11 @@ export default function RegisterEntryPage() {
                   </Select>
                 </div>
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Company (optional)</label>
-                  <Input value={newPersonCompany} onChange={e => setNewPersonCompany(e.target.value)} placeholder="Company name (if applicable)" />
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Company</label>
+                  <Select value={newPersonCompany} onChange={e => setNewPersonCompany(e.target.value)}>
+                    <option value="">Select company</option>
+                    {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </Select>
                 </div>
                 <div className="col-span-2 flex gap-3">
                   <Button type="button" className="flex-1 bg-cyan-600 hover:bg-cyan-700" onClick={handleCreateNewPerson} disabled={!newPersonFullname}>
@@ -397,7 +383,7 @@ export default function RegisterEntryPage() {
               <Button type="submit" className="flex-1 bg-cyan-600 hover:bg-cyan-700" disabled={loading}>
                 {loading ? 'Registering...' : 'Register Entry'}
               </Button>
-              <Button type="button" variant="outline" onClick={() => setForm({ fullName: '', category: 'guest', companyId: '', notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })}>
+              <Button type="button" variant="outline" onClick={() => setForm({ fullName: '', category: 'guest', notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })}>
                 Clear
               </Button>
             </div>

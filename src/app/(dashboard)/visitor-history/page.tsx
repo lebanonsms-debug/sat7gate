@@ -83,7 +83,7 @@ export default function VisitorHistoryPage() {
                   <tr key={m.id} className="hover:bg-slate-700/20">
                     <td className="px-4 py-3 text-sm font-medium text-white">{m.visitor?.person?.full_name}</td>
                     <td className="px-4 py-3 text-sm text-slate-300 capitalize">{m.visitor?.person?.person_category?.replace('_', ' ')}</td>
-                    <td className="px-4 py-3 text-sm text-slate-300">{m.visitor?.company?.name}</td>
+                    <td className="px-4 py-3 text-sm text-slate-300">{m.visitor?.company?.name || '-'}</td>
                     <td className="px-4 py-3 text-sm text-slate-300">{m.entry_time ? new Date(m.entry_time).toLocaleString() : '-'}</td>
                     <td className="px-4 py-3 text-sm text-slate-300">{m.exit_time ? new Date(m.exit_time).toLocaleString() : '-'}</td>
                     <td className="px-4 py-3"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${m.status === 'inside' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10 text-slate-400'}`}>{m.status}</span></td>
