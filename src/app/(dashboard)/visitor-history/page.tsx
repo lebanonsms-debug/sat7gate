@@ -14,9 +14,8 @@ export default function VisitorHistoryPage() {
     exit_time?: string
     entry_officer_id?: string
     visitor?: {
-      person?: { full_name?: string; person_category?: string }
+      person?: { full_name?: string; person_category?: string; vehicles?: Array<{ plate_number?: string }> }
       company?: { name?: string }
-      vehicles?: Array<{ plate_number?: string }>
     }
   }
   const [records, setRecords] = useState<HistoryRecord[]>([])
@@ -28,7 +27,7 @@ export default function VisitorHistoryPage() {
   useEffect(() => {
     const fetch = async () => {
       const [{ data }, { data: officerData }] = await Promise.all([
-        supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))').order('entry_time', { ascending: false }).limit(100),
+        supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*, vehicles:vehicles(*)), company:companies(*))').order('entry_time', { ascending: false }).limit(100),
         supabase.from('officer_directory').select('id, full_name'),
       ])
       setRecords(data || [])
@@ -41,7 +40,7 @@ export default function VisitorHistoryPage() {
   const filtered = records.filter((m) => {
     if (!search) return true
     const name = (m as { visitor?: { person?: { full_name?: string } } }).visitor?.person?.full_name?.toLowerCase() || ''
-    const plate = (m as { visitor?: { vehicles?: Array<{ plate_number?: string }> } }).visitor?.vehicles?.[0]?.plate_number?.toLowerCase() || ''
+    const plate = (m as { visitor?: { person?: { vehicles?: Array<{ plate_number?: string }> } } }).visitor?.person?.vehicles?.[0]?.plate_number?.toLowerCase() || ''
     return name.includes(search.toLowerCase()) || plate.includes(search.toLowerCase())
   })
 

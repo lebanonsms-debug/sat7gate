@@ -7,13 +7,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { LogOut } from 'lucide-react'
 
 export default function LiveGatePage() {
-  const [movements, setMovements] = useState<{ id: string; entry_time?: string; entry_officer_id?: string; visitor?: { person?: { full_name?: string; person_category?: string }; company?: { name?: string }; vehicles?: Array<{ manufacturer?: string; model?: string; plate_number?: string }> } }[]>([])
+  const [movements, setMovements] = useState<{ id: string; entry_time?: string; entry_officer_id?: string; visitor?: { person?: { full_name?: string; person_category?: string; vehicles?: Array<{ manufacturer?: string; model?: string; plate_number?: string }> }; company?: { name?: string } } }[]>([])
   const [officers, setOfficers] = useState<{ id: string; full_name: string }[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClientComponentClient()
 
   const fetchMovements = useCallback(async () => {
-    const { data } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))').eq('status', 'inside').order('entry_time', { ascending: false })
+    const { data } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*, vehicles:vehicles(*)), company:companies(*))').eq('status', 'inside').order('entry_time', { ascending: false })
     setMovements(data || [])
     setLoading(false)
   }, [supabase])
@@ -73,8 +73,8 @@ export default function LiveGatePage() {
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm font-medium text-white">{m.visitor?.person?.full_name}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 capitalize hidden sm:table-cell">{m.visitor?.person?.person_category?.replace('_', ' ')}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden md:table-cell">{m.visitor?.company?.name || '-'}</td>
-                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden lg:table-cell">{m.visitor?.vehicles?.[0] ? `${m.visitor.vehicles[0].manufacturer} ${m.visitor.vehicles[0].model}` : '-'}</td>
-                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 font-mono">{m.visitor?.vehicles?.[0]?.plate_number || '-'}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden lg:table-cell">{m.visitor?.person?.vehicles?.[0] ? `${m.visitor.person.vehicles[0].manufacturer} ${m.visitor.person.vehicles[0].model}` : '-'}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 font-mono">{m.visitor?.person?.vehicles?.[0]?.plate_number || '-'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{m.entry_time ? new Date(m.entry_time).toLocaleString() : '-'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden md:table-cell">{officers.find(o => o.id === m.entry_officer_id)?.full_name || (m.entry_officer_id || '').slice(0, 8) + '...'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4">
