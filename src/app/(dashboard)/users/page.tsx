@@ -244,18 +244,18 @@ export default function UsersPage() {
             <table className="w-full">
               <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Role</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-white/[0.06]">
                 {users.map(user => {
                   const roleInfo = ROLES.find(r => r.value === user.role) || ROLES[0]
                   return (
-                    <tr key={user.id} className="hover:bg-slate-700/20">
+                    <tr key={user.id} className="hover:bg-white/[0.04]">
                       <td className="px-6 py-4 text-sm text-white font-medium">{user.full_name}</td>
                       <td className="px-6 py-4 text-sm text-slate-300">{user.email}</td>
                       <td className="px-6 py-4 text-sm">

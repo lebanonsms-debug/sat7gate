@@ -195,11 +195,11 @@ export default function SecurityOfficersPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-white/[0.03] border-b border-white/[0.06]">
-                <tr><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Email</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Role</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Shift</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th></tr>
+                <tr><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Name</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Email</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Role</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Shift</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Actions</th></tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-white/[0.06]">
                 {officers.map(o => (
-                  <tr key={o.id} className="hover:bg-slate-700/20">
+                  <tr key={o.id} className="hover:bg-white/[0.04]">
                     <td className="px-6 py-4 text-sm text-white font-medium">{o.full_name}</td>
                     <td className="px-6 py-4 text-sm text-slate-300">{o.email}</td>
                     <td className="px-6 py-4 text-sm text-slate-300 capitalize">{o.role.replace('_', ' ')}</td>

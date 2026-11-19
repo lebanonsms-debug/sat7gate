@@ -109,11 +109,11 @@ export default function VehiclesPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-white/[0.03] border-b border-white/[0.06]">
-                <tr><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Plate</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Person</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Make/Model</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Color</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th></tr>
+                <tr><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Plate</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Person</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Make/Model</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Color</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Actions</th></tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-white/[0.06]">
                 {vehicles.map(v => (
-                  <tr key={v.id} className="hover:bg-slate-700/20">
+                  <tr key={v.id} className="hover:bg-white/[0.04]">
                     <td className="px-6 py-4 text-sm font-mono text-white">{v.plate_number}</td>
                     <td className="px-6 py-4 text-sm text-slate-300">{v.person?.full_name || '-'}</td>
                     <td className="px-6 py-4 text-sm text-slate-300">{v.manufacturer} {v.model}</td>

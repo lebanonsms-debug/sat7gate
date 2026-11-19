@@ -93,11 +93,11 @@ export default function CompaniesPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-white/[0.03] border-b border-white/[0.06]">
-                  <tr><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Identifier</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Color</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Status</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th></tr>
+                  <tr><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Name</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Identifier</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Color</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Status</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Actions</th></tr>
                 </thead>
-                <tbody className="divide-y divide-slate-700">
+                <tbody className="divide-y divide-white/[0.06]">
                   {companies.map(c => (
-                    <tr key={c.id} className="hover:bg-slate-700/20">
+                    <tr key={c.id} className="hover:bg-white/[0.04]">
                       <td className="px-6 py-4 text-sm font-medium text-white">{c.name}</td>
                       <td className="px-6 py-4 text-sm text-slate-300">{c.identifier}</td>
                       <td className="px-6 py-4"><div className="w-6 h-6 rounded-full border border-slate-500" style={{ backgroundColor: c.color }} /></td>

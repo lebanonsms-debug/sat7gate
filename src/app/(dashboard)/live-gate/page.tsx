@@ -62,23 +62,23 @@ export default function LiveGatePage() {
             <table className="w-full">
               <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Company</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Vehicle</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Plate</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Entry Time</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Officer</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Action</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Company</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Vehicle</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Plate</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Entry Time</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Officer</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-white/[0.06]">
                 {loading ? (
                   <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-400">Loading...</td></tr>
                 ) : movements.length === 0 ? (
                   <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-400">No one currently inside</td></tr>
                 ) : movements.map((m) => (
-                  <tr key={m.id} className="hover:bg-slate-700/20 transition-colors">
+                  <tr key={m.id} className="hover:bg-white/[0.04] transition-colors">
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm font-medium text-white">{m.visitor?.person?.full_name}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 capitalize hidden sm:table-cell">{m.visitor?.person?.person_category?.replace('_', ' ')}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden md:table-cell">{m.visitor?.person?.company ? (companyNames[m.visitor.person.company] || m.visitor.person.company) : '-'}</td>

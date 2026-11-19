@@ -62,9 +62,9 @@ export default function AuditLogsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-white/[0.03] border-b border-white/[0.06]">
-                <tr><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Action</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Entity</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Details</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">User</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Time</th></tr>
+                <tr><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Action</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Entity</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Details</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">User</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Time</th></tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-white/[0.06]">
                 {loading ? (
                   <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400">Loading...</td></tr>
                 ) : error ? (
@@ -72,7 +72,7 @@ export default function AuditLogsPage() {
                 ) : logs.length === 0 ? (
                   <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-400">No audit logs found</td></tr>
                 ) : logs.map(l => (
-                  <tr key={l.id} className="hover:bg-slate-700/20">
+                  <tr key={l.id} className="hover:bg-white/[0.04]">
                     <td className="px-6 py-4 text-sm text-white font-medium">{l.action}</td>
                     <td className="px-6 py-4 text-sm text-slate-300 capitalize">{l.entity_type} {l.entity_id?.slice(0, 8)}</td>
                     <td className="px-6 py-4 text-sm text-slate-300">{l.details || '-'}</td>

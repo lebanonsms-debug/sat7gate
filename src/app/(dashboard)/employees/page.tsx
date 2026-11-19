@@ -100,20 +100,20 @@ export default function EmployeesPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-white/[0.03] border-b border-white/[0.06]">
-                <tr><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">ID Number</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Created</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th></tr>
+                <tr><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Name</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">ID Number</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Created</th><th className="px-6 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Actions</th></tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-white/[0.06]">
                 {employees.map(e => (
-                  <tr key={e.id} className="hover:bg-slate-700/20">
+                  <tr key={e.id} className="hover:bg-white/[0.04]">
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-white font-medium">{e.full_name}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300">{e.identification_number || '-'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{new Date(e.created_at).toLocaleDateString()}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm">
                       <div className="flex gap-2">
-                        <button onClick={() => startEdit(e)} className="text-cyan-400 hover:text-cyan-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Edit employee">
+                        <button onClick={() => startEdit(e)} className="text-cyan-400 hover:text-cyan-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-white/[0.06]" title="Edit employee">
                           <Pencil className="w-4 h-4" />
                         </button>
-                        <button onClick={() => deleteEmployee(e.id, e.full_name)} className="text-red-400 hover:text-red-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Delete employee">
+                        <button onClick={() => deleteEmployee(e.id, e.full_name)} className="text-red-400 hover:text-red-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-white/[0.06]" title="Delete employee">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
