@@ -19,12 +19,18 @@ export default function LiveOccupancyPage() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const { data: movements } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*, vehicles:vehicles(*)), company:companies(*))').eq('status', 'inside')
+      const [{ data: movements }, { data: companies }] = await Promise.all([
+        supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*, vehicles:vehicles(*)), company:companies(*))').eq('status', 'inside'),
+        supabase.from('companies').select('id, name'),
+      ])
+      const companyName: Record<string, string> = {}
+      ;(companies || []).forEach(c => { companyName[c.id] = c.name })
       const list = movements || []
       const byCompany: Record<string, number> = {}
       const categoryOf = (m: { visitor?: { person?: { person_category?: string } } }) => m.visitor?.person?.person_category || 'other'
       list.forEach((m) => {
-        const name = (m as { visitor?: { company?: { name?: string } } }).visitor?.company?.name || 'No company'
+        const raw = (m as { visitor?: { person?: { company?: string } } }).visitor?.person?.company
+        const name = raw ? (companyName[raw] || raw) : 'No company'
         byCompany[name] = (byCompany[name] || 0) + 1
       })
       const employees = list.filter((m) => categoryOf(m) === 'employee').length

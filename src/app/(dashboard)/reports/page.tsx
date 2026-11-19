@@ -16,7 +16,12 @@ export default function ReportsPage() {
   useEffect(() => {
     const fetchReports = async () => {
       const today = new Date().toISOString().split('T')[0]
-      const { data: movements } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))').gte('entry_time', today)
+      const [{ data: movements }, { data: companyRows }] = await Promise.all([
+        supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))').gte('entry_time', today),
+        supabase.from('companies').select('id, name'),
+      ])
+      const companyName: Record<string, string> = {}
+      ;(companyRows || []).forEach(c => { companyName[c.id] = c.name })
       const list = movements || []
       
       // Hourly distribution
@@ -27,7 +32,7 @@ export default function ReportsPage() {
 
       // By company
       const companies: Record<string, number> = {}
-      list.forEach((m) => { const name = (m as { visitor?: { company?: { name?: string } } }).visitor?.company?.name || 'No company'; companies[name] = (companies[name] || 0) + 1 })
+      list.forEach((m) => { const raw = (m as { visitor?: { person?: { company?: string } } }).visitor?.person?.company; const name = raw ? (companyName[raw] || raw) : 'No company'; companies[name] = (companies[name] || 0) + 1 })
       setByCompany(Object.entries(companies).map(([name, count]) => ({ name, count })))
 
       // By category

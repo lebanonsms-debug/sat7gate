@@ -47,7 +47,12 @@ export default function DashboardPage() {
   const fetchData = useMemo(() => async () => {
     try {
       const today = new Date().toISOString().split('T')[0]
-      const { data: movements } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*, vehicles:vehicles(*)), company:companies(*))')
+      const [{ data: movements }, { data: companyRows }] = await Promise.all([
+        supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*, vehicles:vehicles(*)), company:companies(*))'),
+        supabase.from('companies').select('id, name'),
+      ])
+      const companyName: Record<string, string> = {}
+      ;(companyRows || []).forEach(c => { companyName[c.id] = c.name })
       const allMovements = movements || []
       const todayMovements = allMovements.filter((m: { entry_time?: string }) => m.entry_time?.startsWith(today))
       const inside = allMovements.filter((m: { status?: string }) => m.status === 'inside')
@@ -83,8 +88,9 @@ export default function DashboardPage() {
 
       // Company breakdown
       const companies: Record<string, { name: string; people: number; vehicles: number; color: string }> = {}
-      inside.forEach((m: { visitor?: { company?: { name?: string }; person?: { vehicles?: unknown[] } } }) => {
-        const name = m.visitor?.company?.name || 'No company'
+      inside.forEach((m: { visitor?: { company?: { name?: string }; person?: { company?: string; vehicles?: unknown[] } } }) => {
+        const raw = m.visitor?.person?.company
+        const name = raw ? (companyName[raw] || raw) : 'No company'
         if (!companies[name]) companies[name] = { name, people: 0, vehicles: 0, color: '#22d3ee' }
         companies[name].people += 1
         if (m.visitor?.person?.vehicles?.length) companies[name].vehicles += 1
