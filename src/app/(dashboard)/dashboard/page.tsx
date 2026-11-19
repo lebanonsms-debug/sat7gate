@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Activity, Users, UserPlus, Camera, TrendingUp } from 'lucide-react'
+import { Activity, Users, UserPlus, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { formatInTimezone } from '@/lib/utils/timezone'
@@ -167,7 +167,6 @@ export default function DashboardPage() {
       <div className="flex flex-wrap gap-2 sm:gap-3">
         <Link href="/register-entry"><Button className="bg-cyan-600 hover:bg-cyan-700 gap-2 text-sm"><UserPlus className="w-4 h-4" />New Gate Entry</Button></Link>
         <Link href="/live-gate"><Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800 gap-2 text-sm"><Activity className="w-4 h-4" />Live Gate Monitor</Button></Link>
-        <Button variant="outline" className="border-slate-600 text-slate-200 hover:bg-slate-800 gap-2 text-sm"><Camera className="w-4 h-4" />LPR Console</Button>
       </div>
 
       {/* KPI Cards */}
