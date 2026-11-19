@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { ShieldCheck, Clock, Sun, Moon, Users } from 'lucide-react'
+import { ShieldCheck, Clock, Sun, Moon, Users, Pencil, Trash2, X } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 import { useTimezone } from '@/hooks/use-timezone'
 import { formatInTimezone } from '@/lib/utils/timezone'
 
@@ -32,6 +33,10 @@ export default function SecurityOfficerPage() {
   const [shift, setShift] = useState<ShiftFilter>('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [editing, setEditing] = useState<Entry | null>(null)
+  const [form, setForm] = useState({ host_name: '', purpose: '', notes: '' })
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState('')
   const { timezone } = useTimezone()
 
   const fetchEntries = useCallback(async (shiftValue: ShiftFilter) => {
@@ -51,6 +56,59 @@ export default function SecurityOfficerPage() {
   }, [])
 
   useEffect(() => { fetchEntries(shift) }, [shift, fetchEntries]) // eslint-disable-line react-hooks/set-state-in-effect
+
+  const startEdit = (entry: Entry) => {
+    setEditing(entry)
+    setMessage('')
+    setForm({ host_name: entry.host_name || '', purpose: entry.purpose || '', notes: entry.notes || '' })
+  }
+
+  const cancelEdit = () => {
+    setEditing(null)
+    setForm({ host_name: '', purpose: '', notes: '' })
+  }
+
+  const saveEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editing) return
+    setSaving(true)
+    setMessage('')
+    try {
+      const res = await fetch('/api/officer-entries', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editing.id, ...form }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to update entry')
+      setMessage('Entry updated')
+      setEditing(null)
+      setForm({ host_name: '', purpose: '', notes: '' })
+      fetchEntries(shift)
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Failed to update entry')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const deleteEntry = async (entry: Entry) => {
+    if (!confirm(`Delete the entry log for "${entry.person_name}"? This also removes the gate movement.`)) return
+    setMessage('')
+    try {
+      const res = await fetch(`/api/officer-entries?id=${entry.id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to delete entry')
+      setMessage('Entry deleted')
+      if (editing?.id === entry.id) {
+        setEditing(null)
+        setForm({ host_name: '', purpose: '', notes: '' })
+      }
+      fetchEntries(shift)
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Failed to delete entry')
+    }
+  }
 
   const dayCount = entries.filter(e => e.officer_shift === 'day').length
   const nightCount = entries.filter(e => e.officer_shift === 'night').length
@@ -121,6 +179,39 @@ export default function SecurityOfficerPage() {
         <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{error}</div>
       )}
 
+      {editing && (
+        <Card className="border-cyan-700 bg-slate-800/50">
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-slate-200">Edit entry — {editing.person_name}</h3>
+              <button onClick={cancelEdit} className="text-slate-400 hover:text-white p-1" title="Cancel"><X className="w-4 h-4" /></button>
+            </div>
+            <form onSubmit={saveEdit} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Host</label>
+                <Input value={form.host_name} onChange={e => setForm({...form, host_name: e.target.value})} placeholder="Host name" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Purpose</label>
+                <Input value={form.purpose} onChange={e => setForm({...form, purpose: e.target.value})} placeholder="Purpose of visit" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Notes</label>
+                <Input value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Notes" />
+              </div>
+              <div className="md:col-span-3 flex gap-2">
+                <button type="submit" disabled={saving} className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium min-h-[44px] touch-manipulation disabled:opacity-50">{saving ? 'Saving...' : 'Save Changes'}</button>
+                <button type="button" onClick={cancelEdit} className="px-4 py-2 rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-700 text-sm min-h-[44px] touch-manipulation">Cancel</button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {message && (
+        <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-700 text-sm text-slate-200">{message}</div>
+      )}
+
       <Card className="border-slate-700 bg-slate-800/50">
         <CardContent className="p-0">
           {loading ? (
@@ -150,6 +241,7 @@ export default function SecurityOfficerPage() {
                     <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase hidden md:table-cell">Host</th>
                     <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Officer</th>
                     <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Shift</th>
+                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-700">
@@ -182,6 +274,16 @@ export default function SecurityOfficerPage() {
                           {e.officer_shift === 'day' ? <Sun className="w-3 h-3" /> : <Moon className="w-3 h-3" />}
                           {e.officer_shift === 'day' ? 'Day' : 'Night'}
                         </span>
+                      </td>
+                      <td className="px-4 sm:px-6 py-3 text-sm">
+                        <div className="flex gap-2">
+                          <button onClick={() => startEdit(e)} className="text-cyan-400 hover:text-cyan-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Edit entry">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => deleteEntry(e)} className="text-red-400 hover:text-red-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Delete entry">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
