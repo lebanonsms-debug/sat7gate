@@ -71,7 +71,7 @@ export default function DashboardPage() {
 
       // Company breakdown
       const companies: Record<string, { name: string; people: number; vehicles: number; color: string }> = {}
-      inside.forEach((m: { visitor?: { company?: { name?: string }; vehicles?: unknown[] } }) => {
+      inside.forEach((m: { visitor?: { company?: { name?: string }; person?: { vehicles?: unknown[] } } }) => {
         const name = m.visitor?.company?.name || 'No company'
         if (!companies[name]) companies[name] = { name, people: 0, vehicles: 0, color: '#22d3ee' }
         companies[name].people += 1
