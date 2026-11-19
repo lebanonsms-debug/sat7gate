@@ -149,3 +149,25 @@ main h1 {
     linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
   background-size: 44px 44px;
 }
+
+/* ---------- Native controls ---------- */
+
+/* Make native popups (select lists, date pickers, scrollbars) follow the dark theme */
+:root {
+  color-scheme: dark;
+}
+
+/* Windows/Chrome renders the option list with the OS theme and inherits the
+   select's light text colour, giving white-on-white. Pin both explicitly. */
+select option,
+select optgroup {
+  background-color: #0a101d;
+  color: #e6edf7;
+}
+
+select option:checked,
+select option:hover,
+select option:focus {
+  background-color: #131c2e;
+  color: #67e8f9;
+}
