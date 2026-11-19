@@ -142,7 +142,7 @@ export default function UsersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white">Users & Roles</h1>
-          <p className="text-slate-400 mt-1">Manage administrators, security officers, and other roles</p>
+          <p className="text-slate-400 mt-1">System accounts only — security officers are managed separately under Security Team</p>
         </div>
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-8 h-8 text-cyan-500" />
