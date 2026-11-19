@@ -18,14 +18,26 @@ interface KPIs {
   visitorsInside: number
   staffInside: number
   guestsInside: number
+  employeesInside: number
+  rentalInside: number
+  deliveryInside: number
+  otherInside: number
   avgDuration: string
   peakHour: string
   trend: string
 }
 
+const INSIDE_TYPES = [
+  { key: 'employeesInside', label: 'Employees', iconColor: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+  { key: 'rentalInside', label: 'Rental Company', iconColor: 'text-blue-400', bg: 'bg-blue-500/10' },
+  { key: 'guestsInside', label: 'Guests', iconColor: 'text-purple-400', bg: 'bg-purple-500/10' },
+  { key: 'deliveryInside', label: 'Delivery', iconColor: 'text-amber-400', bg: 'bg-amber-500/10' },
+  { key: 'otherInside', label: 'Other', iconColor: 'text-slate-400', bg: 'bg-slate-500/10' },
+] as const
+
 export default function DashboardPage() {
   const { timezone } = useTimezone()
-  const [kpis, setKpis] = useState<KPIs>({ totalEntriesToday: 0, currentlyInside: 0, totalExitsToday: 0, vehiclesInside: 0, visitorsInside: 0, staffInside: 0, guestsInside: 0, avgDuration: '0m', peakHour: '--:--', trend: '+0%' })
+  const [kpis, setKpis] = useState<KPIs>({ totalEntriesToday: 0, currentlyInside: 0, totalExitsToday: 0, vehiclesInside: 0, visitorsInside: 0, staffInside: 0, guestsInside: 0, employeesInside: 0, rentalInside: 0, deliveryInside: 0, otherInside: 0, avgDuration: '0m', peakHour: '--:--', trend: '+0%' })
   const [recent, setRecent] = useState<{ id: string; status?: string; entry_time?: string; visitor?: { person?: { full_name?: string }; company?: { name?: string } } }[]>([])
   const [hourlyData, setHourlyData] = useState<{ hour: string; count: number }[]>([])
   const [companyData, setCompanyData] = useState<{ name: string; people: number; vehicles: number; color: string }[]>([])
@@ -82,6 +94,12 @@ export default function DashboardPage() {
       const staff = inside.filter((m: { visitor?: { person?: { person_category?: string } } }) => m.visitor?.person?.person_category === 'employee').length
       const guests = inside.filter((m: { visitor?: { person?: { person_category?: string } } }) => m.visitor?.person?.person_category !== 'employee').length
       const vehicles = inside.filter((m: { visitor?: { person?: { vehicles?: unknown[] } } }) => m.visitor?.person?.vehicles?.length).length
+      const categoryOf = (m: { visitor?: { person?: { person_category?: string } } }) => m.visitor?.person?.person_category || 'other'
+      const employeesInside = inside.filter((m) => categoryOf(m) === 'employee').length
+      const rentalInside = inside.filter((m) => categoryOf(m) === 'rental_company').length
+      const guestsInside = inside.filter((m) => categoryOf(m) === 'guest').length
+      const deliveryInside = inside.filter((m) => categoryOf(m) === 'delivery').length
+      const otherInside = inside.length - employeesInside - rentalInside - guestsInside - deliveryInside
 
       setKpis({
         totalEntriesToday: todayMovements.length,
@@ -90,7 +108,11 @@ export default function DashboardPage() {
         vehiclesInside: vehicles,
         visitorsInside: guests,
         staffInside: staff,
-        guestsInside: guests,
+        guestsInside: guestsInside,
+        employeesInside,
+        rentalInside,
+        deliveryInside,
+        otherInside,
         avgDuration: `${avgMins}m`,
         peakHour,
         trend: trend.startsWith('-') ? trend : `+${Math.abs(parseInt(trend))}%`
@@ -141,7 +163,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         <Card className="border-slate-700 bg-slate-800/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
           <CardContent className="p-4 sm:p-6 relative">
@@ -191,19 +213,25 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-slate-700 bg-slate-800/50 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
-          <CardContent className="p-4 sm:p-6 relative">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <p className="text-xs sm:text-sm text-slate-400">Breakdown Today</p>
-              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-            </div>
-            <div className="space-y-1">
-              <p className="text-xl sm:text-2xl font-bold text-white">{kpis.staffInside} Staff / {kpis.guestsInside} Guests</p>
-              <p className="text-xs text-slate-400 hidden sm:inline">Deliveries: <span className="text-white">1</span></p>
-            </div>
-          </CardContent>
-        </Card>
+      </div>
+
+      {/* Inside by Type */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+        {INSIDE_TYPES.map(t => (
+          <Card key={t.key} className="border-slate-700 bg-slate-800/50">
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-lg ${t.bg} flex items-center justify-center shrink-0`}>
+                  <Users className={`w-5 h-5 ${t.iconColor}`} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-slate-400 truncate">{t.label}</p>
+                  <p className="text-2xl font-bold text-white">{loading ? '...' : kpis[t.key]}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Charts Row */}
