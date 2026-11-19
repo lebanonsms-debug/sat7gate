@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { useTimezone } from '@/hooks/use-timezone'
 import { formatInTimezone } from '@/lib/utils/timezone'
 import { useRole } from '@/hooks/use-role'
+import { categoryLabel } from '@/lib/categories'
 
 type Entry = {
   id: string
@@ -259,7 +260,7 @@ export default function SecurityOfficerPage() {
                         {e.purpose ? <span className="block text-xs text-slate-400 font-normal">{e.purpose}</span> : null}
                       </td>
                       <td className="px-4 sm:px-6 py-3 text-sm text-slate-300 hidden sm:table-cell">
-                        {e.person_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        {categoryLabel(e.person_category)}
                       </td>
                       <td className="px-4 sm:px-6 py-3 text-sm text-slate-300 hidden md:table-cell">{e.company_name}</td>
                       <td className="px-4 sm:px-6 py-3 text-sm text-slate-300 hidden md:table-cell">{e.host_name || '-'}</td>

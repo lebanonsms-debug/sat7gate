@@ -5,6 +5,7 @@ import { createClientComponentClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Search } from 'lucide-react'
+import { categoryLabel } from '@/lib/categories'
 
 export default function VisitorHistoryPage() {
   type HistoryRecord = {
@@ -86,7 +87,7 @@ export default function VisitorHistoryPage() {
                 ) : filtered.map((m) => (
                   <tr key={m.id} className="hover:bg-white/[0.04]">
                     <td className="px-4 py-3 text-sm font-medium text-white">{m.visitor?.person?.full_name}</td>
-                    <td className="px-4 py-3 text-sm text-slate-300 capitalize">{m.visitor?.person?.person_category?.replace('_', ' ')}</td>
+                    <td className="px-4 py-3 text-sm text-slate-300">{categoryLabel(m.visitor?.person?.person_category)}</td>
                     <td className="px-4 py-3 text-sm text-slate-300">{m.visitor?.person?.company ? (companyNames[m.visitor.person.company] || m.visitor.person.company) : '-'}</td>
                     <td className="px-4 py-3 text-sm text-slate-300">{m.entry_time ? new Date(m.entry_time).toLocaleString() : '-'}</td>
                     <td className="px-4 py-3 text-sm text-slate-300">{m.exit_time ? new Date(m.exit_time).toLocaleString() : '-'}</td>

@@ -10,12 +10,12 @@ const OCCUPANCY_TYPES = [
   { key: 'rental', label: 'Rental Company', iconColor: 'text-blue-400', bg: 'bg-blue-500/10' },
   { key: 'guests', label: 'Guests', iconColor: 'text-purple-400', bg: 'bg-purple-500/10' },
   { key: 'delivery', label: 'Delivery', iconColor: 'text-amber-400', bg: 'bg-amber-500/10' },
-  { key: 'walksIn', label: 'Walks In', iconColor: 'text-rose-400', bg: 'bg-rose-500/10' },
+  { key: 'walkIn', label: 'WALK-INS', iconColor: 'text-rose-400', bg: 'bg-rose-500/10' },
   { key: 'other', label: 'Other', iconColor: 'text-slate-400', bg: 'bg-slate-500/10' },
 ] as const
 
 export default function LiveOccupancyPage() {
-  const [stats, setStats] = useState({ total: 0, employees: 0, rental: 0, guests: 0, delivery: 0, walksIn: 0, other: 0, vehicles: 0, companies: {} as Record<string, number> })
+  const [stats, setStats] = useState({ total: 0, employees: 0, rental: 0, guests: 0, delivery: 0, walkIn: 0, other: 0, vehicles: 0, companies: {} as Record<string, number> })
   const supabase = createClientComponentClient()
 
   useEffect(() => {
@@ -38,15 +38,15 @@ export default function LiveOccupancyPage() {
       const rental = list.filter((m) => categoryOf(m) === 'rental_company').length
       const guests = list.filter((m) => categoryOf(m) === 'guest').length
       const delivery = list.filter((m) => categoryOf(m) === 'delivery').length
-      const walksIn = list.filter((m) => categoryOf(m) === 'walks_in').length
+      const walkIn = list.filter((m) => categoryOf(m) === 'walk_in').length
       setStats({
         total: list.length,
         employees,
         rental,
         guests,
         delivery,
-        walksIn,
-        other: list.length - employees - rental - guests - delivery - walksIn,
+        walkIn,
+        other: list.length - employees - rental - guests - delivery - walkIn,
         vehicles: list.filter((m) => (m as { visitor?: { person?: { vehicles?: unknown[] } } }).visitor?.person?.vehicles?.length).length,
         companies: byCompany,
       })

@@ -8,6 +8,7 @@ import { Select } from '@/components/ui/select'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { VoiceInput } from '@/components/ui/voice-input'
 import type { PersonCategory, Company } from '@/lib/types'
+import { categoryLabel } from '@/lib/categories'
 
 const CATEGORIES: { value: PersonCategory; label: string }[] = [
   { value: 'employee', label: 'Employee' },
@@ -17,7 +18,7 @@ const CATEGORIES: { value: PersonCategory; label: string }[] = [
   { value: 'delivery', label: 'Delivery Personnel' },
   { value: 'supplier', label: 'Supplier' },
   { value: 'rental_company', label: 'Rental Company' },
-  { value: 'walks_in', label: 'Walks In' },
+  { value: 'walk_in', label: 'WALK-INS' },
   { value: 'other', label: 'Other' },
 ]
 
@@ -294,7 +295,7 @@ export default function RegisterEntryPage() {
                 <option>Select person...</option>
                 {persons.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.full_name} ({p.person_category})
+                    {p.full_name} ({categoryLabel(p.person_category)})
                   </option>
                 ))}
               </Select>
@@ -313,7 +314,7 @@ export default function RegisterEntryPage() {
                 <label className="block text-sm font-medium text-slate-300 mb-3">Person Information (from database)</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                   <div><span className="text-xs text-slate-500">Name:</span><p className="text-white font-medium">{[foundPerson.given_name, foundPerson.family_name].filter(Boolean).join(' ') || foundPerson.full_name}</p></div>
-                  <div><span className="text-xs text-slate-500">Category:</span><p className="text-white">{foundPerson.person_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p></div>
+                  <div><span className="text-xs text-slate-500">Category:</span><p className="text-white">{categoryLabel(foundPerson.person_category)}</p></div>
                   {foundPerson.company && <div><span className="text-xs text-slate-500">Company:</span><p className="text-white">{companies.find(c => c.id === foundPerson.company)?.name || foundPerson.company}</p></div>}
                 </div>
               </div>

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Plus, Trash2, Pencil, X } from 'lucide-react'
 import type { Person } from '@/lib/types'
+import { categoryLabel } from '@/lib/categories'
 import { useRole } from '@/hooks/use-role'
 
 const CATEGORIES = [
@@ -14,7 +15,7 @@ const CATEGORIES = [
   { value: 'rental_company', label: 'Rental Company' },
   { value: 'guest', label: 'Guest' },
   { value: 'delivery', label: 'Delivery' },
-  { value: 'walks_in', label: 'Walks In' },
+  { value: 'walk_in', label: 'WALK-INS' },
 ] as const
 
 export default function PeoplePage() {
@@ -213,7 +214,7 @@ export default function PeoplePage() {
                   {persons.map(p => (
                     <tr key={p.id} className="hover:bg-white/[0.04]">
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-white font-medium">{[p.given_name, p.family_name].filter(Boolean).join(' ') || p.full_name || '-'}</td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300">{p.person_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
+                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300">{categoryLabel(p.person_category)}</td>
                       
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{companies.find(c => c.id === p.company)?.name || p.company || '-'}</td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{new Date(p.created_at).toLocaleDateString()}</td>

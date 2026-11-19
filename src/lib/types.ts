@@ -19,7 +19,7 @@ export interface Company {
   created_at: string
 }
 
-export type PersonCategory = 'employee' | 'freelancer' | 'contractor' | 'guest' | 'delivery' | 'supplier' | 'rental_company' | 'walks_in' | 'other'
+export type PersonCategory = 'employee' | 'freelancer' | 'contractor' | 'guest' | 'delivery' | 'supplier' | 'rental_company' | 'walk_in' | 'other'
 
 export interface Person {
   id: string

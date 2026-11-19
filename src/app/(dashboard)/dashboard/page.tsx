@@ -21,7 +21,7 @@ interface KPIs {
   employeesInside: number
   rentalInside: number
   deliveryInside: number
-  walksIn: number
+  walkIn: number
   otherInside: number
   avgDuration: string
   peakHour: string
@@ -34,11 +34,11 @@ const INSIDE_TYPES = [
   { key: 'rentalInside', category: 'rental_company', label: 'Rental Company', iconColor: 'text-blue-400', bg: 'bg-blue-500/10', bar: '#60a5fa' },
   { key: 'guestsInside', category: 'guest', label: 'Guests', iconColor: 'text-purple-400', bg: 'bg-purple-500/10', bar: '#c084fc' },
   { key: 'deliveryInside', category: 'delivery', label: 'Delivery', iconColor: 'text-amber-400', bg: 'bg-amber-500/10', bar: '#fbbf24' },
-  { key: 'walksIn', category: 'walks_in', label: 'Walks In', iconColor: 'text-rose-400', bg: 'bg-rose-500/10', bar: '#fb7185' },
+  { key: 'walkIn', category: 'walk_in', label: 'WALK-INS', iconColor: 'text-rose-400', bg: 'bg-rose-500/10', bar: '#fb7185' },
   { key: 'otherInside', category: 'other', label: 'Other', iconColor: 'text-slate-400', bg: 'bg-slate-500/10', bar: '#94a3b8' },
 ] as const
 
-const KNOWN_CATEGORIES = ['employee', 'rental_company', 'guest', 'delivery', 'walks_in']
+const KNOWN_CATEGORIES = ['employee', 'rental_company', 'guest', 'delivery', 'walk_in']
 const HOURS = Array.from({ length: 10 }, (_, i) => i + 7)
 
 /* ------------------------------------------------------------------ */
@@ -83,7 +83,7 @@ function MiniStat({ label, value }: { label: string; value: string | number }) {
 
 export default function DashboardPage() {
   const { timezone } = useTimezone()
-  const [kpis, setKpis] = useState<KPIs>({ totalEntriesToday: 0, currentlyInside: 0, totalExitsToday: 0, vehiclesInside: 0, visitorsInside: 0, staffInside: 0, guestsInside: 0, employeesInside: 0, rentalInside: 0, deliveryInside: 0, walksIn: 0, otherInside: 0, avgDuration: '0m', peakHour: '--:--', peakExitHour: '--:--', trend: '+0%' })
+  const [kpis, setKpis] = useState<KPIs>({ totalEntriesToday: 0, currentlyInside: 0, totalExitsToday: 0, vehiclesInside: 0, visitorsInside: 0, staffInside: 0, guestsInside: 0, employeesInside: 0, rentalInside: 0, deliveryInside: 0, walkIn: 0, otherInside: 0, avgDuration: '0m', peakHour: '--:--', peakExitHour: '--:--', trend: '+0%' })
   const [recent, setRecent] = useState<{ id: string; status?: string; entry_time?: string; visitor?: { person?: { full_name?: string; company?: string } } }[]>([])
   const [companyNames, setCompanyNames] = useState<Record<string, string>>({})
   const [hourly, setHourly] = useState<{ hour: string; entries: number; exits: number; inside: number }[]>([])
@@ -165,8 +165,8 @@ export default function DashboardPage() {
       const rentalInside = inside.filter((m) => categoryOf(m) === 'rental_company').length
       const guestsInside = inside.filter((m) => categoryOf(m) === 'guest').length
       const deliveryInside = inside.filter((m) => categoryOf(m) === 'delivery').length
-      const walksIn = inside.filter((m) => categoryOf(m) === 'walks_in').length
-      const otherInside = inside.length - employeesInside - rentalInside - guestsInside - deliveryInside - walksIn
+      const walkIn = inside.filter((m) => categoryOf(m) === 'walk_in').length
+      const otherInside = inside.length - employeesInside - rentalInside - guestsInside - deliveryInside - walkIn
 
       // Per-type people + vehicles
       const typeMap: Record<string, { people: number; vehicles: number }> = {}
@@ -190,7 +190,7 @@ export default function DashboardPage() {
         employeesInside,
         rentalInside,
         deliveryInside,
-        walksIn,
+        walkIn,
         otherInside,
         avgDuration: `${avgMins}m`,
         peakHour,

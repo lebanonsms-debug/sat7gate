@@ -5,6 +5,7 @@ import { createClientComponentClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { LogOut } from 'lucide-react'
+import { categoryLabel } from '@/lib/categories'
 
 export default function LiveGatePage() {
   const [movements, setMovements] = useState<{ id: string; entry_time?: string; entry_officer_id?: string; visitor?: { person?: { full_name?: string; person_category?: string; company?: string; vehicles?: Array<{ manufacturer?: string; model?: string; plate_number?: string }> }; company?: { name?: string } } }[]>([])
@@ -80,7 +81,7 @@ export default function LiveGatePage() {
                 ) : movements.map((m) => (
                   <tr key={m.id} className="hover:bg-white/[0.04] transition-colors">
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm font-medium text-white">{m.visitor?.person?.full_name}</td>
-                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 capitalize hidden sm:table-cell">{m.visitor?.person?.person_category?.replace('_', ' ')}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{categoryLabel(m.visitor?.person?.person_category)}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden md:table-cell">{m.visitor?.person?.company ? (companyNames[m.visitor.person.company] || m.visitor.person.company) : '-'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden lg:table-cell">{m.visitor?.person?.vehicles?.[0] ? `${m.visitor.person.vehicles[0].manufacturer} ${m.visitor.person.vehicles[0].model}` : '-'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 font-mono">{m.visitor?.person?.vehicles?.[0]?.plate_number || '-'}</td>
