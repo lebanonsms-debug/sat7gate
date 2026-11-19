@@ -18,7 +18,8 @@ export default function SecurityOfficersPage() {
   const supabase = createClientComponentClient()
 
   const fetchOfficers = useCallback(async () => {
-    const { data } = await supabase.from('profiles').select('*').in('role', ['security_officer', 'administrator']).order('full_name')
+    // Security officers are an independent roster — administrators live under Users
+    const { data } = await supabase.from('profiles').select('*').eq('role', 'security_officer').order('full_name')
     setOfficers(data || [])
   }, [supabase])
 
@@ -115,7 +116,6 @@ export default function SecurityOfficersPage() {
             )}
             <select className="flex h-10 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" value={form.role} onChange={e => setForm({...form, role: e.target.value as Profile['role']})}>
               <option value="security_officer">Security Officer</option>
-              <option value="administrator">Administrator</option>
             </select>
             <select className="flex h-10 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" value={form.shift} onChange={e => setForm({...form, shift: e.target.value as Profile['shift']})}>
               <option value="day">&#9728;&#65039; Day Shift</option>

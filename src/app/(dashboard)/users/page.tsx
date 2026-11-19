@@ -11,14 +11,13 @@ import type { Profile } from '@/lib/types'
 
 const ROLES = [
   { value: 'administrator', label: 'Administrator', color: 'bg-red-500/20 text-red-400' },
-  { value: 'security_officer', label: 'Security Officer', color: 'bg-cyan-500/20 text-cyan-400' },
   { value: 'management', label: 'Management', color: 'bg-purple-500/20 text-purple-400' },
   { value: 'viewer', label: 'Viewer', color: 'bg-slate-500/20 text-slate-400' },
 ]
 
 export default function UsersPage() {
   const [users, setUsers] = useState<Profile[]>([])
-  const [form, setForm] = useState({ email: '', password: '', full_name: '', role: 'security_officer' as Profile['role'] })
+  const [form, setForm] = useState({ email: '', password: '', full_name: '', role: 'administrator' as Profile['role'] })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [editingUser, setEditingUser] = useState<Profile | null>(null)
@@ -28,7 +27,8 @@ export default function UsersPage() {
 
   const fetchUsers = useCallback(async () => {
     const { data } = await supabase.from('profiles').select('*').order('full_name')
-    setUsers(data || [])
+    // Security officers are managed separately — Users holds system accounts only
+    setUsers((data || []).filter(u => u.role !== 'security_officer'))
   }, [supabase])
 
   useEffect(() => { fetchUsers() }, [fetchUsers]) // eslint-disable-line react-hooks/set-state-in-effect
@@ -47,7 +47,7 @@ export default function UsersPage() {
       if (!res.ok) {
         setMessage(result.error || 'Failed to create user')
       } else {
-        setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
+        setForm({ email: '', password: '', full_name: '', role: 'administrator' })
         setMessage('User created successfully!')
         fetchUsers()
       }
@@ -75,7 +75,7 @@ export default function UsersPage() {
         setMessage(result.error || 'Failed to update user')
       } else {
         setEditingUser(null)
-        setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
+        setForm({ email: '', password: '', full_name: '', role: 'administrator' })
         setMessage('User updated successfully!')
         fetchUsers()
       }
@@ -104,7 +104,7 @@ export default function UsersPage() {
       } else {
         setResettingUser(null)
         setShowResetForm(false)
-        setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
+        setForm({ email: '', password: '', full_name: '', role: 'administrator' })
         setMessage('Password reset successfully! New password sent to email.')
       }
     } catch (err) {
@@ -134,7 +134,7 @@ export default function UsersPage() {
 
   const cancelEdit = () => {
     setEditingUser(null)
-    setForm({ email: '', password: '', full_name: '', role: 'security_officer' })
+    setForm({ email: '', password: '', full_name: '', role: 'administrator' })
   }
 
   return (
@@ -253,7 +253,7 @@ export default function UsersPage() {
               </thead>
               <tbody className="divide-y divide-slate-700">
                 {users.map(user => {
-                  const roleInfo = ROLES.find(r => r.value === user.role) || ROLES[1]
+                  const roleInfo = ROLES.find(r => r.value === user.role) || ROLES[0]
                   return (
                     <tr key={user.id} className="hover:bg-slate-700/20">
                       <td className="px-6 py-4 text-sm text-white font-medium">{user.full_name}</td>

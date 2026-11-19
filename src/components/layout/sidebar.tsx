@@ -32,12 +32,17 @@ const navSections = [
     ]
   },
   {
+    title: 'Security Team',
+    items: [
+      { href: '/security-officers', label: 'Security Officers', icon: ShieldCheck, roles: ['security_officer', 'administrator'] },
+      { href: '/officer-entries', label: 'Security Officer', icon: Clock, roles: ['security_officer', 'administrator'] },
+    ]
+  },
+  {
     title: 'Management & Control',
     items: [
       { href: '/reports', label: 'Reports & Analytics', icon: FileText, roles: ['administrator', 'management'] },
       { href: '/users', label: 'Users', icon: UsersRound, roles: ['administrator'] },
-      { href: '/officer-entries', label: 'Security Officer', icon: Clock, roles: ['security_officer', 'administrator'] },
-      { href: '/security-officers', label: 'Security Officers', icon: ShieldCheck, roles: ['security_officer', 'administrator'] },
     ]
   }
 ]
