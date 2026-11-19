@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Plus, Trash2, Pencil, X } from 'lucide-react'
 import type { Person } from '@/lib/types'
+import { useRole } from '@/hooks/use-role'
 
 const CATEGORIES = [
   { value: 'employee', label: 'Employee' },
@@ -16,6 +17,7 @@ const CATEGORIES = [
 ] as const
 
 export default function PeoplePage() {
+  const role = useRole()
   const [persons, setPersons] = useState<Person[]>([])
   const [editing, setEditing] = useState<Person | null>(null)
   const [form, setForm] = useState({
@@ -201,7 +203,9 @@ export default function PeoplePage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Category</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Company</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Created</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th>
+                    {role === 'administrator' && (
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-700">
@@ -212,16 +216,18 @@ export default function PeoplePage() {
                       
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{companies.find(c => c.id === p.company)?.name || p.company || '-'}</td>
                       <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{new Date(p.created_at).toLocaleDateString()}</td>
-                      <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm">
-                        <div className="flex gap-2">
-                          <button onClick={() => startEdit(p)} className="text-cyan-400 hover:text-cyan-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Edit person">
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => deletePerson(p.id, p, p.person_category)} className="text-red-400 hover:text-red-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Delete person">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+                      {role === 'administrator' && (
+                        <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm">
+                          <div className="flex gap-2">
+                            <button onClick={() => startEdit(p)} className="text-cyan-400 hover:text-cyan-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Edit person">
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => deletePerson(p.id, p, p.person_category)} className="text-red-400 hover:text-red-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Delete person">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

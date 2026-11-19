@@ -27,7 +27,7 @@ const navSections = [
     items: [
       { href: '/visitor-history', label: 'Visitor History', icon: HistoryIcon, roles: ['security_officer', 'administrator', 'management', 'viewer'] },
       { href: '/people', label: 'People', icon: Users, roles: ['security_officer', 'administrator', 'management', 'viewer'] },
-      { href: '/vehicles', label: 'Vehicles', icon: Car, roles: ['security_officer', 'administrator'] },
+      { href: '/vehicles', label: 'Vehicles', icon: Car, roles: ['administrator'] },
       { href: '/companies', label: 'Companies', icon: Building2, roles: ['administrator'] },
     ]
   },

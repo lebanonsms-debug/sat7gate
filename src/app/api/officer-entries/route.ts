@@ -2,12 +2,13 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
-async function getStaff(request: Request) {
+// Mutating an entry log is an administrator action — officers may only read the log.
+async function getAdmin(request: Request) {
   const { supabase } = createSupabaseServerClient(request)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || !['administrator', 'security_officer'].includes(profile.role)) {
+  if (!profile || profile.role !== 'administrator') {
     return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
   }
   const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
@@ -72,7 +73,7 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const staff = await getStaff(request)
+    const staff = await getAdmin(request)
     if (staff.error) return staff.error
 
     const { id, host_name, purpose, notes } = await request.json()
@@ -100,7 +101,7 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const staff = await getStaff(request)
+    const staff = await getAdmin(request)
     if (staff.error) return staff.error
 
     const id = new URL(request.url).searchParams.get('id')

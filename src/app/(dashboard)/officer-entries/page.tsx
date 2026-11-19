@@ -6,6 +6,7 @@ import { ShieldCheck, Clock, Sun, Moon, Users, Pencil, Trash2, X } from 'lucide-
 import { Input } from '@/components/ui/input'
 import { useTimezone } from '@/hooks/use-timezone'
 import { formatInTimezone } from '@/lib/utils/timezone'
+import { useRole } from '@/hooks/use-role'
 
 type Entry = {
   id: string
@@ -38,6 +39,7 @@ export default function SecurityOfficerPage() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
   const { timezone } = useTimezone()
+  const role = useRole()
 
   const fetchEntries = useCallback(async (shiftValue: ShiftFilter) => {
     setLoading(true)
@@ -241,7 +243,9 @@ export default function SecurityOfficerPage() {
                     <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase hidden md:table-cell">Host</th>
                     <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Officer</th>
                     <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Shift</th>
-                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th>
+                    {role === 'administrator' && (
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-700">
@@ -275,16 +279,18 @@ export default function SecurityOfficerPage() {
                           {e.officer_shift === 'day' ? 'Day' : 'Night'}
                         </span>
                       </td>
-                      <td className="px-4 sm:px-6 py-3 text-sm">
-                        <div className="flex gap-2">
-                          <button onClick={() => startEdit(e)} className="text-cyan-400 hover:text-cyan-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Edit entry">
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => deleteEntry(e)} className="text-red-400 hover:text-red-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Delete entry">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+                      {role === 'administrator' && (
+                        <td className="px-4 sm:px-6 py-3 text-sm">
+                          <div className="flex gap-2">
+                            <button onClick={() => startEdit(e)} className="text-cyan-400 hover:text-cyan-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Edit entry">
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => deleteEntry(e)} className="text-red-400 hover:text-red-300 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-slate-700/50" title="Delete entry">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
