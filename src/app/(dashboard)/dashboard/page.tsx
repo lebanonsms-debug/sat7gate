@@ -35,7 +35,7 @@ export default function DashboardPage() {
   const fetchData = useMemo(() => async () => {
     try {
       const today = new Date().toISOString().split('T')[0]
-      const { data: movements } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))')
+      const { data: movements } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*, vehicles:vehicles(*)), company:companies(*))')
       const allMovements = movements || []
       const todayMovements = allMovements.filter((m: { entry_time?: string }) => m.entry_time?.startsWith(today))
       const inside = allMovements.filter((m: { status?: string }) => m.status === 'inside')
@@ -72,16 +72,16 @@ export default function DashboardPage() {
       // Company breakdown
       const companies: Record<string, { name: string; people: number; vehicles: number; color: string }> = {}
       inside.forEach((m: { visitor?: { company?: { name?: string }; vehicles?: unknown[] } }) => {
-        const name = m.visitor?.company?.name || 'Unknown'
+        const name = m.visitor?.company?.name || 'No company'
         if (!companies[name]) companies[name] = { name, people: 0, vehicles: 0, color: '#22d3ee' }
         companies[name].people += 1
-        if (m.visitor?.vehicles?.length) companies[name].vehicles += 1
+        if (m.visitor?.person?.vehicles?.length) companies[name].vehicles += 1
       })
       setCompanyData(Object.values(companies))
 
       const staff = inside.filter((m: { visitor?: { person?: { person_category?: string } } }) => m.visitor?.person?.person_category === 'employee').length
       const guests = inside.filter((m: { visitor?: { person?: { person_category?: string } } }) => m.visitor?.person?.person_category !== 'employee').length
-      const vehicles = inside.filter((m: { visitor?: { vehicles?: unknown[] } }) => m.visitor?.vehicles?.length).length
+      const vehicles = inside.filter((m: { visitor?: { person?: { vehicles?: unknown[] } } }) => m.visitor?.person?.vehicles?.length).length
 
       setKpis({
         totalEntriesToday: todayMovements.length,

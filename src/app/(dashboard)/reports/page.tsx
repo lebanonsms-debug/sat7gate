@@ -27,7 +27,7 @@ export default function ReportsPage() {
 
       // By company
       const companies: Record<string, number> = {}
-      list.forEach((m) => { const name = (m as { visitor?: { company?: { name?: string } } }).visitor?.company?.name || 'Unknown'; companies[name] = (companies[name] || 0) + 1 })
+      list.forEach((m) => { const name = (m as { visitor?: { company?: { name?: string } } }).visitor?.company?.name || 'No company'; companies[name] = (companies[name] || 0) + 1 })
       setByCompany(Object.entries(companies).map(([name, count]) => ({ name, count })))
 
       // By category

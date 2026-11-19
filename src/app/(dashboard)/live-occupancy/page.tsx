@@ -15,7 +15,7 @@ export default function LiveOccupancyPage() {
       const list = movements || []
       const byCompany: Record<string, number> = {}
       list.forEach((m) => {
-        const name = (m as { visitor?: { company?: { name?: string } } }).visitor?.company?.name || 'Unknown'
+        const name = (m as { visitor?: { company?: { name?: string } } }).visitor?.company?.name || 'No company'
         byCompany[name] = (byCompany[name] || 0) + 1
       })
       setStats({
