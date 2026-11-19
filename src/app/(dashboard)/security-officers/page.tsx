@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { VoiceInput } from '@/components/ui/voice-input'
-import { ShieldCheck, Pencil, Trash2, X } from 'lucide-react'
+import { ShieldCheck, Pencil, Trash2, X, Lock } from 'lucide-react'
 import type { Profile } from '@/lib/types'
 
 export default function SecurityOfficersPage() {
@@ -15,6 +15,7 @@ export default function SecurityOfficersPage() {
   const [form, setForm] = useState({ email: '', password: '', full_name: '', role: 'security_officer' as Profile['role'], shift: 'day' as Profile['shift'] })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [resetting, setResetting] = useState<Profile | null>(null)
   const supabase = createClientComponentClient()
 
   const fetchOfficers = useCallback(async () => {
@@ -70,6 +71,8 @@ export default function SecurityOfficersPage() {
 
   const startEdit = (officer: Profile) => {
     setEditing(officer)
+    setResetting(null)
+    setMessage('')
     setForm({ email: '', password: '', full_name: officer.full_name, role: officer.role, shift: officer.shift || 'day' })
   }
 
@@ -94,38 +97,96 @@ export default function SecurityOfficersPage() {
     setForm({ email: '', password: '', full_name: '', role: 'security_officer', shift: 'day' })
   }
 
+  const startReset = (officer: Profile) => {
+    setResetting(officer)
+    setEditing(null)
+    setMessage('')
+    setForm({ email: '', password: '', full_name: '', role: 'security_officer', shift: officer.shift || 'day' })
+  }
+
+  const cancelReset = () => {
+    setResetting(null)
+    setForm({ email: '', password: '', full_name: '', role: 'security_officer', shift: 'day' })
+  }
+
+  const resetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!resetting) return
+    setLoading(true)
+    setMessage('')
+    try {
+      const res = await fetch('/api/users/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: resetting.id, password: form.password }),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        setMessage(result.error || 'Failed to reset password')
+      } else {
+        const name = resetting.full_name
+        setResetting(null)
+        setForm({ email: '', password: '', full_name: '', role: 'security_officer', shift: 'day' })
+        setMessage('Password reset successfully for ' + name)
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error resetting password'
+      setMessage(message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-white">Security Officers</h1>
       <Card className="border-slate-700 bg-slate-800/50">
-        <CardHeader><CardTitle>{editing ? 'Edit Officer' : 'Create Officer'}</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{resetting ? 'Reset Officer Password' : (editing ? 'Edit Officer' : 'Create Officer')}</CardTitle></CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="flex gap-4 flex-wrap items-end">
-            <VoiceInput onTranscript={(text) => setForm({...form, full_name: text})}>
-              <Input placeholder="Full name" value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required className="flex-1" />
-            </VoiceInput>
-            {!editing && (
-              <>
-                <VoiceInput onTranscript={(text) => setForm({...form, email: text})}>
-                  <Input placeholder="Email" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required className="flex-1" />
-                </VoiceInput>
-                <VoiceInput onTranscript={(text) => setForm({...form, password: text})}>
-                  <Input placeholder="Password" type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
-                </VoiceInput>
-              </>
-            )}
-            <select className="flex h-10 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" value={form.role} onChange={e => setForm({...form, role: e.target.value as Profile['role']})}>
-              <option value="security_officer">Security Officer</option>
-            </select>
-            <select className="flex h-10 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" value={form.shift} onChange={e => setForm({...form, shift: e.target.value as Profile['shift']})}>
-              <option value="day">&#9728;&#65039; Day Shift</option>
-              <option value="night">&#127769; Night Shift</option>
-            </select>
-            <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700" disabled={loading}>
-              <ShieldCheck className="w-4 h-4 mr-2" />{loading ? 'Saving...' : (editing ? 'Update' : 'Create')}
-            </Button>
-            {editing && <Button type="button" variant="outline" onClick={cancelEdit}><X className="w-4 h-4 mr-2" />Cancel</Button>}
-          </form>
+          {resetting ? (
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-slate-300">
+                Reset Password — {resetting.full_name} <span className="text-slate-500">({resetting.email})</span>
+              </h4>
+              <form onSubmit={resetPassword} className="flex gap-3 flex-wrap items-end">
+                <div className="flex-1 min-w-[220px]">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">New Password *</label>
+                  <Input type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required minLength={6} placeholder="Minimum 6 characters" />
+                </div>
+                <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700" disabled={loading}>
+                  <Lock className="w-4 h-4 mr-2" />{loading ? 'Resetting...' : 'Reset Password'}
+                </Button>
+                <Button type="button" variant="outline" onClick={cancelReset}>Cancel</Button>
+              </form>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex gap-4 flex-wrap items-end">
+              <VoiceInput onTranscript={(text) => setForm({...form, full_name: text})}>
+                <Input placeholder="Full name" value={form.full_name} onChange={e => setForm({...form, full_name: e.target.value})} required className="flex-1" />
+              </VoiceInput>
+              {!editing && (
+                <>
+                  <VoiceInput onTranscript={(text) => setForm({...form, email: text})}>
+                    <Input placeholder="Email" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required className="flex-1" />
+                  </VoiceInput>
+                  <VoiceInput onTranscript={(text) => setForm({...form, password: text})}>
+                    <Input placeholder="Password" type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
+                  </VoiceInput>
+                </>
+              )}
+              <select className="flex h-10 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" value={form.role} onChange={e => setForm({...form, role: e.target.value as Profile['role']})}>
+                <option value="security_officer">Security Officer</option>
+              </select>
+              <select className="flex h-10 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" value={form.shift} onChange={e => setForm({...form, shift: e.target.value as Profile['shift']})}>
+                <option value="day">&#9728;&#65039; Day Shift</option>
+                <option value="night">&#127769; Night Shift</option>
+              </select>
+              <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700" disabled={loading}>
+                <ShieldCheck className="w-4 h-4 mr-2" />{loading ? 'Saving...' : (editing ? 'Update' : 'Create')}
+              </Button>
+              {editing && <Button type="button" variant="outline" onClick={cancelEdit}><X className="w-4 h-4 mr-2" />Cancel</Button>}
+            </form>
+          )}
           {message && <p className={`text-sm mt-2 ${message.includes('success') || message.includes('updated') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
         </CardContent>
       </Card>
@@ -154,6 +215,9 @@ export default function SecurityOfficersPage() {
                     <td className="px-6 py-4 flex gap-2">
                       <button onClick={() => startEdit(o)} className="text-cyan-400 hover:text-cyan-300 p-1" title="Edit officer">
                         <Pencil className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => startReset(o)} className="text-amber-400 hover:text-amber-300 p-1" title="Reset password">
+                        <Lock className="w-4 h-4" />
                       </button>
                       <button onClick={() => deleteOfficer(o.id, o.full_name)} className="text-red-400 hover:text-red-300 p-1" title="Delete officer">
                         <Trash2 className="w-4 h-4" />

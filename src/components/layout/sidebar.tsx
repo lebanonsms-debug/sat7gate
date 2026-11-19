@@ -34,7 +34,7 @@ const navSections = [
   {
     title: 'Security Team',
     items: [
-      { href: '/security-officers', label: 'Security Officers', icon: ShieldCheck, roles: ['security_officer', 'administrator'] },
+      { href: '/security-officers', label: 'Security Officers', icon: ShieldCheck, roles: ['administrator'] },
       { href: '/officer-entries', label: 'Security Officer', icon: Clock, roles: ['security_officer', 'administrator'] },
     ]
   },
