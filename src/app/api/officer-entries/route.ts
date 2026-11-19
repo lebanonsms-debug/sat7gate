@@ -22,7 +22,7 @@ export async function GET(request: Request) {
         .select('id, created_at, host_name, purpose, notes, created_by, person_id, destination_company_id')
         .order('created_at', { ascending: false })
         .limit(500),
-      admin.from('persons').select('id, full_name, person_category'),
+      admin.from('persons').select('id, full_name, person_category, company'),
       admin.from('companies').select('id, name'),
       admin.from('profiles').select('id, full_name, shift'),
     ])
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
         notes: v.notes,
         person_name: person?.full_name || 'Unknown',
         person_category: person?.person_category || 'other',
-        company_name: companyMap.get(v.destination_company_id)?.name || '-',
+        company_name: person?.company ? (companyMap.get(person.company)?.name || person.company) : '-',
         officer_name: officer?.full_name || 'Unknown',
         officer_shift: (officer?.shift || 'day') as 'day' | 'night',
       }

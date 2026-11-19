@@ -7,8 +7,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { LogOut } from 'lucide-react'
 
 export default function LiveGatePage() {
-  const [movements, setMovements] = useState<{ id: string; entry_time?: string; entry_officer_id?: string; visitor?: { person?: { full_name?: string; person_category?: string; vehicles?: Array<{ manufacturer?: string; model?: string; plate_number?: string }> }; company?: { name?: string } } }[]>([])
+  const [movements, setMovements] = useState<{ id: string; entry_time?: string; entry_officer_id?: string; visitor?: { person?: { full_name?: string; person_category?: string; company?: string; vehicles?: Array<{ manufacturer?: string; model?: string; plate_number?: string }> }; company?: { name?: string } } }[]>([])
   const [officers, setOfficers] = useState<{ id: string; full_name: string }[]>([])
+  const [companyNames, setCompanyNames] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const supabase = createClientComponentClient()
 
@@ -23,13 +24,21 @@ export default function LiveGatePage() {
     setOfficers(data || [])
   }, [supabase])
 
+  const fetchCompanies = useCallback(async () => {
+    const { data } = await supabase.from('companies').select('id, name')
+    const map: Record<string, string> = {}
+    ;(data || []).forEach(c => { map[c.id] = c.name })
+    setCompanyNames(map)
+  }, [supabase])
+
   useEffect(() => {
     fetchMovements() // eslint-disable-line react-hooks/set-state-in-effect
-    fetchOfficers() // eslint-disable-line react-hooks/set-state-in-effect
+    fetchOfficers()
+    fetchCompanies()
     const channel = supabase.channel('live-gate')
     channel.on('postgres_changes', { event: '*', schema: 'public', table: 'gate_movements' }, fetchMovements).subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [supabase, fetchMovements, fetchOfficers])
+  }, [supabase, fetchMovements, fetchOfficers, fetchCompanies])
 
   const markExit = async (id: string) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -72,7 +81,7 @@ export default function LiveGatePage() {
                   <tr key={m.id} className="hover:bg-slate-700/20 transition-colors">
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm font-medium text-white">{m.visitor?.person?.full_name}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 capitalize hidden sm:table-cell">{m.visitor?.person?.person_category?.replace('_', ' ')}</td>
-                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden md:table-cell">{m.visitor?.company?.name || '-'}</td>
+                    <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden md:table-cell">{m.visitor?.person?.company ? (companyNames[m.visitor.person.company] || m.visitor.person.company) : '-'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden lg:table-cell">{m.visitor?.person?.vehicles?.[0] ? `${m.visitor.person.vehicles[0].manufacturer} ${m.visitor.person.vehicles[0].model}` : '-'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 font-mono">{m.visitor?.person?.vehicles?.[0]?.plate_number || '-'}</td>
                     <td className="px-4 sm:px-6 py-3 sm:py-4 text-sm text-slate-300 hidden sm:table-cell">{m.entry_time ? new Date(m.entry_time).toLocaleString() : '-'}</td>

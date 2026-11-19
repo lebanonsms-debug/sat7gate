@@ -14,27 +14,32 @@ export default function VisitorHistoryPage() {
     exit_time?: string
     entry_officer_id?: string
     visitor?: {
-      person?: { full_name?: string; person_category?: string; vehicles?: Array<{ plate_number?: string }> }
+      person?: { full_name?: string; person_category?: string; company?: string; vehicles?: Array<{ plate_number?: string }> }
       company?: { name?: string }
     }
   }
   const [records, setRecords] = useState<HistoryRecord[]>([])
   const [officers, setOfficers] = useState<{ id: string; full_name: string }[]>([])
+  const [companyNames, setCompanyNames] = useState<Record<string, string>>({})
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const supabase = createClientComponentClient()
 
   useEffect(() => {
     const fetch = async () => {
-      const [{ data }, { data: officerData }] = await Promise.all([
+      const [{ data }, { data: officerData }, { data: companyRows }] = await Promise.all([
         supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*, vehicles:vehicles(*)), company:companies(*))').order('entry_time', { ascending: false }).limit(100),
         supabase.from('officer_directory').select('id, full_name'),
+        supabase.from('companies').select('id, name'),
       ])
       setRecords(data || [])
       setOfficers(officerData || [])
+      const map: Record<string, string> = {}
+      ;(companyRows || []).forEach(c => { map[c.id] = c.name })
+      setCompanyNames(map)
       setLoading(false)
     }
-    fetch() // eslint-disable-line react-hooks/set-state-in-effect
+    fetch()
   }, [supabase])
 
   const filtered = records.filter((m) => {
@@ -82,7 +87,7 @@ export default function VisitorHistoryPage() {
                   <tr key={m.id} className="hover:bg-slate-700/20">
                     <td className="px-4 py-3 text-sm font-medium text-white">{m.visitor?.person?.full_name}</td>
                     <td className="px-4 py-3 text-sm text-slate-300 capitalize">{m.visitor?.person?.person_category?.replace('_', ' ')}</td>
-                    <td className="px-4 py-3 text-sm text-slate-300">{m.visitor?.company?.name || '-'}</td>
+                    <td className="px-4 py-3 text-sm text-slate-300">{m.visitor?.person?.company ? (companyNames[m.visitor.person.company] || m.visitor.person.company) : '-'}</td>
                     <td className="px-4 py-3 text-sm text-slate-300">{m.entry_time ? new Date(m.entry_time).toLocaleString() : '-'}</td>
                     <td className="px-4 py-3 text-sm text-slate-300">{m.exit_time ? new Date(m.exit_time).toLocaleString() : '-'}</td>
                     <td className="px-4 py-3"><span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${m.status === 'inside' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-500/10 text-slate-400'}`}>{m.status}</span></td>
