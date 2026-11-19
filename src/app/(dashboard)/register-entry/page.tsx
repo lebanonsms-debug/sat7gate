@@ -83,15 +83,6 @@ export default function RegisterEntryPage() {
           const { data: personVehicles } = await supabase.from('vehicles').select('*').eq('person_id', found.id)
           const vehicleList = personVehicles || []
           setVehicles(vehicleList)
-          const vehicle = vehicleList[0]
-          if (vehicle) {
-            setVehicleForm({
-              plateNumber: vehicle.plate_number || '',
-              manufacturer: vehicle.manufacturer || '',
-              model: vehicle.model || '',
-              color: vehicle.color || '',
-            })
-          }
           setForm(prev => (
             prev.fullName === found.full_name && prev.category === found.person_category
               ? prev
@@ -139,16 +130,36 @@ export default function RegisterEntryPage() {
         return
       }
 
+      let vehicleCreated = false
+      if (vehicleForm.plateNumber) {
+        const { error: vehicleError } = await supabase.from('vehicles').insert({
+          person_id: newPerson.id,
+          plate_number: vehicleForm.plateNumber,
+          manufacturer: vehicleForm.manufacturer,
+          model: vehicleForm.model,
+          color: vehicleForm.color,
+        })
+        if (vehicleError) {
+          setNewPersonError('Person created, but vehicle failed: ' + vehicleError.message)
+        } else {
+          vehicleCreated = true
+        }
+      }
+
+      const { data: personVehicles } = await supabase.from('vehicles').select('*').eq('person_id', newPerson.id)
+      setVehicles(personVehicles || [])
+      setFoundPerson({ id: newPerson.id, full_name: newPerson.full_name, person_category: newPerson.person_category, company: newPersonCompany || undefined })
       setSelectedPerson({ id: newPerson.id, full_name: newPerson.full_name, person_category: newPerson.person_category })
       setForm(prev => ({
         ...prev,
         fullName: newPerson.full_name,
         category: newPerson.person_category,
       }))
-      setNewPersonSuccess('Created ' + newPerson.full_name)
+      setNewPersonSuccess(vehicleCreated ? 'Created ' + newPerson.full_name + ' + vehicle' : 'Created ' + newPerson.full_name)
       setNewPersonFullname('')
       setNewPersonCategory('employee')
       setNewPersonCompany('')
+      setVehicleForm({ plateNumber: '', manufacturer: '', model: '', color: '' })
       setMessage('Created new person - ' + newPerson.full_name)
     } catch (err) {
       setNewPersonError(err instanceof Error ? err.message : 'Error creating person')
@@ -185,20 +196,6 @@ export default function RegisterEntryPage() {
       }
 
       if (!personId) throw new Error('No person selected')
-
-      if (vehicleForm.plateNumber) {
-        const { data: existingVehicle } = await supabase.from('vehicles').select('id').eq('person_id', personId).eq('plate_number', vehicleForm.plateNumber).maybeSingle()
-        if (!existingVehicle) {
-          const { error: vehicleError } = await supabase.from('vehicles').insert({
-            person_id: personId,
-            plate_number: vehicleForm.plateNumber,
-            manufacturer: vehicleForm.manufacturer,
-            model: vehicleForm.model,
-            color: vehicleForm.color,
-          })
-          if (vehicleError) console.error('Vehicle insert error:', vehicleError)
-        }
-      }
 
       const { data: visitor, error: visitorError } = await supabase.from('visitors').insert({
         person_id: personId,
@@ -324,19 +321,10 @@ export default function RegisterEntryPage() {
                     {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </Select>
                 </div>
-                <div className="col-span-2 flex gap-3">
-                  <Button type="button" className="flex-1 bg-cyan-600 hover:bg-cyan-700" onClick={handleCreateNewPerson} disabled={!newPersonFullname}>
-                    Create Person
-                  </Button>
-                  {newPersonError && <p className="text-sm text-red-400">{newPersonError}</p>}
-                  {newPersonSuccess && <p className="text-sm text-emerald-400">{newPersonSuccess}</p>}
-                </div>
-              </div>
-            </div>
 
-            <div className="border-t border-slate-700 pt-4">
-              <h3 className="text-lg font-medium text-white mb-4">Vehicle Information (Optional)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-2 mt-2">
+                  <p className="text-sm font-medium text-slate-400">Vehicle (optional)</p>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">License Plate</label>
                   <Input value={vehicleForm.plateNumber} onChange={e => setVehicleForm({ ...vehicleForm, plateNumber: e.target.value })} placeholder="e.g. 1234 ABC" />
@@ -352,6 +340,14 @@ export default function RegisterEntryPage() {
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-1">Color</label>
                   <Input value={vehicleForm.color} onChange={e => setVehicleForm({ ...vehicleForm, color: e.target.value })} placeholder="e.g. Blue" />
+                </div>
+
+                <div className="col-span-2 flex gap-3">
+                  <Button type="button" className="flex-1 bg-cyan-600 hover:bg-cyan-700" onClick={handleCreateNewPerson} disabled={!newPersonFullname}>
+                    Create Person
+                  </Button>
+                  {newPersonError && <p className="text-sm text-red-400">{newPersonError}</p>}
+                  {newPersonSuccess && <p className="text-sm text-emerald-400">{newPersonSuccess}</p>}
                 </div>
               </div>
             </div>
