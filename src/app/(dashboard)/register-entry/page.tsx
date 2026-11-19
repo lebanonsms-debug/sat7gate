@@ -83,6 +83,15 @@ export default function RegisterEntryPage() {
           const { data: personVehicles } = await supabase.from('vehicles').select('*').eq('person_id', found.id)
           const vehicleList = personVehicles || []
           setVehicles(vehicleList)
+          const autoVehicle = vehicleList[0]
+          if (autoVehicle) {
+            setVehicleForm({
+              plateNumber: autoVehicle.plate_number || '',
+              manufacturer: autoVehicle.manufacturer || '',
+              model: autoVehicle.model || '',
+              color: autoVehicle.color || '',
+            })
+          }
           setForm(prev => (
             prev.fullName === found.full_name && prev.category === found.person_category
               ? prev
@@ -235,7 +244,6 @@ export default function RegisterEntryPage() {
       setLoading(false)
     }
   }
-
   return (
     <div className="w-full">
       <div className="mb-6">
@@ -243,142 +251,160 @@ export default function RegisterEntryPage() {
         <p className="text-slate-400 mt-1">Create a new gate entry record for employee, freelancer, contractor, guest, delivery, or rental company</p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 md:gap-6 items-start">
-
-        {/* ---- Visitor information ---- */}
-        <Card className="border-slate-700 bg-slate-800/50 xl:col-span-3">
-          <CardHeader><CardTitle>Visitor Information</CardTitle></CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Select Person *</label>
-                <Select
-                  value={selectedPerson?.id || ''}
-                  onChange={(e) => {
-                    const person = persons.find(p => p.id === e.target.value)
-                    if (person) {
-                      setSelectedPerson(person)
-                      setForm(prev => ({
-                        ...prev,
-                        fullName: person.full_name,
-                        category: person.person_category as PersonCategory,
-                      }))
-                      setMessage('Person selected')
-                    }
-                  }}
-                  className="w-full"
-                >
-                  <option>Select person...</option>
-                  {persons.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.full_name} ({p.person_category})
-                    </option>
-                  ))}
-                </Select>
-                {loadingPersons && <div className="mt-1 text-xs text-slate-400">Loading people...</div>}
-                {selectedPerson && !loadingPersons && (
-                  <div className="mt-1 text-xs text-emerald-400">Person selected</div>
-                )}
-                {foundPerson && !selectedPerson && (
-                  <div className="mt-1 text-xs text-emerald-400">Person found - auto-filled</div>
-                )}
-                {loadingPerson && !foundPerson && !selectedPerson && <div className="mt-1 text-xs text-slate-400">Searching...</div>}
-              </div>
-
-              {foundPerson && (
-                <div className="rounded-lg bg-slate-900/40 border border-slate-700 p-4">
-                  <label className="block text-sm font-medium text-slate-300 mb-3">Person Information (from database)</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-                    <div><span className="text-xs text-slate-500">Name:</span><p className="text-white font-medium">{[foundPerson.given_name, foundPerson.family_name].filter(Boolean).join(' ') || foundPerson.full_name}</p></div>
-                    <div><span className="text-xs text-slate-500">Category:</span><p className="text-white">{foundPerson.person_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p></div>
-                    {foundPerson.company && <div><span className="text-xs text-slate-500">Company:</span><p className="text-white">{companies.find(c => c.id === foundPerson.company)?.name || foundPerson.company}</p></div>}
-                  </div>
-                </div>
+      <Card className="border-slate-700 bg-slate-800/50">
+        <CardHeader><CardTitle>Visitor Information</CardTitle></CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Select Person *</label>
+              <Select
+                value={selectedPerson?.id || ''}
+                onChange={(e) => {
+                  const person = persons.find(p => p.id === e.target.value)
+                  if (person) {
+                    setSelectedPerson(person)
+                    setForm(prev => ({
+                      ...prev,
+                      fullName: person.full_name,
+                      category: person.person_category as PersonCategory,
+                    }))
+                    setMessage('Person selected')
+                    supabase
+                      .from('vehicles')
+                      .select('*')
+                      .eq('person_id', person.id)
+                      .then(({ data }) => {
+                        const list = data || []
+                        setVehicles(list)
+                        const v = list[0]
+                        if (v) {
+                          setVehicleForm({
+                            plateNumber: v.plate_number || '',
+                            manufacturer: v.manufacturer || '',
+                            model: v.model || '',
+                            color: v.color || '',
+                          })
+                        }
+                      })
+                  }
+                }}
+                className="w-full"
+              >
+                <option>Select person...</option>
+                {persons.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.full_name} ({p.person_category})
+                  </option>
+                ))}
+              </Select>
+              {loadingPersons && <div className="mt-1 text-xs text-slate-400">Loading people...</div>}
+              {selectedPerson && !loadingPersons && (
+                <div className="mt-1 text-xs text-emerald-400">Person selected</div>
               )}
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Notes</label>
-                <VoiceInput onTranscript={(text) => setForm({ ...form, notes: form.notes ? form.notes + ' ' + text : text })}>
-                  <textarea className="w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" rows={4} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
-                </VoiceInput>
-              </div>
-
-              {vehicles.length > 0 && (
-                <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
-                  <h4 className="text-sm font-medium text-cyan-400 mb-2">Existing Vehicles ({vehicles.length})</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {vehicles.map(v => (
-                      <div key={v.id} className="text-xs text-slate-300 flex items-center gap-2">
-                        <span className="font-medium">{String(v.plate_number || 'N/A').toUpperCase()}</span>
-                        {v.manufacturer && <span className="text-slate-500">{v.manufacturer}</span>}
-                        {v.model && <span className="text-slate-500">{v.model}</span>}
-                        {v.color && <span className="text-slate-500">{v.color}</span>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              {foundPerson && !selectedPerson && (
+                <div className="mt-1 text-xs text-emerald-400">Person found - auto-filled</div>
               )}
+              {loadingPerson && !foundPerson && !selectedPerson && <div className="mt-1 text-xs text-slate-400">Searching...</div>}
+            </div>
 
-              {message && <p className={`text-sm ${message.includes('✓') || message.includes('successfully') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
-
-              <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                <Button type="submit" className="flex-1 bg-cyan-600 hover:bg-cyan-700 h-12" disabled={loading}>
-                  {loading ? 'Registering...' : 'Register Entry'}
-                </Button>
-                <Button type="button" variant="outline" className="sm:w-32 h-12" onClick={() => setForm({ fullName: '', category: 'guest', notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })}>
-                  Clear
-                </Button>
+            {foundPerson && (
+              <div className="rounded-lg bg-slate-900/40 border border-slate-700 p-4">
+                <label className="block text-sm font-medium text-slate-300 mb-3">Person Information (from database)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+                  <div><span className="text-xs text-slate-500">Name:</span><p className="text-white font-medium">{[foundPerson.given_name, foundPerson.family_name].filter(Boolean).join(' ') || foundPerson.full_name}</p></div>
+                  <div><span className="text-xs text-slate-500">Category:</span><p className="text-white">{foundPerson.person_category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p></div>
+                  {foundPerson.company && <div><span className="text-xs text-slate-500">Company:</span><p className="text-white">{companies.find(c => c.id === foundPerson.company)?.name || foundPerson.company}</p></div>}
+                </div>
               </div>
-            </form>
-          </CardContent>
-        </Card>
+            )}
 
-        {/* ---- Create new person ---- */}
-        <Card className="border-slate-700 bg-slate-800/50 xl:col-span-2">
-          <CardHeader><CardTitle>Create New Person</CardTitle></CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Full Name *</label>
-                <Input value={newPersonFullname} onChange={e => setNewPersonFullname(e.target.value)} placeholder="Full name" className="h-11" />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Notes</label>
+              <VoiceInput onTranscript={(text) => setForm({ ...form, notes: form.notes ? form.notes + ' ' + text : text })}>
+                <textarea className="w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" rows={4} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
+              </VoiceInput>
+            </div>
+
+            <div className="border-t border-slate-700 pt-4">
+              <h3 className="text-lg font-medium text-white mb-4">Create New Person</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Full Name *</label>
+                  <Input value={newPersonFullname} onChange={e => setNewPersonFullname(e.target.value)} placeholder="Full name" />
+                </div>
+                <div className="md:col-span-2 lg:col-span-1">
                   <label className="block text-sm font-medium text-slate-300 mb-1">Category *</label>
                   <Select value={newPersonCategory} onChange={e => setNewPersonCategory(e.target.value as PersonCategory)}>
                     {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                   </Select>
                 </div>
-                <div>
+                <div className="md:col-span-2 lg:col-span-1">
                   <label className="block text-sm font-medium text-slate-300 mb-1">Company</label>
                   <Select value={newPersonCompany} onChange={e => setNewPersonCompany(e.target.value)}>
                     <option value="">Select company</option>
                     {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </Select>
                 </div>
-              </div>
 
-              <div>
-                <p className="text-sm font-medium text-slate-400 mb-2">Vehicle (optional)</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Input value={vehicleForm.plateNumber} onChange={e => setVehicleForm({ ...vehicleForm, plateNumber: e.target.value })} placeholder="License plate" className="h-11" />
-                  <Input value={vehicleForm.manufacturer} onChange={e => setVehicleForm({ ...vehicleForm, manufacturer: e.target.value })} placeholder="Manufacturer" className="h-11" />
-                  <Input value={vehicleForm.model} onChange={e => setVehicleForm({ ...vehicleForm, model: e.target.value })} placeholder="Model" className="h-11" />
-                  <Input value={vehicleForm.color} onChange={e => setVehicleForm({ ...vehicleForm, color: e.target.value })} placeholder="Color" className="h-11" />
+                <div className="md:col-span-2 mt-2">
+                  <p className="text-sm font-medium text-slate-400">Vehicle (optional)</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">License Plate</label>
+                  <Input value={vehicleForm.plateNumber} onChange={e => setVehicleForm({ ...vehicleForm, plateNumber: e.target.value })} placeholder="e.g. 1234 ABC" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Manufacturer</label>
+                  <Input value={vehicleForm.manufacturer} onChange={e => setVehicleForm({ ...vehicleForm, manufacturer: e.target.value })} placeholder="e.g. Toyota" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Model</label>
+                  <Input value={vehicleForm.model} onChange={e => setVehicleForm({ ...vehicleForm, model: e.target.value })} placeholder="e.g. Camry" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Color</label>
+                  <Input value={vehicleForm.color} onChange={e => setVehicleForm({ ...vehicleForm, color: e.target.value })} placeholder="e.g. Blue" />
+                </div>
+
+                <div className="md:col-span-2 flex gap-3">
+                  <Button type="button" className="flex-1 bg-cyan-600 hover:bg-cyan-700 h-12" onClick={handleCreateNewPerson} disabled={!newPersonFullname}>
+                    Create Person
+                  </Button>
+                  {newPersonError && <p className="text-sm text-red-400">{newPersonError}</p>}
+                  {newPersonSuccess && <p className="text-sm text-emerald-400">{newPersonSuccess}</p>}
                 </div>
               </div>
-
-              <div className="flex flex-col gap-2 pt-1">
-                <Button type="button" className="w-full bg-cyan-600 hover:bg-cyan-700 h-12" onClick={handleCreateNewPerson} disabled={!newPersonFullname}>
-                  Create Person
-                </Button>
-                {newPersonError && <p className="text-sm text-red-400">{newPersonError}</p>}
-                {newPersonSuccess && <p className="text-sm text-emerald-400">{newPersonSuccess}</p>}
-              </div>
             </div>
-          </CardContent>
-        </Card>
 
-      </div>
+            {vehicles.length > 0 && (
+              <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
+                <h4 className="text-sm font-medium text-cyan-400 mb-2">Existing Vehicles ({vehicles.length})</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {vehicles.map(v => (
+                    <div key={v.id} className="text-xs text-slate-300 flex items-center gap-2">
+                      <span className="font-medium">{String(v.plate_number || 'N/A').toUpperCase()}</span>
+                      {v.manufacturer && <span className="text-slate-500">{v.manufacturer}</span>}
+                      {v.model && <span className="text-slate-500">{v.model}</span>}
+                      {v.color && <span className="text-slate-500">{v.color}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {message && <p className={`text-sm ${message.includes('✓') || message.includes('successfully') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button type="submit" className="flex-1 bg-cyan-600 hover:bg-cyan-700 h-12" disabled={loading}>
+                {loading ? 'Registering...' : 'Register Entry'}
+              </Button>
+              <Button type="button" variant="outline" className="sm:w-32 h-12" onClick={() => setForm({ fullName: '', category: 'guest', notes: '', plateNumber: '', manufacturer: '', model: '', color: '' })}>
+                Clear
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
-  )}
+  )
+}
