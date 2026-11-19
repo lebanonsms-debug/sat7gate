@@ -162,6 +162,8 @@ export default function RegisterEntryPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      if (!foundPerson && !selectedPerson) throw new Error('Please select a person')
+
       let personId: string | undefined
       if (foundPerson) {
         personId = foundPerson.id
@@ -246,15 +248,8 @@ export default function RegisterEntryPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Full Name *</label>
-                <VoiceInput onTranscript={(text) => setForm({ ...form, fullName: text })}>
-                  <Input value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} placeholder="Type person name" required />
-                </VoiceInput>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Select Person or Search *</label>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-300 mb-1">Select Person *</label>
                 <Select
                   value={selectedPerson?.id || ''}
                   onChange={(e) => {
@@ -271,7 +266,7 @@ export default function RegisterEntryPage() {
                   }}
                   className="w-full"
                 >
-                  <option>Search people...</option>
+                  <option>Select person...</option>
                   {persons.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.full_name} ({p.person_category})
