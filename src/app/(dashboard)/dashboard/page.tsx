@@ -38,7 +38,8 @@ const INSIDE_TYPES = [
 export default function DashboardPage() {
   const { timezone } = useTimezone()
   const [kpis, setKpis] = useState<KPIs>({ totalEntriesToday: 0, currentlyInside: 0, totalExitsToday: 0, vehiclesInside: 0, visitorsInside: 0, staffInside: 0, guestsInside: 0, employeesInside: 0, rentalInside: 0, deliveryInside: 0, otherInside: 0, avgDuration: '0m', peakHour: '--:--', trend: '+0%' })
-  const [recent, setRecent] = useState<{ id: string; status?: string; entry_time?: string; visitor?: { person?: { full_name?: string }; company?: { name?: string } } }[]>([])
+  const [recent, setRecent] = useState<{ id: string; status?: string; entry_time?: string; visitor?: { person?: { full_name?: string; company?: string } } }[]>([])
+  const [companyNames, setCompanyNames] = useState<Record<string, string>>({})
   const [hourlyData, setHourlyData] = useState<{ hour: string; count: number }[]>([])
   const [companyData, setCompanyData] = useState<{ name: string; people: number; vehicles: number; color: string }[]>([])
   const [loading, setLoading] = useState(true)
@@ -124,6 +125,7 @@ export default function DashboardPage() {
         trend: trend.startsWith('-') ? trend : `+${Math.abs(parseInt(trend))}%`
       })
       setRecent(allMovements.slice(0, 10))
+      setCompanyNames(companyName)
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error)
     } finally {
@@ -314,7 +316,7 @@ export default function DashboardPage() {
                   <div className={`w-2 h-2 rounded-full ${m.status === 'inside' ? 'bg-emerald-400 shadow-lg shadow-emerald-500/50' : 'bg-slate-500'}`} />
                   <div>
                     <p className="text-sm font-medium text-white">{m.visitor?.person?.full_name || 'Unknown'}</p>
-                    <p className="text-xs text-slate-400">{m.visitor?.company?.name || 'Unknown company'}</p>
+                    <p className="text-xs text-slate-400">{m.visitor?.person?.company ? (companyNames[m.visitor.person.company] || m.visitor.person.company) : 'No company'}</p>
                   </div>
                 </div>
                 <div className="flex sm:flex-col items-center sm:items-end justify-between sm:text-right pl-5 sm:pl-0">
