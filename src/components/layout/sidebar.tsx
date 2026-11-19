@@ -55,50 +55,50 @@ export function Sidebar({ profile, onLogout, onNavigate }: { profile: Profile | 
   }
 
   return (
-    <aside className="w-64 h-screen bg-slate-950 border-r border-slate-800 flex flex-col fixed left-0 top-0 z-40">
+    <aside className="w-64 h-screen bg-slate-950/70 backdrop-blur-xl border-r border-white/[0.06] flex flex-col fixed left-0 top-0 z-40">
       {/* Logo */}
-      <div className="p-6 border-b border-slate-800">
+      <div className="p-5 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <ShieldCheck className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25 ring-1 ring-white/20">
+            <ShieldCheck className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white tracking-tight">SAT7 GATE</h1>
-            <p className="text-xs text-slate-400">Control Center v2.4</p>
+            <h1 className="text-base font-bold text-white tracking-tight">SAT7 GATE</h1>
+            <p className="text-[11px] text-slate-500">Control Center v2.4</p>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-5 overflow-y-auto">
         {navSections.map(section => (
           <div key={section.title}>
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-2">{section.title}</h3>
+            <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.14em] mb-2 px-3">{section.title}</h3>
             <div className="space-y-1">
               {section.items.filter(item => item.roles.includes(profile?.role || '')).map(item => {
                 const Icon = item.icon
                 const active = pathname === item.href
                 return (
-                  <Link key={item.href} href={item.href} onClick={handleClick}>
+                  <Link key={item.href} href={item.href} onClick={handleClick} aria-current={active ? 'page' : undefined}>
                     <Button
-                      variant={active ? 'default' : 'ghost'}
+                      variant="ghost"
                       className={cn(
-                        'w-full justify-start gap-3 relative min-h-[44px] px-2 sm:px-4 py-2 sm:py-3 touch-manipulation',
+                        'w-full justify-start gap-3 relative min-h-[44px] px-3 py-2.5 rounded-xl border touch-manipulation',
                         active
-                          ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/20'
-                          : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                          ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-transparent shadow-lg shadow-cyan-500/25 hover:from-cyan-400 hover:to-blue-500'
+                          : 'text-slate-400 border-transparent hover:text-white hover:bg-white/[0.05]'
                       )}
                     >
-                      <Icon className="w-4 h-4" />
-                      {item.label}
+                      <Icon className={cn('w-4 h-4 shrink-0 transition-colors', active ? 'text-white' : 'text-slate-500')} />
+                      <span className="truncate">{item.label}</span>
                       {item.badge && (
                         <span className={cn(
-                          'ml-auto text-xs px-2 py-0.5 rounded-full',
+                          'ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full',
                           item.badge === 'Live'
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                             : item.badge === 'Quick'
-                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                            : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
                         )}>
                           {item.badge}
                         </span>
@@ -113,17 +113,17 @@ export function Sidebar({ profile, onLogout, onNavigate }: { profile: Profile | 
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-800">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
+      <div className="p-3 border-t border-white/[0.06]">
+        <div className="flex items-center gap-3 mb-2 px-1">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold ring-1 ring-white/20">
             {profile?.full_name?.charAt(0).toUpperCase() || 'U'}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">{profile?.full_name || 'User'}</p>
-            <p className="text-xs text-slate-400 capitalize">{profile?.role?.replace('_', ' ') || 'User'}</p>
+            <p className="text-[11px] text-slate-500 capitalize">{profile?.role?.replace('_', ' ') || 'User'}</p>
           </div>
         </div>
-        <Button variant="ghost" className="w-full justify-start gap-3 text-slate-400 hover:text-white hover:bg-slate-900" onClick={onLogout}>
+        <Button variant="ghost" className="w-full justify-start gap-3 text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-xl" onClick={onLogout}>
           <LogOut className="w-4 h-4" />
           Logout
         </Button>

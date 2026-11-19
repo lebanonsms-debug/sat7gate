@@ -119,7 +119,7 @@ export default function SecurityOfficerPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-white">Security Officer</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Security Officer</h1>
           <p className="text-slate-400 mt-1">Entries created by security officers — filter by shift</p>
         </div>
         <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export default function SecurityOfficerPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="border-slate-700 bg-slate-800/50">
+        <Card className="">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
               <Users className="w-5 h-5 text-cyan-400" />
@@ -153,7 +153,7 @@ export default function SecurityOfficerPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="border-slate-700 bg-slate-800/50">
+        <Card className="">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
               <Sun className="w-5 h-5 text-amber-400" />
@@ -164,7 +164,7 @@ export default function SecurityOfficerPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="border-slate-700 bg-slate-800/50">
+        <Card className="">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
               <Moon className="w-5 h-5 text-indigo-400" />
@@ -203,7 +203,7 @@ export default function SecurityOfficerPage() {
               </div>
               <div className="md:col-span-3 flex gap-2">
                 <button type="submit" disabled={saving} className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-medium min-h-[44px] touch-manipulation disabled:opacity-50">{saving ? 'Saving...' : 'Save Changes'}</button>
-                <button type="button" onClick={cancelEdit} className="px-4 py-2 rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-700 text-sm min-h-[44px] touch-manipulation">Cancel</button>
+                <button type="button" onClick={cancelEdit} className="px-4 py-2 rounded-xl border border-slate-600/70 text-slate-300 hover:bg-slate-700 text-sm min-h-[44px] touch-manipulation">Cancel</button>
               </div>
             </form>
           </CardContent>
@@ -211,10 +211,10 @@ export default function SecurityOfficerPage() {
       )}
 
       {message && (
-        <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-700 text-sm text-slate-200">{message}</div>
+        <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] text-sm text-slate-200">{message}</div>
       )}
 
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardContent className="p-0">
           {loading ? (
             <div className="text-center py-12">
@@ -234,7 +234,7 @@ export default function SecurityOfficerPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-900/50 border-b border-slate-700">
+                <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                   <tr>
                     <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Entry Time</th>
                     <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Person</th>

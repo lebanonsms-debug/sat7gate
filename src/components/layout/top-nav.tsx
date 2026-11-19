@@ -34,7 +34,7 @@ export function TopNav({ profile, onMenuClick }: { profile: Profile | null; onMe
   }, [supabase])
 
   return (
-    <header className="h-auto bg-slate-950/80 backdrop-blur-md border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-8 sticky top-0 z-30">
+    <header className="h-auto bg-slate-950/60 backdrop-blur-xl border-b border-white/[0.06] flex flex-col md:flex-row md:items-center justify-between px-4 md:px-8 sticky top-0 z-30">
       <div className="flex items-center justify-between w-full md:w-auto gap-3 py-3 md:py-0">
         <div className="flex items-center gap-3">
           {onMenuClick && (
@@ -46,7 +46,9 @@ export function TopNav({ profile, onMenuClick }: { profile: Profile | null; onMe
             <h2 className="text-sm font-medium text-white">
               {time.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </h2>
-            <p className="text-xs text-slate-400">Security Operations Center</p>
+            <p className="text-xs text-slate-500">
+              Security Operations Center &middot; <span className="tabular-nums text-slate-400">{time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+            </p>
           </div>
         </div>
         <Button variant="ghost" size="sm" onClick={() => setStatsOpen(!statsOpen)} className="md:hidden text-slate-400 hover:text-white px-2">
@@ -54,7 +56,7 @@ export function TopNav({ profile, onMenuClick }: { profile: Profile | null; onMe
         </Button>
       </div>
       <div className={`${statsOpen ? 'flex' : 'hidden'} md:flex items-center gap-3 md:gap-4 pb-3 md:pb-0`}>
-        <div className="h-8 w-px bg-slate-800 hidden md:block" />
+        <div className="h-8 w-px bg-white/[0.06] hidden md:block" />
         <div className="flex flex-wrap items-center gap-3 text-xs">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
@@ -63,21 +65,21 @@ export function TopNav({ profile, onMenuClick }: { profile: Profile | null; onMe
             </span>
             <span className="text-emerald-400 font-medium">Barrier Online</span>
           </div>
-          <div className="text-slate-400">
+          <div className="text-slate-500">
             Lanes: <span className="text-white font-medium">{occupancy.lanes} Active</span>
           </div>
-          <div className="text-slate-400">
+          <div className="text-slate-500">
             Inside: <span className="text-white font-medium">{occupancy.people} People / {occupancy.vehicles} Vehicles</span>
           </div>
-          <div className="text-slate-600 hidden sm:block">build-20261103135239</div>
+          <div className="text-slate-700 hidden sm:block">build-20261103135239</div>
         </div>
       </div>
-      <div className="hidden md:flex items-center gap-4">
+      <div className="hidden md:flex items-center gap-3">
         <div className="text-right">
           <p className="text-sm font-medium text-white">{profile?.full_name || 'Officer'}</p>
-          <p className="text-xs text-slate-400">ID: SG-104</p>
+          <p className="text-xs text-slate-500">ID: SG-104</p>
         </div>
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm ring-1 ring-white/20">
           {profile?.full_name?.charAt(0).toUpperCase() || 'O'}
         </div>
       </div>

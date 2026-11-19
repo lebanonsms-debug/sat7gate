@@ -70,8 +70,8 @@ export default function EmployeesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-white">Employees</h1>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Employees</h1>
+      <Card className="">
         <CardHeader><CardTitle>{editing ? 'Edit Employee' : 'Add Employee'}</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap items-stretch sm:items-end">
@@ -89,7 +89,7 @@ export default function EmployeesPage() {
           {message && <p className={`text-sm mt-2 ${message.includes('success') || message.includes('added') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
         </CardContent>
       </Card>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardContent className="p-0">
           {employees.length === 0 ? (
             <div className="text-center py-12">
@@ -99,7 +99,7 @@ export default function EmployeesPage() {
           ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-900/50 border-b border-slate-700">
+              <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                 <tr><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">ID Number</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Created</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th></tr>
               </thead>
               <tbody className="divide-y divide-slate-700">

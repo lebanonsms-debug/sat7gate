@@ -57,18 +57,18 @@ export default function LiveOccupancyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Live Occupancy</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Live Occupancy</h1>
         <p className="text-slate-400 mt-1">Real-time building occupancy overview</p>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        <Card className="border-slate-700 bg-slate-800/50"><CardContent className="p-4 sm:p-6"><div className="flex items-center justify-between"><div><p className="text-sm text-slate-400">Total Inside</p><p className="text-3xl font-bold text-white">{stats.total}</p></div><Users className="w-8 h-8 text-cyan-400" /></div></CardContent></Card>
+        <Card className=""><CardContent className="p-4 sm:p-6"><div className="flex items-center justify-between"><div><p className="text-sm text-slate-400">Total Inside</p><p className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{stats.total}</p></div><Users className="w-8 h-8 text-cyan-400" /></div></CardContent></Card>
         {OCCUPANCY_TYPES.map(t => (
-          <Card key={t.key} className="border-slate-700 bg-slate-800/50">
+          <Card key={t.key} className="">
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-sm text-slate-400 truncate">{t.label}</p>
-                  <p className="text-3xl font-bold text-white">{stats[t.key]}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{stats[t.key]}</p>
                 </div>
                 <div className={`w-10 h-10 rounded-lg ${t.bg} flex items-center justify-center shrink-0`}>
                   <Users className={`w-5 h-5 ${t.iconColor}`} />
@@ -77,9 +77,9 @@ export default function LiveOccupancyPage() {
             </CardContent>
           </Card>
         ))}
-        <Card className="border-slate-700 bg-slate-800/50"><CardContent className="p-4 sm:p-6"><div className="flex items-center justify-between"><div><p className="text-sm text-slate-400">Vehicles</p><p className="text-3xl font-bold text-white">{stats.vehicles}</p></div><Car className="w-8 h-8 text-blue-400" /></div></CardContent></Card>
+        <Card className=""><CardContent className="p-4 sm:p-6"><div className="flex items-center justify-between"><div><p className="text-sm text-slate-400">Vehicles</p><p className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{stats.vehicles}</p></div><Car className="w-8 h-8 text-blue-400" /></div></CardContent></Card>
       </div>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardHeader><CardTitle>By Company</CardTitle></CardHeader>
         <CardContent>
           <div className="space-y-3">

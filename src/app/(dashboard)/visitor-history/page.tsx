@@ -52,10 +52,10 @@ export default function VisitorHistoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Visitor History</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Visitor History</h1>
         <p className="text-slate-400 mt-1">Complete entrance and exit history</p>
       </div>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardContent className="p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -63,11 +63,11 @@ export default function VisitorHistoryPage() {
           </div>
         </CardContent>
       </Card>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-900/50 border-b border-slate-700">
+              <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Category</th>

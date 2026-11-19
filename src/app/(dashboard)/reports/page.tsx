@@ -46,11 +46,11 @@ export default function ReportsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Reports & Analytics</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Reports & Analytics</h1>
         <p className="text-slate-400 mt-1">Daily activity overview</p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-slate-700 bg-slate-800/50">
+        <Card className="">
           <CardHeader><CardTitle>Hourly Entries Today</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -64,7 +64,7 @@ export default function ReportsPage() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="border-slate-700 bg-slate-800/50">
+        <Card className="">
           <CardHeader><CardTitle>By Company</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -77,7 +77,7 @@ export default function ReportsPage() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card className="border-slate-700 bg-slate-800/50">
+        <Card className="">
           <CardHeader><CardTitle>By Category</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>

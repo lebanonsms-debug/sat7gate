@@ -53,15 +53,15 @@ export default function AuditLogsPage() {
           <ClipboardList className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Audit Logs</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Audit Logs</h1>
           <p className="text-slate-400 mt-1">System activity and change history</p>
         </div>
       </div>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-900/50 border-b border-slate-700">
+              <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                 <tr><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Action</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Entity</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Details</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">User</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Time</th></tr>
               </thead>
               <tbody className="divide-y divide-slate-700">

@@ -141,7 +141,7 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Users & Roles</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Users & Roles</h1>
           <p className="text-slate-400 mt-1">System accounts only — security officers are managed separately under Security Team</p>
         </div>
         <div className="flex items-center gap-2">
@@ -150,7 +150,7 @@ export default function UsersPage() {
         </div>
       </div>
 
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardHeader><CardTitle>Create New User</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={createUser} className="space-y-4">
@@ -176,7 +176,7 @@ export default function UsersPage() {
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1">Role *</label>
                 <select 
-                  className="flex h-10 w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100"
+                  className="flex h-10 w-full rounded-xl border border-slate-600/70 bg-white/[0.04] px-3 py-2 text-sm text-slate-100"
                   value={form.role}
                   onChange={e => setForm({...form, role: e.target.value as Profile['role']})}
                 >
@@ -205,7 +205,7 @@ export default function UsersPage() {
                       <div>
                         <label className="block text-sm font-medium text-slate-300 mb-1">Role *</label>
                         <select
-                          className="flex h-10 w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100"
+                          className="flex h-10 w-full rounded-xl border border-slate-600/70 bg-white/[0.04] px-3 py-2 text-sm text-slate-100"
                           value={form.role}
                           onChange={e => setForm({...form, role: e.target.value as Profile['role']})}
                         >
@@ -237,12 +237,12 @@ export default function UsersPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardHeader><CardTitle>All Users</CardTitle></CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-900/50 border-b border-slate-700">
+              <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Email</th>

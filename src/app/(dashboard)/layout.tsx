@@ -53,7 +53,7 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center">
+      <div className="min-h-screen bg-[#070b15] flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-400">Loading Security Operations Center...</p>
@@ -64,7 +64,7 @@ export default function DashboardLayout({
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-[#0B0F19] flex items-center justify-center">
+      <div className="min-h-screen bg-[#070b15] flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-400 text-lg" style={{color:'#ff6568'}}>Failed to load profile</p>
           <p className="text-slate-400 mt-2" style={{color:'#90a1b9'}}>Please try logging in again</p>
@@ -74,7 +74,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0F19]">
+    <div className="min-h-screen bg-[#070b15]">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -82,10 +82,10 @@ export default function DashboardLayout({
 
       {/* Mobile sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-slate-950 border-r border-slate-800 transform transition-transform duration-300 ease-in-out lg:hidden",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-slate-950/90 backdrop-blur-xl border-r border-white/[0.06] transform transition-transform duration-300 ease-in-out lg:hidden",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-4 border-b border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -112,7 +112,7 @@ export default function DashboardLayout({
       {/* Main content area */}
       <div className="lg:ml-64 pt-14">
         <TopNav profile={profile} onMenuClick={() => setSidebarOpen(true)} />
-        <main className="p-3 sm:p-4 md:p-6">
+        <main className="p-3 sm:p-4 md:p-6 animate-fade-in">
           {children}
         </main>
       </div>

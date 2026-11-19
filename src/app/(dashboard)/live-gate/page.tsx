@@ -53,14 +53,14 @@ export default function LiveGatePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Live Gate</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Live Gate</h1>
         <p className="text-slate-400 mt-1">Currently inside the building — {movements.length} active</p>
       </div>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-900/50 border-b border-slate-700">
+              <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Category</th>

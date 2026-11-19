@@ -84,14 +84,14 @@ export default function VehiclesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-white">Vehicles</h1>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Vehicles</h1>
+      <Card className="">
         <CardHeader><CardTitle>{editing ? 'Edit Vehicle' : 'Add Vehicle'}</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label className="block text-sm font-medium text-slate-300 mb-1">License Plate</label><Input value={form.plate_number} onChange={e => setForm({...form, plate_number: e.target.value.toUpperCase()})} required /></div>
-              <div><label className="block text-sm font-medium text-slate-300 mb-1">Person</label><select className="w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" value={form.person_id} onChange={e => setForm({...form, person_id: e.target.value})} required><option value="">Select person</option>{persons.map(p => <option key={p.id} value={p.id}>{p.full_name} ({p.person_category})</option>)}</select></div>
+              <div><label className="block text-sm font-medium text-slate-300 mb-1">Person</label><select className="w-full rounded-xl border border-slate-600/70 bg-white/[0.04] px-3 py-2 text-sm text-slate-100" value={form.person_id} onChange={e => setForm({...form, person_id: e.target.value})} required><option value="">Select person</option>{persons.map(p => <option key={p.id} value={p.id}>{p.full_name} ({p.person_category})</option>)}</select></div>
               <div><label className="block text-sm font-medium text-slate-300 mb-1">Manufacturer</label><Input value={form.manufacturer} onChange={e => setForm({...form, manufacturer: e.target.value})} /></div>
               <div><label className="block text-sm font-medium text-slate-300 mb-1">Model</label><Input value={form.model} onChange={e => setForm({...form, model: e.target.value})} /></div>
               <div><label className="block text-sm font-medium text-slate-300 mb-1">Color</label><Input value={form.color} onChange={e => setForm({...form, color: e.target.value})} /></div>
@@ -104,11 +104,11 @@ export default function VehiclesPage() {
           </form>
         </CardContent>
       </Card>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-900/50 border-b border-slate-700">
+              <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                 <tr><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Plate</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Person</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Make/Model</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Color</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th></tr>
               </thead>
               <tbody className="divide-y divide-slate-700">

@@ -158,9 +158,18 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Security Operations Center</h1>
-        <p className="text-slate-400 mt-1">Real-time access oversight for SAT-7</p>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Security Operations Center</h1>
+          <p className="text-slate-400 mt-1">Real-time access oversight for SAT-7</p>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-slate-400">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          All systems operational
+        </div>
       </div>
 
       {/* Quick Actions */}
@@ -171,7 +180,8 @@ export default function DashboardPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-        <Card className="border-slate-700 bg-slate-800/50 relative overflow-hidden">
+        <Card className="relative overflow-hidden animate-fade-up stagger-1">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/60 to-transparent" />
           <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
           <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -188,7 +198,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-slate-700 bg-slate-800/50 relative overflow-hidden">
+        <Card className="relative overflow-hidden animate-fade-up stagger-2">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent" />
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
           <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -206,7 +217,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-slate-700 bg-slate-800/50 relative overflow-hidden">
+        <Card className="relative overflow-hidden animate-fade-up stagger-3">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
           <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
           <CardContent className="p-4 sm:p-6 relative">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
@@ -225,7 +237,7 @@ export default function DashboardPage() {
       {/* Inside by Type */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
         {INSIDE_TYPES.map(t => (
-          <Card key={t.key} className="border-slate-700 bg-slate-800/50">
+          <Card key={t.key} className="lift">
             <CardContent className="p-4 sm:p-5">
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-lg ${t.bg} flex items-center justify-center shrink-0`}>
@@ -244,7 +256,7 @@ export default function DashboardPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
         {/* Peak Hours Chart */}
-        <Card className="border-slate-700 bg-slate-800/50 lg:col-span-2">
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Peak Entrance Hours</CardTitle>
           </CardHeader>
@@ -252,12 +264,12 @@ export default function DashboardPage() {
             <div className="w-full overflow-x-auto">
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={hourlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis dataKey="hour" stroke="#64748b" fontSize={11} />
-                  <YAxis stroke="#64748b" fontSize={11} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1f2b42" />
+                  <XAxis dataKey="hour" stroke="#55637a" fontSize={11} />
+                  <YAxis stroke="#55637a" fontSize={11} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
-                    labelStyle={{ color: '#e2e8f0' }}
+                    contentStyle={{ backgroundColor: '#0e1626', border: '1px solid #1f2b42', borderRadius: '12px' }}
+                    labelStyle={{ color: '#e6edf7' }}
                   />
                   <Bar dataKey="count" fill="#22d3ee" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -268,7 +280,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Company Occupancy */}
-        <Card className="border-slate-700 bg-slate-800/50">
+        <Card className="">
           <CardHeader>
             <CardTitle>Tenant Company Occupancy</CardTitle>
           </CardHeader>
@@ -284,7 +296,7 @@ export default function DashboardPage() {
                       <span className="text-slate-300">{company.name}</span>
                       <span className="text-white font-medium">{company.people} people / {company.vehicles} vehicles</span>
                     </div>
-                    <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${width}%`, backgroundColor: company.color }}
@@ -303,14 +315,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Activity */}
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {recent.map((m) => (
-              <div key={m.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-slate-900/50 border border-slate-700 gap-2 sm:gap-3">
+              <div key={m.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] gap-2 sm:gap-3">
                 <div className="flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full ${m.status === 'inside' ? 'bg-emerald-400 shadow-lg shadow-emerald-500/50' : 'bg-slate-500'}`} />
                   <div>

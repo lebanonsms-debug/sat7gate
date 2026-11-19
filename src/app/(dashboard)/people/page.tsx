@@ -126,8 +126,8 @@ export default function PeoplePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-white">People</h1>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">People</h1>
+      <Card className="">
         <CardHeader><CardTitle>{editing ? 'Edit Person' : 'Add Person'}</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap items-stretch sm:items-end">
@@ -141,7 +141,7 @@ export default function PeoplePage() {
               <select
                 value={form.person_category}
                 onChange={e => setForm({ ...form, person_category: e.target.value as Person['person_category'] })}
-                className="flex-1 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100"
+                className="flex-1 rounded-xl border border-slate-600/70 bg-white/[0.04] px-3 py-2 text-sm text-slate-100"
               >
                 {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
@@ -150,7 +150,7 @@ export default function PeoplePage() {
             <select
               value={form.company}
               onChange={e => setForm({ ...form, company: e.target.value })}
-              className="flex-1 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100 w-full min-w-[200px]"
+              className="flex-1 rounded-xl border border-slate-600/70 bg-white/[0.04] px-3 py-2 text-sm text-slate-100 w-full min-w-[200px]"
               disabled={loadingCompanies}
             >
               <option value=''>Select company</option>
@@ -187,7 +187,7 @@ export default function PeoplePage() {
         </CardContent>
       </Card>
 
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardContent className="p-0">
           {persons.length === 0 ? (
             <div className="text-center py-12">
@@ -197,7 +197,7 @@ export default function PeoplePage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-900/50 border-b border-slate-700">
+                <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Category</th>

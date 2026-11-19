@@ -139,8 +139,8 @@ export default function SecurityOfficersPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-white">Security Officers</h1>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Security Officers</h1>
+      <Card className="">
         <CardHeader><CardTitle>{resetting ? 'Reset Officer Password' : (editing ? 'Edit Officer' : 'Create Officer')}</CardTitle></CardHeader>
         <CardContent>
           {resetting ? (
@@ -174,10 +174,10 @@ export default function SecurityOfficersPage() {
                   </VoiceInput>
                 </>
               )}
-              <select className="flex h-10 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" value={form.role} onChange={e => setForm({...form, role: e.target.value as Profile['role']})}>
+              <select className="flex h-10 rounded-xl border border-slate-600/70 bg-white/[0.04] px-3 py-2 text-sm text-slate-100" value={form.role} onChange={e => setForm({...form, role: e.target.value as Profile['role']})}>
                 <option value="security_officer">Security Officer</option>
               </select>
-              <select className="flex h-10 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" value={form.shift} onChange={e => setForm({...form, shift: e.target.value as Profile['shift']})}>
+              <select className="flex h-10 rounded-xl border border-slate-600/70 bg-white/[0.04] px-3 py-2 text-sm text-slate-100" value={form.shift} onChange={e => setForm({...form, shift: e.target.value as Profile['shift']})}>
                 <option value="day">&#9728;&#65039; Day Shift</option>
                 <option value="night">&#127769; Night Shift</option>
               </select>
@@ -190,11 +190,11 @@ export default function SecurityOfficersPage() {
           {message && <p className={`text-sm mt-2 ${message.includes('success') || message.includes('updated') ? 'text-emerald-400' : 'text-red-400'}`}>{message}</p>}
         </CardContent>
       </Card>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-900/50 border-b border-slate-700">
+              <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                 <tr><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Email</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Role</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Shift</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th></tr>
               </thead>
               <tbody className="divide-y divide-slate-700">

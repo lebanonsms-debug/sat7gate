@@ -247,11 +247,11 @@ export default function RegisterEntryPage() {
   return (
     <div className="w-full">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white">NEW ENTRY</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">NEW ENTRY</h1>
         <p className="text-slate-400 mt-1">Create a new gate entry record for employee, freelancer, contractor, guest, delivery, or rental company</p>
       </div>
 
-      <Card className="border-slate-700 bg-slate-800/50">
+      <Card className="">
         <CardHeader><CardTitle>Visitor Information</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -308,7 +308,7 @@ export default function RegisterEntryPage() {
             </div>
 
             {foundPerson && (
-              <div className="rounded-lg bg-slate-900/40 border border-slate-700 p-4">
+              <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-4">
                 <label className="block text-sm font-medium text-slate-300 mb-3">Person Information (from database)</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                   <div><span className="text-xs text-slate-500">Name:</span><p className="text-white font-medium">{[foundPerson.given_name, foundPerson.family_name].filter(Boolean).join(' ') || foundPerson.full_name}</p></div>
@@ -321,11 +321,11 @@ export default function RegisterEntryPage() {
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Notes</label>
               <VoiceInput onTranscript={(text) => setForm({ ...form, notes: form.notes ? form.notes + ' ' + text : text })}>
-                <textarea className="w-full rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100" rows={4} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
+                <textarea className="w-full rounded-xl border border-slate-600/70 bg-white/[0.04] px-3 py-2 text-sm text-slate-100" rows={4} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
               </VoiceInput>
             </div>
 
-            <div className="border-t border-slate-700 pt-4">
+            <div className="border-t border-white/[0.06] pt-4">
               <h3 className="text-lg font-medium text-white mb-4">Create New Person</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">

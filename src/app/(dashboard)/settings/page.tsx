@@ -57,8 +57,8 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <h1 className="text-3xl font-bold text-white">Settings</h1>
-      <Card className="border-slate-700 bg-slate-800/50">
+      <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Settings</h1>
+      <Card className="">
         <CardHeader><CardTitle>System Configuration</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           {loading ? (
@@ -72,7 +72,7 @@ export default function SettingsPage() {
                   <select
                     value={timezone}
                     onChange={e => setTimezone(e.target.value)}
-                    className="flex-1 rounded-lg border border-slate-600 bg-slate-900/50 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    className="flex-1 rounded-xl border border-slate-600/70 bg-white/[0.04] px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   >
                     {COMMON_TIMEZONES.map(tz => (
                       <option key={tz} value={tz}>{tz.replace('_', ' ')}</option>

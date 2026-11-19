@@ -68,12 +68,12 @@ export default function CompaniesPage() {
       {message && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">{message}</div>}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Companies</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Companies</h1>
           <p className="text-slate-400 mt-1">Manage building tenants and visitor destinations</p>
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="border-slate-700 bg-slate-800/50 lg:col-span-1">
+        <Card className="lg:col-span-1">
           <CardHeader><CardTitle>{editing ? 'Edit Company' : 'Add Company'}</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -88,11 +88,11 @@ export default function CompaniesPage() {
             </form>
           </CardContent>
         </Card>
-        <Card className="border-slate-700 bg-slate-800/50 lg:col-span-2">
+        <Card className="lg:col-span-2">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-900/50 border-b border-slate-700">
+                <thead className="bg-white/[0.03] border-b border-white/[0.06]">
                   <tr><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Name</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Identifier</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Color</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Status</th><th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Actions</th></tr>
                 </thead>
                 <tbody className="divide-y divide-slate-700">
