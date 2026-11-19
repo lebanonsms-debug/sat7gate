@@ -17,6 +17,7 @@ const CATEGORIES: { value: PersonCategory; label: string }[] = [
   { value: 'delivery', label: 'Delivery Personnel' },
   { value: 'supplier', label: 'Supplier' },
   { value: 'rental_company', label: 'Rental Company' },
+  { value: 'walks_in', label: 'Walks In' },
   { value: 'other', label: 'Other' },
 ]
 

@@ -14,6 +14,7 @@ const CATEGORIES = [
   { value: 'rental_company', label: 'Rental Company' },
   { value: 'guest', label: 'Guest' },
   { value: 'delivery', label: 'Delivery' },
+  { value: 'walks_in', label: 'Walks In' },
 ] as const
 
 export default function PeoplePage() {
