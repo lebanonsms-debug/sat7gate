@@ -19,11 +19,11 @@ export function TopNav({ profile, onMenuClick }: { profile: Profile | null; onMe
 
   useEffect(() => {
     const fetchOccupancy = async () => {
-      const { data } = await supabase.from('gate_movements').select('status').eq('status', 'inside')
+      const { data } = await supabase.from('gate_movements').select('status, visitor:visitors(person:persons(vehicles:vehicles(id)))').eq('status', 'inside')
       const list = data || []
       setOccupancy({
         people: list.length,
-        vehicles: 0,
+        vehicles: list.filter((m) => (m as { visitor?: { person?: { vehicles?: unknown[] } } }).visitor?.person?.vehicles?.length).length,
         lanes: Math.min(list.length, 2)
       })
     }

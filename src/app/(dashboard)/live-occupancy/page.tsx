@@ -11,7 +11,7 @@ export default function LiveOccupancyPage() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const { data: movements } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*), company:companies(*))').eq('status', 'inside')
+      const { data: movements } = await supabase.from('gate_movements').select('*, visitor:visitors(*, person:persons(*, vehicles:vehicles(*)), company:companies(*))').eq('status', 'inside')
       const list = movements || []
       const byCompany: Record<string, number> = {}
       list.forEach((m) => {
@@ -22,7 +22,7 @@ export default function LiveOccupancyPage() {
         total: list.length,
         employees: list.filter((m) => (m as { visitor?: { person?: { person_category?: string } } }).visitor?.person?.person_category === 'employee').length,
         guests: list.filter((m) => (m as { visitor?: { person?: { person_category?: string } } }).visitor?.person?.person_category !== 'employee').length,
-        vehicles: list.filter((m) => (m as { visitor?: { vehicles?: unknown[] } }).visitor?.vehicles?.length).length,
+        vehicles: list.filter((m) => (m as { visitor?: { person?: { vehicles?: unknown[] } } }).visitor?.person?.vehicles?.length).length,
         companies: byCompany,
       })
     }
